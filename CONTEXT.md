@@ -40,6 +40,10 @@ _Avoid_: contact, follow, friend, link
 An offer of a Connection, carrying an optional note. It is the product's only message request.
 _Avoid_: invite, invitation, add request
 
+**Invite**:
+An offer sent to an email address that belongs to no Member yet, carrying an optional note. It never gates signup; it becomes a Connection request if the person joins.
+_Avoid_: referral, invitation code, waitlist, early access
+
 **Disconnect**:
 Ending a Connection. Quiet and reversible.
 _Avoid_: remove, unfriend, unfollow
