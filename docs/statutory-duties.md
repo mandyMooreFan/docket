@@ -6,7 +6,73 @@ Research for [mandyMooreFan/docket#18](https://github.com/mandyMooreFan/docket/i
 
 > **I am not a lawyer. This is not legal advice.** Everything below is a non-lawyer's reading of the sources linked inline. Anywhere marked **LAWYER** needs a real one before launch.
 
-> ⚠️ **Retrieval limitation.** Ofcom's own guidance pages block automated retrieval (HTTP 403). UK findings below rest on legislation summaries and law-firm analyses rather than on Ofcom's primary text, and are tagged accordingly. **A human must verify the UK section against [Ofcom's guide for services](https://www.ofcom.org.uk/online-safety/illegal-and-harmful-content/guide-for-services) directly.**
+> ⚠️ **Retrieval note — resolved on second pass.** Ofcom's live site returns HTTP 403 to all automated fetching, including its PDFs. **A second pass retrieved Ofcom's own documents via the Internet Archive** (`https://web.archive.org/web/<ts>id_/<ofcom-url>` returns Ofcom's unaltered bytes), so the UK findings below now rest on **Ofcom's own primary text** rather than law-firm summaries. `legislation.gov.uk` was directly reachable throughout. Documents read in full: Children's Access Assessments Guidance (24 Apr 2025), Guidance on Highly Effective Age Assurance for Part 3 Services (24 Apr 2025), Record-Keeping and Review Guidance, Risk Assessment Guidance and Risk Profiles, and four Ofcom web pages.
+
+---
+
+## 0a. ⚠️ Corrections to the first pass
+
+**This document was written before Ofcom's own text could be read. Four things were wrong or missing.**
+
+### C1 — Docket is NOT late. **(a) ESTABLISHED**
+
+The first pass said the 2025 deadlines "passed" and that a service launching now "is late to it." **That is wrong for a service that has not launched.**
+
+[Schedule 3 para 3](https://www.legislation.gov.uk/ukpga/2023/50/schedule/3) gives a **new** Part 3 service **three months from its first day of operation** for *both* assessments. Ofcom confirms twice: Risk Assessment Guidance ¶2.19 — *"If you start a new service … you must complete your risk assessment within three months of doing so."* CAA Guidance ¶2.23 — *"If you started operating a new Part 3 service after 16 January 2025, you must complete the first children's access assessment … within three months of the first day of operation … you will have to complete the illegal content risk assessment and the children's access assessment concurrently."*
+
+**The dated deadlines applied to services already operating. Docket's clock starts at launch.** This is a launch precondition on a three-month clock, not an overdue debt.
+
+### C2 — The age escape hatch is wider than described, but not in a way that helps. **(a)**
+
+The first pass implied highly effective age assurance is the only way out. It is not: HEAA settles **Stage 1** only, and a service can still conclude "not likely to be accessed by children" at **Stage 2** on evidence. Ofcom's own case studies do exactly that for a retirement forum and a 40+ career-change community.
+
+**But Docket's specific facts run hard against a Stage 2 escape**, in Ofcom's own words:
+
+- **CAA Guidance Table 7** lists as content appealing to children: *"Content about future careers and finance"* and *"Content providing advice on further education and careers."*
+- **¶4.31**: *"Some functionalities are appealing to children and used by children, for example, **the ability to make a user profile, making connections with other users, and direct messaging**."*
+- **¶4.19**: a minimum age does not discharge the test — *"if your service is likely to attract a significant number of children between 15-17, this would be sufficient."*
+- **¶1.4**: *"We anticipate that **most Part 3 services that are not using highly effective age assurance are likely to be accessed by children**."*
+- The closest Ofcom case study is a **dating service** — 18+ in terms, self-declared age, publicly not targeted at children — and Ofcom walks it to *"the child user condition **is** met"*, citing profiles, connections and direct messaging.
+
+**The sharper framing: the children's-regime exposure is driven by what Docket *is*, not by where it sets its age floor. "Just raise it to 18" does not resolve it. (a) on the sources; (b) as applied.**
+
+Two asymmetries worth knowing: concluding **"yes, children"** needs no detailed evidence record (¶4.5); concluding **"no children"** must be evidenced and recorded (¶2.30, ¶4.2). And **not doing the assessment at all deems the service likely to be accessed by children** ([s.37(4)–(5)](https://www.legislation.gov.uk/ukpga/2023/50/section/37)).
+
+### C3 — ⚠️ A duty this document missed entirely, in force since 29 June 2026. **(a)**
+
+The Crime and Policing Act 2026 inserted **[OSA s.20A](https://www.legislation.gov.uk/ukpga/2023/50/section/20A)** and **[s.10(3A)–(3B)](https://www.legislation.gov.uk/ukpga/2023/50/section/10)**, commenced by S.I. 2026/689:
+
+- **s.20A(1)** — a duty to operate systems and processes allowing users and affected persons to *"easily make an **intimate image content report**"*. This is a **distinct reporting route**, not the generic illegal-content one.
+- **s.10(3A)** — a duty to take down reported intimate image content **and any substantially similar content** *"as soon as reasonably practicable, and **no later than 48 hours**, after the provider receives the report."*
+
+**This binds all regulated user-to-user services regardless of size, and it lands squarely on Docket's image-bearing private messages.** A hard 48-hour clock is a serious operational constraint on the single-moderator model [#16](https://github.com/mandyMooreFan/docket/issues/16) chose. **Nothing in #16 covers it.**
+
+### C4 — The "named accountable individual" is a Code measure, not a statutory duty. **(b)**
+
+It does not appear in [s.23](https://www.legislation.gov.uk/ukpga/2023/50/section/23) or elsewhere in Part 3's duties. It is a **recommendation**: Record-Keeping Guidance ¶3.6 says the risk assessment record *should* name the person responsible and who approved it, and Ofcom's small-services page lists *"a specific individual responsible for compliance, who we can contact if we need to."*
+
+Because Codes are recommendations, [s.23(4)](https://www.legislation.gov.uk/ukpga/2023/50/section/23) permits **alternative measures** provided you record how they amount to compliance — in practice adopting the measure is cheaper than justifying a departure.
+
+⚠️ **Unresolved and contradictory across passes.** One verification pass reported reading the Illegal Content Codes and quoted a governance measure (cited as **ICU A2**, applicability *"All services"*, with a children's twin **PCU A2** scoped to services likely to be accessed by children). A second pass **could not retrieve the Codes PDF at all** and warned against treating any measure code as established. **Treat the specific measure reference and its applicability line as (c) UNRESOLVED until someone reads the Codes text directly.** The general shape — one named person, recorded, cheap — is not in doubt; Ofcom explicitly contemplates a one-person service satisfying it, and its guidance says *"For small services without formal boards or oversight teams, this can simply mean reporting to a senior manager with responsibility for online safety."*
+
+### C5 — Two findings that *help*
+
+- **Proportionality relief is real and in Ofcom's own words, upgrading §5's claim from (b) to (a).** Helping small services: if risks are assessed low with good reason, *"they will only be expected to have basic but important measures to remove illegal content when they become aware of it"* — findable terms, a complaints tool, the ability to review and take down quickly, and a named responsible individual. Plus: *"**We are not setting out to penalise small, low risk services trying to comply in good faith.**"* **This vindicates #16's reactive-by-default posture from the regulator's own mouth.**
+- **[s.12(5)](https://www.legislation.gov.uk/ukpga/2023/50/section/12) is a cheap escape from mandatory HEAA even inside the children's regime.** s.12(4)/(6) would otherwise require *highly effective* age assurance where a provider identifies primary priority content on the service — **but not where "(a) a term of service indicates (in whatever words) that the presence of that kind of primary priority content … is prohibited on the service, and (b) that policy applies in relation to all users."** A blanket prohibition in the terms, applied to everyone, disapplies the trigger. **LAWYER**, but materially useful.
+
+### C6 — Landscape: there is no industry norm to point at **(a)**
+
+| Service | Stated minimum | Age assurance |
+|---|---|---|
+| LinkedIn | **16**, global | None — self-declared |
+| Indeed | **18 in the UK** since 1 Feb 2024 (16 elsewhere) | None — reactive removal only |
+| Welcome to the Jungle / Otta | 18 | None documented |
+| Totaljobs / Milkround | "not directed towards" 18; **hard floor 14** | None documented |
+| Glassdoor | 18 | None documented |
+| Adzuna | 13 | Self-declared |
+| Reed.co.uk, CV-Library | **none stated at all** | n/a |
+
+**The spread is 13 → 14 → 16 → 18 → nothing, and not one documents any age-assurance mechanism.** LinkedIn — large, well-resourced, UK-regulated, structurally the closest analogue — sits at **16 with nothing but self-declaration**. No comparator publishes a children's access assessment outcome, but **there is no duty to publish one**, so that silence is uninformative. **(c)**
 
 ---
 
@@ -55,7 +121,7 @@ Every regulated user-to-user service must:
 - **Name an individual accountable** for content safety.
 - **Say the relevant things in terms of service.**
 
-**Both deadlines are in the past.** A service launching now is not "preparing for" this regime; it is late to it. **(b)**
+~~**Both deadlines are in the past.** A service launching now is not "preparing for" this regime; it is late to it.~~ **CORRECTED — see C1.** Those deadlines bound services already operating. A new service gets **three months from its first day of operation** for both assessments, concurrently. **(a)**
 
 **One genuine relief: proactive monitoring is not required of small low-risk services** — responsive action on reports is the standard. **This vindicates #16's reactive-by-default decision. (b)**
 
