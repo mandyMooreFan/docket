@@ -30,6 +30,10 @@ _Avoid_: permission, role, entitlement, grant
 A quiet flag on a Profile, shown to an audience the Member chooses. It is never searchable and never indexed.
 _Avoid_: available, looking, job-seeking status
 
+**Age fact**:
+What Docket knows of a Member's age. For an adult: only that adulthood was declared, and when. For a 16–17-year-old: the declared birth month and year, kept solely to lift the under-18 protections at 18 and deleted at that rollover. Docket holds no birth date for any adult Member.
+_Avoid_: date of birth, DOB, age verification
+
 ### The graph
 
 **Connection**:
@@ -69,6 +73,10 @@ _Avoid_: comment, thread
 **Save**:
 A Member's private bookmark of a Post. Visible to nobody else.
 _Avoid_: bookmark, like, favourite
+
+**Authored as minor**:
+An immutable fact set on a Post or Reply at creation when its author's declared age band was 16–17. Content carrying it is never visible logged-out and never indexed, permanently; it is never displayed and exists only to drive derived visibility.
+_Avoid_: minor flag, child content, teen post
 
 **Recommendation**:
 Something one Member writes about another, published on the subject's Profile only once they approve it.
