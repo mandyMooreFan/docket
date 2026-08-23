@@ -1,0 +1,220 @@
+/* Docket design language — SPEC.md §2, realised by hand; no framework.
+   The visual record is the pinned prototype (pass A3) linked from §2.
+   The rule the language turns on: serif for anything a person wrote,
+   sans for anything the app said. */
+
+/* ---------- fonts (vendored variable fonts; both OFL-1.1) ---------- */
+
+@font-face {
+  font-family: "Source Serif 4";
+  font-style: normal;
+  font-weight: 400 700;
+  src: url("/fonts/source-serif-4-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Serif 4";
+  font-style: normal;
+  font-weight: 400 700;
+  src: url("/fonts/source-serif-4-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Libre Franklin";
+  font-style: normal;
+  font-weight: 400 700;
+  src: url("/fonts/libre-franklin-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Libre Franklin";
+  font-style: normal;
+  font-weight: 400 700;
+  src: url("/fonts/libre-franklin-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  font-display: swap;
+}
+
+/* ---------- tokens ---------- */
+
+:root {
+  /* type scale (§2.1) — nothing off the scale */
+  --t-12: .75rem; --t-13: .8125rem; --t-14: .875rem; --t-16: 1rem; --t-18: 1.125rem;
+  --t-20: 1.25rem; --t-24: 1.5rem; --t-30: 1.875rem; --t-36: 2.25rem; --t-44: 2.75rem;
+
+  /* spacing scale (§2.3) — more space between groups than within them */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-6: 24px;
+  --s-8: 32px; --s-12: 48px; --s-16: 64px; --s-24: 96px;
+
+  /* four-step ink ramp, three grounds, one accent (§2.2) */
+  --i900: #101418; --i700: #333B45; --i500: #5D6775; --i400: #8A94A2;
+  --g0: #FFFFFF; --g1: #F5F7F9; --g2: #EAEEF2;
+  --ac: #1F5C99; --ac-soft: #E9F1F8; --ac-ink: #FFFFFF;
+
+  /* two soft shadow levels — the only dividers besides space and fill */
+  --sh-1: 0 1px 2px rgba(16,20,24,.06);
+  --sh-2: 0 1px 3px rgba(16,20,24,.07), 0 10px 28px -8px rgba(16,20,24,.10);
+
+  --serif: "Source Serif 4", Georgia, serif;
+  --sans: "Libre Franklin", system-ui, sans-serif;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --i900: #F1F4F8; --i700: #C6CDD7; --i500: #949EAB; --i400: #6E7887;
+    --g0: #0D1117; --g1: #161B22; --g2: #1E252E;
+    --ac: #7CB2E8; --ac-soft: rgba(124,178,232,.13); --ac-ink: #0D1117;
+    --sh-1: 0 1px 2px rgba(0,0,0,.4);
+    --sh-2: 0 1px 3px rgba(0,0,0,.5), 0 10px 28px -8px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"] {
+  --i900: #F1F4F8; --i700: #C6CDD7; --i500: #949EAB; --i400: #6E7887;
+  --g0: #0D1117; --g1: #161B22; --g2: #1E252E;
+  --ac: #7CB2E8; --ac-soft: rgba(124,178,232,.13); --ac-ink: #0D1117;
+  --sh-1: 0 1px 2px rgba(0,0,0,.4);
+  --sh-2: 0 1px 3px rgba(0,0,0,.5), 0 10px 28px -8px rgba(0,0,0,.6);
+}
+
+/* ---------- base ---------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--g0);
+  color: var(--i700);
+  font-family: var(--sans);
+  font-size: var(--t-16);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--ac); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--ac); outline-offset: 2px; border-radius: 4px; }
+img { max-width: 100%; }
+
+/* ---------- app bar: the one hairline on the page (a shadow, not a stroke) ---------- */
+
+.appbar { position: sticky; top: 0; z-index: 10; background: var(--g0); box-shadow: var(--sh-1); }
+.appbar-inner {
+  max-width: 70rem; margin: 0 auto; height: 60px; padding: 0 var(--s-6);
+  display: flex; align-items: center; gap: var(--s-8);
+}
+.wordmark {
+  font-family: var(--serif); font-size: var(--t-20); font-weight: 700;
+  color: var(--i900); letter-spacing: -.015em;
+}
+.wordmark:hover { text-decoration: none; }
+.appbar nav { display: flex; gap: var(--s-6); flex: 1; }
+.appbar nav a { font-size: var(--t-14); font-weight: 500; color: var(--i500); }
+.appbar nav a:hover { color: var(--i900); text-decoration: none; }
+.appbar nav a.active { color: var(--i900); font-weight: 600; }
+.appbar .right { display: flex; align-items: center; gap: var(--s-4); margin-left: auto; }
+
+/* AGPL §13: the Source link, quiet but on every page, logged in or out (§12) */
+.source-link { font-size: var(--t-13); font-weight: 500; color: var(--i400); }
+.source-link:hover { color: var(--i900); text-decoration: none; }
+
+.search {
+  font: inherit; font-size: var(--t-13); color: var(--i700); width: 16rem;
+  background: var(--g1); border: 0; border-radius: 8px; padding: var(--s-2) var(--s-3);
+}
+.search::placeholder { color: var(--i400); }
+
+/* ---------- layout containers (§2.3) ---------- */
+
+/* the single reading column */
+.page { max-width: 42rem; margin: 0 auto; padding: var(--s-16) var(--s-6) var(--s-24); }
+
+/* main column with the 18rem rail */
+.with-rail {
+  max-width: 70rem; margin: 0 auto; padding: var(--s-12) var(--s-6) var(--s-24);
+  display: grid; grid-template-columns: minmax(0, 1fr) 18rem; gap: var(--s-16);
+}
+.rail {
+  position: sticky; top: calc(60px + var(--s-6)); align-self: start;
+  display: flex; flex-direction: column; gap: var(--s-6);
+}
+.panel { background: var(--g1); border-radius: 12px; padding: var(--s-4); }
+.panel > h3 {
+  font-size: var(--t-12); font-weight: 700; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--i400); margin: 0 0 var(--s-4);
+}
+
+/* ---------- shared elements ---------- */
+
+/* uppercase section label — the palest ink (§2.1) */
+.block { margin-top: var(--s-16); }
+.block > h2, .label {
+  font-size: var(--t-12); font-weight: 700; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--i400); margin: 0 0 var(--s-6);
+}
+
+/* reading prose: 18px serif at 1.7 (§2.1) */
+.prose { font-family: var(--serif); font-size: var(--t-18); line-height: 1.7; color: var(--i700); }
+.prose p { margin: 0 0 var(--s-4); }
+.prose p:last-child { margin-bottom: 0; }
+
+/* a dated entry (positions, education) */
+.entry + .entry { margin-top: var(--s-8); }
+.entry h3 {
+  font-family: var(--serif); font-size: var(--t-20); font-weight: 600;
+  color: var(--i900); margin: 0; line-height: 1.3;
+}
+.entry .org { font-size: var(--t-13); font-weight: 600; color: var(--i500); margin: var(--s-1) 0 var(--s-3); }
+.entry .org .when { font-weight: 400; color: var(--i400); }
+.entry p { font-family: var(--serif); font-size: var(--t-16); line-height: 1.65; color: var(--i500); margin: 0; }
+
+/* self-declared plain lists (skills) */
+.chips { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.chips span {
+  font-size: var(--t-14); font-weight: 500; color: var(--i700);
+  background: var(--g1); border-radius: 8px; padding: var(--s-2) var(--s-3);
+}
+
+/* buttons: solid primary, tinted secondary, no outline styles */
+.btn {
+  font: inherit; font-size: var(--t-14); font-weight: 600; border: 0; border-radius: 8px;
+  padding: var(--s-2) var(--s-4); cursor: pointer; background: var(--g1); color: var(--i700);
+}
+.btn:hover { background: var(--g2); }
+.btn.primary { background: var(--ac); color: var(--ac-ink); box-shadow: var(--sh-1); }
+.btn.primary:hover { filter: brightness(1.1); }
+.btn.sm { font-size: var(--t-13); padding: var(--s-1) var(--s-3); }
+.btn.quiet { background: transparent; color: var(--i500); padding-left: 0; padding-right: 0; }
+.btn.quiet:hover { background: transparent; color: var(--i900); }
+
+/* the one accent pill: the quiet open-to-work flag (§2.2, §4.1) */
+.flag {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  font-size: var(--t-13); font-weight: 600; color: var(--ac); background: var(--ac-soft);
+  border-radius: 999px; padding: var(--s-1) var(--s-3);
+}
+.flag::before { content: ""; width: 6px; height: 6px; border-radius: 999px; background: var(--ac); }
+
+/* avatar: initials on a neutral fill (photo treatment stays open — §2) */
+.av {
+  border-radius: 999px; background: var(--g2); color: var(--i500);
+  display: flex; align-items: center; justify-content: center; font-weight: 600; flex: none;
+}
+.av-32 { width: 32px; height: 32px; font-size: var(--t-12); }
+.av-40 { width: 40px; height: 40px; font-size: var(--t-13); }
+
+/* page-level heading: the profile-name treatment (§2.1) */
+.title-serif {
+  font-family: var(--serif); font-size: var(--t-44); font-weight: 600;
+  line-height: 1.05; letter-spacing: -.025em; color: var(--i900); margin: 0 0 var(--s-3);
+}
+
+/* ---------- phone width (§14.1): one fluid column; the rail's contents are
+   promoted to nav destinations by the pages that own them, never stacked ---------- */
+@media (max-width: 880px) {
+  .with-rail { grid-template-columns: 1fr; gap: var(--s-12); }
+  .rail { display: none; }
+  .search { width: 10rem; }
+  .title-serif { font-size: var(--t-36); }
+}
