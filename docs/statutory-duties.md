@@ -53,7 +53,61 @@ It does not appear in [s.23](https://www.legislation.gov.uk/ukpga/2023/50/sectio
 
 Because Codes are recommendations, [s.23(4)](https://www.legislation.gov.uk/ukpga/2023/50/section/23) permits **alternative measures** provided you record how they amount to compliance — in practice adopting the measure is cheaper than justifying a departure.
 
-⚠️ **Unresolved and contradictory across passes.** One verification pass reported reading the Illegal Content Codes and quoted a governance measure (cited as **ICU A2**, applicability *"All services"*, with a children's twin **PCU A2** scoped to services likely to be accessed by children). A second pass **could not retrieve the Codes PDF at all** and warned against treating any measure code as established. **Treat the specific measure reference and its applicability line as (c) UNRESOLVED until someone reads the Codes text directly.** The general shape — one named person, recorded, cheap — is not in doubt; Ofcom explicitly contemplates a one-person service satisfying it, and its guidance says *"For small services without formal boards or oversight teams, this can simply mean reporting to a senior manager with responsibility for online safety."*
+✅ **RESOLVED on a third pass — the measure is real and verifiable.** The earlier contradiction is settled in favour of the pass that quoted it. **Route that worked: `assets.publishing.service.gov.uk`** — Ofcom's Codes are laid before Parliament, so GOV.UK hosts the full PDFs unblocked by plain `curl`. (The Internet Archive was rate-limited, HTTP 429, on this attempt; ofcom.org.uk remains 403.)
+
+**ICU A2**, verbatim from the Illegal content Codes of Practice for user-to-user services (issued 24 Feb 2025, **in force 17 Mar 2025**):
+
+> **ICU A2 — Individual accountable for illegal content safety duties and reporting and complaints duties**
+> **ICU A2.1** This measure applies to a provider in respect of each service it provides.
+> **ICU A2.2** The provider should name an individual accountable to the most senior governance body for compliance with the illegal content safety duties and the reporting and complaints duties.
+
+**Applicability: "All services."** The children's twin **PCU A2** exists in the Protection of Children Code (in force 25 Jul 2025), scoped to *"each service likely to be accessed by children it provides"* — which, after [#20](https://github.com/mandyMooreFan/docket/issues/20), includes Docket. **(a) ESTABLISHED**
+
+**Scoping definitions, both Codes. (a)**
+- **Large service** — *"more than 7 million monthly active United Kingdom users"* (six-month mean; you stay above until the average has been at or below for a continuous six months).
+- **Multi-risk** — *"medium or high risk of two or more kinds of illegal harm set out in table C"*, excluding rows 2A/2B/2C. The Protection of Children Code has a separate **multi-risk (children)** test.
+
+Docket is neither.
+
+### C4a — The actual minimum: 14 ICU measures apply to **all** services **(a)**
+
+Read from each measure's own `.1` Application paragraph rather than the index table, whose merged cells are ambiguous:
+
+| Ref | Title |
+|---|---|
+| **ICU A2** | Individual accountable for illegal content safety duties and reporting and complaints duties |
+| **ICU C1** | Having a content moderation function to review and assess suspected illegal content |
+| **ICU C2** | Having a content moderation function that allows for the swift take down of illegal content |
+| **ICU D1** | Enabling complaints |
+| **ICU D2** | Having easy to find, easy to access and easy to use complaints systems and processes |
+| **ICU D7** | Appropriate action for relevant complaints about suspected illegal content |
+| **ICU D9** | Appeals determination — **applies *because* the service is neither large nor multi-risk** |
+| **ICU D10** | Appropriate action for relevant complaints which are appeals – action following determination |
+| **ICU D11** | Appropriate action for relevant complaints about proactive technology, which are not appeals |
+| **ICU D12** | Appropriate action for all other relevant complaints |
+| **ICU D13** | Exception: manifestly unfounded complaints |
+| **ICU G1** | Terms of service: substance (all services) |
+| **ICU G3** | Terms of service: clarity and accessibility |
+| **ICU H1** | Removing accounts of proscribed organisations |
+
+**ICU D9 is the easy one to miss** — it applies *precisely because* Docket is small, and ICU D8 (its large/multi-risk counterpart) does not.
+
+**Refinement to the earlier applicability claim:** A1, A3–A7 are indeed all size- or risk-gated, but not uniformly — **ICU A1 is large-services-only**, A3/A5/A6/A7 are large **or** multi-risk, and **ICU A4 requires both**.
+
+**Protection of Children Code, all child-accessible services: A2, C1, C2, D1, D2, D7, D10, D13, D14, G1, G3**, plus **D9 and D12** which apply because Docket is neither large nor multi-risk (children). **PCU C1** and **PCU C2** require a content moderation function to review and act on content harmful to children. **PCU B1** (age assurance process) bites only if the service uses highly effective age assurance to identify child users — Docket does not.
+
+### C4b — The June 2026 amendments are **NOT in force**, and the hash-matching measure does not reach Docket **(a)**
+
+The laid draft's own preamble: *"The amendments come into force **[at the end of the period of 21 days beginning with the day on which they are issued]**"* — Ofcom's own square-bracket placeholder, so they have not been issued and the clock has not started. GOV.UK's explanatory memorandum says Ofcom plans its final decision **Autumn 2026**. **The in-force user-to-user illegal-content Code today remains the 24 February 2025 issue.**
+
+The new measure is **ICU C14 — "Using hash matching to detect intimate image abuse content"**, and it **does not apply to Docket, twice over**:
+
+1. **It fails the first gate.** C14.1 requires the service to be at high risk of intimate image abuse **and** either principally a pornography service, or **over 700,000 monthly active UK users**, or a file-storage/file-sharing service — or else to be a *large* service at medium/high risk.
+2. **Even if it applied, its scope is public content.** C14.2(a)(ii) limits relevant content to that which *"is communicated publicly by means of the service"* — **so private 1:1 messages are outside the measure by definition.**
+
+A second draft package (18 June 2026) adds crisis-response measures scoped to large or high-risk services. Also not applicable, also still draft.
+
+⚠️ **Residual gap:** it could not be independently confirmed that *no other* amendment was issued and brought into force between March 2025 and today, because Ofcom's current consolidated page is unreachable to automated fetching. Both amendment packages found are draft. Closing this properly needs a real browser session against Ofcom's site.
 
 ### C5 — Two findings that *help*
 
