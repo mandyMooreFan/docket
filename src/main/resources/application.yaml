@@ -1,0 +1,7 @@
+spring:
+  jpa:
+    # The lazy-loading-in-templates footgun is structurally impossible (SPEC.md §14.2):
+    # the service layer hands templates fully-loaded view models.
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate

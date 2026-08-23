@@ -1,0 +1,13 @@
+# Dev database. Spring Boot's docker-compose support starts this automatically
+# on `./mvnw spring-boot:run`; Postgres is pinned by major (SPEC.md §14.2).
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: docket
+      POSTGRES_PASSWORD: docket
+      POSTGRES_DB: docket
+    ports:
+      # Host port off 5432 so a Postgres already on the machine never collides;
+      # Spring's docker-compose support reads the mapped port automatically.
+      - "54320:5432"
