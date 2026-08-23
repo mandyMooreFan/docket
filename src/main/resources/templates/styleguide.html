@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Docket — design language</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">The design language</h1>
+    <div class="prose">
+        <p><strong>Serif for anything a person wrote; sans for anything the app said.</strong>
+            Names, headlines, summaries, Post bodies, Recommendations and job titles read in
+            Source Serif&nbsp;4. Navigation, labels, timestamps, counts, buttons and form
+            controls speak in Libre Franklin. This page exercises every token in
+            <code>docket.css</code>; the spec is <code>SPEC.md&nbsp;§2</code>.</p>
+    </div>
+
+    <section class="block">
+        <h2>Type scale</h2>
+        <p style="font-size: var(--t-44); font-family: var(--serif); font-weight: 600; margin: 0; color: var(--i900); letter-spacing: -.025em;">44 — a profile name</p>
+        <p style="font-size: var(--t-30); font-family: var(--serif); font-weight: 600; margin: 0; color: var(--i900);">30 — a page heading</p>
+        <p style="font-size: var(--t-24); font-family: var(--serif); font-weight: 600; margin: 0; color: var(--i900);">24 — a long-form kicker</p>
+        <p style="font-size: var(--t-20); font-family: var(--serif); margin: 0; color: var(--i700);">20 — a headline, an entry title</p>
+        <p style="font-size: var(--t-18); font-family: var(--serif); margin: 0; color: var(--i700);">18 — reading prose, at 1.7 line-height</p>
+        <p style="font-size: var(--t-16); margin: 0;">16 — supporting prose</p>
+        <p style="font-size: var(--t-14); margin: 0;">14 — navigation, buttons</p>
+        <p style="font-size: var(--t-13); margin: 0; color: var(--i500);">13 — metadata</p>
+        <p class="label" style="margin: var(--s-2) 0 0;">12 — an uppercase section label</p>
+    </section>
+
+    <section class="block">
+        <h2>Ink and grounds</h2>
+        <div class="chips">
+            <span style="color: var(--i900);">i900 primary</span>
+            <span style="color: var(--i700);">i700 body</span>
+            <span style="color: var(--i500);">i500 support</span>
+            <span style="color: var(--i400);">i400 palest</span>
+            <span style="background: var(--g0); box-shadow: var(--sh-1);">g0 page</span>
+            <span style="background: var(--g1);">g1 fill</span>
+            <span style="background: var(--g2);">g2 deep fill</span>
+            <span style="color: var(--ac);">the one accent</span>
+        </div>
+    </section>
+
+    <section class="block">
+        <h2>Controls</h2>
+        <p style="display: flex; gap: var(--s-2); align-items: center; flex-wrap: wrap; margin: 0;">
+            <button class="btn primary" type="button">Primary</button>
+            <button class="btn" type="button">Secondary</button>
+            <button class="btn sm" type="button">Small</button>
+            <button class="btn quiet" type="button">Quiet</button>
+            <span class="flag">Open to work</span>
+            <span class="av av-40">DM</span>
+        </p>
+    </section>
+
+    <section class="block">
+        <h2>An entry</h2>
+        <div class="entry">
+            <h3>Example role title</h3>
+            <p class="org">Example Company <span class="when">· 2024 – present</span></p>
+            <p>What a person wrote about their work reads in serif, one step quieter than
+                the prose around it.</p>
+        </div>
+    </section>
+
+    <section class="block">
+        <h2>A panel</h2>
+        <div class="panel" style="max-width: 18rem;">
+            <h3>Rail panel</h3>
+            <p style="margin: 0; font-size: var(--t-13); color: var(--i400);">Fill and radius divide;
+                never a 1px rule. The app bar's shadow is the one hairline in the UI.</p>
+        </div>
+    </section>
+</main>
+</body>
+</html>

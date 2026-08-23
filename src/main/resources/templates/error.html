@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif" th:text="${status != null && status == 404} ? 'There is no page here' : 'Something went wrong'">
+        There is no page here</h1>
+    <div class="prose">
+        <p th:if="${status != null && status == 404}">
+            Nothing lives at this address. If a link brought you here, the page may not be built
+            yet — Docket is under construction and the parts that exist say so plainly.</p>
+        <p th:unless="${status != null && status == 404}">
+            Docket hit an error handling this request. Nothing you did caused it.</p>
+        <p><a href="/">Back to the feed</a></p>
+    </div>
+</main>
+</body>
+</html>

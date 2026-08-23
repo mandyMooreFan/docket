@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="layout (title, main)">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:replace="${title}">Docket</title>
+    <link rel="stylesheet" href="/css/docket.css">
+    <script src="/vendor/htmx-2.0.10.min.js" defer></script>
+</head>
+<body>
+<header class="appbar">
+    <div class="appbar-inner">
+        <a class="wordmark" href="/">Docket</a>
+        <nav>
+            <a href="/">Feed</a>
+            <a href="/jobs">Jobs</a>
+            <a href="/messages">Messages</a>
+            <a href="/network">Network</a>
+        </nav>
+        <div class="right">
+            <!-- AGPL §13: durable Source link, reachable from every page, logged in or out -->
+            <a class="source-link" href="https://github.com/mandyMooreFan/docket">Source</a>
+        </div>
+    </div>
+</header>
+<main th:replace="${main}"></main>
+</body>
+</html>
