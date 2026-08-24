@@ -74,13 +74,17 @@
                 Nobody by that name yet. People search matches names only — that's deliberate.
             </p>
 
-            <article class="entry" th:each="row : ${results.people}">
-                <h3><a th:href="'/p/' + ${row.person.memberId}"
-                       th:text="${row.person.displayName()}">Name</a></h3>
-                <!-- §8.2: Mutuals are displayed and never reorder. Plain names,
-                     not links: the People group is search's one people surface. -->
-                <p class="mutuals" th:if="${!row.mutuals.isEmpty()}"
-                   th:text="${row.mutualsLine()}">You both know someone</p>
+            <article class="entry person" th:each="row : ${results.people}">
+                <span class="av av-40"
+                      th:insert="~{fragments/avatar :: face(${row.person.initials}, ${row.person.photoImageId})}">·</span>
+                <div class="said">
+                    <h3><a th:href="'/p/' + ${row.person.memberId}"
+                           th:text="${row.person.displayName()}">Name</a></h3>
+                    <!-- §8.2: Mutuals are displayed and never reorder. Plain names,
+                         not links: the People group is search's one people surface. -->
+                    <p class="mutuals" th:if="${!row.mutuals.isEmpty()}"
+                       th:text="${row.mutualsLine()}">You both know someone</p>
+                </div>
             </article>
         </section>
 

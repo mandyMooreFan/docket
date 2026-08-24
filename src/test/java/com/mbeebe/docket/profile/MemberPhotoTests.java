@@ -271,6 +271,32 @@ class MemberPhotoTests extends GraphTestBase {
     }
 
     /**
+     * The cross-module half (#52's PersonCard change): a face is drawn wherever a
+     * person is drawn, from the one card type profile, graph, jobs, messaging and
+     * search all read. /network stands in for the set — the type change is what
+     * carries it to the rest, and the compiler enforced that.
+     */
+    @Test
+    void aPhotoIsDrawnWhereverThePersonIs() throws Exception {
+        Cookie owner = completeMember("photo-lists-owner@example.org", "Lena Lister");
+        Cookie friend = completeMember("photo-lists-friend@example.org", "Fred Friendly");
+        connect(friend, owner);
+        long photo = setPhoto(friend, "listed-face".getBytes(StandardCharsets.UTF_8));
+
+        mvc.perform(get("/network").cookie(owner))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("/images/" + photo)));
+
+        // Removal reaches the lists too: the connection is back to initials.
+        mvc.perform(post("/profile/photo/delete").cookie(friend))
+                .andExpect(redirectedUrl("/profile/edit"));
+        String network = mvc.perform(get("/network").cookie(owner))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertThat(network).doesNotContain("/images/" + photo).contains(">FF<");
+    }
+
+    /**
      * The edit page's own promise (§4.1): removing is a button that is simply there,
      * beside the photo, whenever there is one to remove — and gone when there isn't,
      * because there is nothing to undo.
