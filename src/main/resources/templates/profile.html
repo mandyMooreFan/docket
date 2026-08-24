@@ -34,6 +34,18 @@
         <h2>About</h2>
         <div class="prose"><p th:text="${profile.summary}">Summary</p></div>
     </section>
+
+    <section class="block" th:if="${!profile.positions.isEmpty()}">
+        <h2>Positions</h2>
+        <article class="entry" th:each="position : ${profile.positions}">
+            <h3 th:text="${position.title}">Title</h3>
+            <p class="org">
+                <th:block th:if="${position.atCompany()}"><span th:text="${position.company}">Company</span> · </th:block>
+                <span class="when" th:text="${position.when}">Mar 2021 — Present</span>
+            </p>
+            <p th:if="${!position.description.isBlank()}" th:text="${position.description}">Description</p>
+        </article>
+    </section>
 </main>
 </body>
 </html>

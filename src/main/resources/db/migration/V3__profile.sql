@@ -14,3 +14,29 @@ create table profile (
     open_to_work text not null default 'OFF'
                  check (open_to_work in ('OFF', 'CONNECTIONS', 'MEMBERS'))
 );
+
+-- A Company exists because somebody named it while adding a Position (§6.1) — no
+-- queue, no gatekeeper, no owner. One row per name, case-insensitively: autocomplete
+-- reuses, never forks. Logo, description and the trust gate arrive with #34.
+create table company (
+    id         bigint generated always as identity primary key,
+    name       text not null,
+    created_at timestamptz not null
+);
+create unique index company_name_key on company (lower(name));
+
+-- A Position: a Member's self-declared claim to a role (§4.1, §16). Month resolution,
+-- stored as the first of the month; a null end month is what "current" means — currency
+-- is derived, never flagged (ADR-0002).
+create table position (
+    id          bigint generated always as identity primary key,
+    member_id   bigint not null references member (id) on delete cascade,
+    company_id  bigint references company (id),
+    title       text not null,
+    description text not null default '',
+    start_month date not null,
+    end_month   date,
+    created_at  timestamptz not null
+);
+create index position_member_idx on position (member_id);
+create index position_company_idx on position (company_id);

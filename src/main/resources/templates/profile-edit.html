@@ -35,6 +35,64 @@
         </label>
         <div><button class="btn primary" type="submit">Save</button></div>
     </form>
+
+    <section class="block">
+        <h2>Positions</h2>
+        <article class="entry" th:each="position : ${edit.positions}">
+            <h3 th:text="${position.title}">Title</h3>
+            <p class="org">
+                <th:block th:if="${position.atCompany()}"><span th:text="${position.company}">Company</span> · </th:block>
+                <span class="when" th:text="${position.when}">Mar 2021 — Present</span>
+            </p>
+            <div style="display: flex; gap: var(--s-4); align-items: center; margin-top: var(--s-2);">
+                <form th:if="${position.current}" method="post"
+                      th:action="'/profile/positions/' + ${position.id} + '/end'"
+                      style="display: flex; gap: var(--s-2); align-items: center;">
+                    <span class="label" style="margin: 0;">Ended</span>
+                    <input class="input" style="width: 4.5rem; padding: var(--s-1) var(--s-2);"
+                           type="number" name="endMonth" min="1" max="12" placeholder="MM" required>
+                    <input class="input" style="width: 6rem; padding: var(--s-1) var(--s-2);"
+                           type="number" name="endYear" min="1900" max="2100" placeholder="YYYY" required>
+                    <button class="btn sm" type="submit">Mark as ended</button>
+                </form>
+                <form method="post" th:action="'/profile/positions/' + ${position.id} + '/delete'">
+                    <button class="btn sm quiet" type="submit">Remove</button>
+                </form>
+            </div>
+        </article>
+
+        <form method="post" action="/profile/positions" class="form" style="margin-top: var(--s-8);">
+            <label class="field">
+                <span class="label">Title</span>
+                <input class="input" type="text" name="title" required>
+            </label>
+            <label class="field">
+                <span class="label">Company</span>
+                <input class="input" type="text" name="company" list="company-options"
+                       placeholder="Leave blank if there isn't one"
+                       hx-get="/companies/options" hx-trigger="input changed delay:200ms"
+                       hx-target="#company-options" hx-swap="outerHTML" autocomplete="off">
+                <datalist id="company-options"></datalist>
+            </label>
+            <div style="display: flex; gap: var(--s-2);">
+                <label class="field">
+                    <span class="label">Start month</span>
+                    <input class="input" style="width: 6rem;" type="number" name="startMonth"
+                           min="1" max="12" placeholder="MM" required>
+                </label>
+                <label class="field">
+                    <span class="label">Start year</span>
+                    <input class="input" style="width: 8rem;" type="number" name="startYear"
+                           min="1900" max="2100" placeholder="YYYY" required>
+                </label>
+            </div>
+            <label class="field">
+                <span class="label">What you did</span>
+                <textarea class="input" name="description" rows="3"></textarea>
+            </label>
+            <div><button class="btn" type="submit">Add position</button></div>
+        </form>
+    </section>
 </main>
 </body>
 </html>

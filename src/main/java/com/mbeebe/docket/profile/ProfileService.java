@@ -1,24 +1,41 @@
 package com.mbeebe.docket.profile;
 
+import com.mbeebe.docket.company.Companies;
+import com.mbeebe.docket.company.Company;
 import com.mbeebe.docket.identity.Member;
 import com.mbeebe.docket.identity.Members;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
 @Service
 public class ProfileService {
 
-    private final ProfileRepository profiles;
-    private final Members members;
-    private final ConnectionLookup connections;
+    private static final DateTimeFormatter MONTH =
+            DateTimeFormatter.ofPattern("MMM uuuu", Locale.UK);
 
-    ProfileService(ProfileRepository profiles, Members members, ConnectionLookup connections) {
+    private final ProfileRepository profiles;
+    private final PositionRepository positions;
+    private final Members members;
+    private final Companies companies;
+    private final ConnectionLookup connections;
+    private final Clock clock;
+
+    ProfileService(ProfileRepository profiles, PositionRepository positions, Members members,
+                   Companies companies, ConnectionLookup connections, Clock clock) {
         this.profiles = profiles;
+        this.positions = positions;
         this.members = members;
+        this.companies = companies;
         this.connections = connections;
+        this.clock = clock;
     }
 
     @Transactional
@@ -38,7 +55,8 @@ public class ProfileService {
             return Optional.empty();
         }
         Profile profile = profiles.findById(memberId).orElseGet(() -> Profile.blankFor(memberId));
-        Completeness completeness = Completeness.of(profile, 0, 0);
+        List<PositionView> positionViews = positionViews(memberId);
+        Completeness completeness = Completeness.of(profile, positionViews.size(), 0);
         EffectiveVisibility visibility =
                 EffectiveVisibility.of(profile.dial(), completeness.complete(), owner.get().isMinor());
         if (!visibility.visibleTo(memberId, viewer, connections)) {
@@ -47,8 +65,8 @@ public class ProfileService {
         boolean isOwner = viewer.map(member -> member.id() == memberId).orElse(false);
         return Optional.of(new ProfilePage(memberId, isOwner, profile.name(), profile.headline(),
                 profile.location(), profile.summary(), initials(profile.name()),
-                openToWorkShown(profile, memberId, viewer, isOwner), completeness, profile.dial(),
-                profile.openToWork(), visibility.indexable()));
+                openToWorkShown(profile, memberId, viewer, isOwner), positionViews, completeness,
+                profile.dial(), profile.openToWork(), visibility.indexable()));
     }
 
     /** What the edit page shows: your own facts, exactly as stored. */
@@ -56,13 +74,57 @@ public class ProfileService {
     public ProfileEdit editView(long memberId) {
         Profile profile = ownProfile(memberId);
         return new ProfileEdit(profile.name(), profile.headline(), profile.location(),
-                profile.summary(), profile.dial(), profile.openToWork());
+                profile.summary(), profile.dial(), profile.openToWork(), positionViews(memberId));
     }
 
     @Transactional
     public void editBasics(long memberId, String name, String headline, String location,
                            String summary) {
         ownProfile(memberId).editBasics(name, headline, location, summary);
+    }
+
+    /** §6.1: naming an employer here is what brings a Company into being, or reuses it. */
+    @Transactional
+    public void addPosition(long memberId, String title, String companyName, YearMonth start,
+                            String description) {
+        Company company = companyName.isBlank() ? null : companies.named(companyName);
+        positions.save(new Position(memberId, company, title.strip(), description.strip(),
+                start, clock.instant()));
+    }
+
+    /** True when the position was the member's own to end; false is the caller's 404. */
+    @Transactional
+    public boolean endPosition(long memberId, long positionId, YearMonth end) {
+        return positions.findByIdAndMemberId(positionId, memberId)
+                .map(position -> {
+                    position.endAt(end);
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    @Transactional
+    public boolean deletePosition(long memberId, long positionId) {
+        return positions.findByIdAndMemberId(positionId, memberId)
+                .map(position -> {
+                    positions.delete(position);
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    private List<PositionView> positionViews(long memberId) {
+        return positions.findByMemberIdOrderByStartMonthDesc(memberId).stream()
+                .sorted(Comparator.comparing(Position::current).reversed())
+                .map(position -> new PositionView(position.id(), position.title(),
+                        position.company() == null ? "" : position.company().name(),
+                        span(position.start(), position.end()), position.description(),
+                        position.current()))
+                .toList();
+    }
+
+    private static String span(YearMonth start, YearMonth end) {
+        return MONTH.format(start) + " — " + (end == null ? "Present" : MONTH.format(end));
     }
 
     /** The quiet flag renders only inside its chosen audience — and never logged-out. */
