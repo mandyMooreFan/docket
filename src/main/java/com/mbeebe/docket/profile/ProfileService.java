@@ -92,6 +92,16 @@ public class ProfileService {
         ownProfile(memberId).editBasics(name, headline, location, summary);
     }
 
+    @Transactional
+    public void setDial(long memberId, Profile.Dial dial) {
+        ownProfile(memberId).setDial(dial);
+    }
+
+    @Transactional
+    public void setOpenToWork(long memberId, Profile.OpenToWork audience) {
+        ownProfile(memberId).setOpenToWork(audience);
+    }
+
     /** §6.1: naming an employer here is what brings a Company into being, or reuses it. */
     @Transactional
     public void addPosition(long memberId, String title, String companyName, YearMonth start,

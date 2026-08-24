@@ -37,6 +37,58 @@
     </form>
 
     <section class="block">
+        <h2>Who can see your page</h2>
+        <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-6);">
+            One setting for the whole page. Until your profile is complete — and always while
+            you're under 18 — it stays visible to signed-in members only, whatever you pick here.
+        </p>
+        <form method="post" action="/profile/dial" class="form">
+            <label class="field" style="flex-direction: row; align-items: center; gap: var(--s-3);">
+                <input type="radio" name="dial" value="PUBLIC"
+                       th:checked="${edit.dial.name() == 'PUBLIC'}">
+                <span style="font-size: var(--t-14);">Public — anyone on the web, search engines included</span>
+            </label>
+            <label class="field" style="flex-direction: row; align-items: center; gap: var(--s-3);">
+                <input type="radio" name="dial" value="MEMBERS_ONLY"
+                       th:checked="${edit.dial.name() == 'MEMBERS_ONLY'}">
+                <span style="font-size: var(--t-14);">Members only — anyone signed in to Docket</span>
+            </label>
+            <label class="field" style="flex-direction: row; align-items: center; gap: var(--s-3);">
+                <input type="radio" name="dial" value="CONNECTIONS_ONLY"
+                       th:checked="${edit.dial.name() == 'CONNECTIONS_ONLY'}">
+                <span style="font-size: var(--t-14);">Connections only</span>
+            </label>
+            <div><button class="btn" type="submit">Set visibility</button></div>
+        </form>
+    </section>
+
+    <section class="block">
+        <h2>Open to work</h2>
+        <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-6);">
+            A quiet flag on your page, off unless you turn it on. It's shown only to the audience
+            you choose, is never searchable, and never appears on the logged-out page.
+        </p>
+        <form method="post" action="/profile/open-to-work" class="form">
+            <label class="field" style="flex-direction: row; align-items: center; gap: var(--s-3);">
+                <input type="radio" name="audience" value="OFF"
+                       th:checked="${edit.openToWork.name() == 'OFF'}">
+                <span style="font-size: var(--t-14);">Off</span>
+            </label>
+            <label class="field" style="flex-direction: row; align-items: center; gap: var(--s-3);">
+                <input type="radio" name="audience" value="CONNECTIONS"
+                       th:checked="${edit.openToWork.name() == 'CONNECTIONS'}">
+                <span style="font-size: var(--t-14);">Shown to your connections</span>
+            </label>
+            <label class="field" style="flex-direction: row; align-items: center; gap: var(--s-3);">
+                <input type="radio" name="audience" value="MEMBERS"
+                       th:checked="${edit.openToWork.name() == 'MEMBERS'}">
+                <span style="font-size: var(--t-14);">Shown to signed-in members</span>
+            </label>
+            <div><button class="btn" type="submit">Set flag</button></div>
+        </form>
+    </section>
+
+    <section class="block">
         <h2>Positions</h2>
         <article class="entry" th:each="position : ${edit.positions}">
             <h3 th:text="${position.title}">Title</h3>

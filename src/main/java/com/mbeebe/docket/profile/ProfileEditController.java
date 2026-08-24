@@ -50,4 +50,24 @@ class ProfileEditController {
         service.editBasics(member.get().id(), name, headline, location, summary);
         return "redirect:/profile/edit";
     }
+
+    @PostMapping("/profile/dial")
+    String dial(@RequestParam Profile.Dial dial, HttpServletRequest request) {
+        Optional<Member> member = CurrentMember.get(request);
+        if (member.isEmpty()) {
+            return "redirect:/login";
+        }
+        service.setDial(member.get().id(), dial);
+        return "redirect:/profile/edit";
+    }
+
+    @PostMapping("/profile/open-to-work")
+    String openToWork(@RequestParam Profile.OpenToWork audience, HttpServletRequest request) {
+        Optional<Member> member = CurrentMember.get(request);
+        if (member.isEmpty()) {
+            return "redirect:/login";
+        }
+        service.setOpenToWork(member.get().id(), audience);
+        return "redirect:/profile/edit";
+    }
 }
