@@ -1,5 +1,7 @@
 package com.mbeebe.docket.moderation;
 
+import com.mbeebe.docket.identity.Member;
+import com.mbeebe.docket.identity.Members;
 import com.mbeebe.docket.profile.Capability;
 import com.mbeebe.docket.profile.WithdrawnCapabilities;
 import org.springframework.stereotype.Service;
@@ -30,21 +32,19 @@ class MemberStanding implements WithdrawnCapabilities {
             DateTimeFormatter.ofPattern("d MMM uuuu", Locale.UK);
 
     private final ModerationActionRepository actions;
-    private final MemberTerminationRepository terminations;
+    private final Members members;
     private final Clock clock;
 
-    MemberStanding(ModerationActionRepository actions,
-                   MemberTerminationRepository terminations,
-                   Clock clock) {
+    MemberStanding(ModerationActionRepository actions, Members members, Clock clock) {
         this.actions = actions;
-        this.terminations = terminations;
+        this.members = members;
         this.clock = clock;
     }
 
     @Override
     @Transactional(readOnly = true)
     public boolean withdrawn(long memberId, Capability capability) {
-        if (terminations.existsByMemberId(memberId)) {
+        if (terminated(memberId)) {
             return true;
         }
         Instant now = clock.instant();
@@ -62,9 +62,14 @@ class MemberStanding implements WithdrawnCapabilities {
                 .anyMatch(action -> action.kind() == ModerationAction.Kind.SUSPENSION);
     }
 
+    /**
+     * Asked of identity, which owns the tombstone (§11.2, #39) — moderation keeps no
+     * second record of who has been ended. The ladder's fourth rung and the member's
+     * own front door write the same fact, so this must read the same fact.
+     */
     @Transactional(readOnly = true)
     boolean terminated(long memberId) {
-        return terminations.existsByMemberId(memberId);
+        return members.find(memberId).map(Member::terminated).orElse(false);
     }
 
     /**

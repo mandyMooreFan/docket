@@ -61,18 +61,8 @@ public class SessionService {
 
     @Transactional
     public void signOutEverywhere(Member member, HttpServletRequest request, HttpServletResponse response) {
-        endAllSessions(member);
-        clearCookie(request, response);
-    }
-
-    /**
-     * End every session a Member holds, without a request of their own to clear a
-     * cookie from. Termination (§10.3, §11.2) happens while the Member is elsewhere,
-     * so the door has to be closable from the other side.
-     */
-    @Transactional
-    public void endAllSessions(Member member) {
         sessions.deleteByMember(member);
+        clearCookie(request, response);
     }
 
     @Transactional(readOnly = true)

@@ -16,6 +16,13 @@ interface MessageRepository extends Repository<Message, Long> {
     /** The Thread as it renders (§7.2) — a removed Message (§10.3) is not in it. */
     List<Message> findByThreadIdAndRemovedAtIsNullOrderByIdAsc(long threadId);
 
+    /**
+     * Every Message in a Thread, removed included. The export (§11.1) carries a Thread
+     * whole — "neither person may destroy the other's record" cuts both ways, and a
+     * moderated message is still part of the correspondence that happened.
+     */
+    List<Message> findByThreadIdOrderByIdAsc(long threadId);
+
     /** The inbox's preview line (§7.2): the latest Message that still stands. */
     Optional<Message> findFirstByThreadIdAndRemovedAtIsNullOrderByIdDesc(long threadId);
 

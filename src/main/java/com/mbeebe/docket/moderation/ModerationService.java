@@ -2,6 +2,7 @@ package com.mbeebe.docket.moderation;
 
 import com.mbeebe.docket.identity.Member;
 import com.mbeebe.docket.identity.Members;
+import com.mbeebe.docket.leaving.Termination;
 import com.mbeebe.docket.profile.Capability;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,20 +34,20 @@ class ModerationService {
     private final ModerationActionRepository actions;
     private final AppealRepository appeals;
     private final ReportableContents content;
-    private final Terminations terminations;
+    private final Termination termination;
     private final ModerationMails mails;
     private final Members members;
     private final Clock clock;
 
     ModerationService(ReportRepository reports, ModerationActionRepository actions,
                       AppealRepository appeals, ReportableContents content,
-                      Terminations terminations, ModerationMails mails,
+                      Termination termination, ModerationMails mails,
                       Members members, Clock clock) {
         this.reports = reports;
         this.actions = actions;
         this.appeals = appeals;
         this.content = content;
-        this.terminations = terminations;
+        this.termination = termination;
         this.mails = mails;
         this.members = members;
         this.clock = clock;
@@ -180,7 +181,11 @@ class ModerationService {
         // The statement of reasons goes before the sessions end: Art. 17 owes it from
         // the moment the restriction takes effect, and afterwards is not that moment.
         tellTheAuthor(report, "Your Docket account has been terminated.", reason, action.id());
-        terminations.terminateByModeration(memberId, reason);
+        // #39's primitive, not a second one. The half that matters is not the deletion
+        // but what survives it, and getting that wrong from the ladder's side would
+        // delete a colleague's correspondence (§11.2, §7.3).
+        members.find(memberId).ifPresent(
+                member -> termination.terminate(member, Termination.Reason.MODERATION));
     }
 
     // ---- Appeals (§10.3) --------------------------------------------------------
@@ -194,7 +199,12 @@ class ModerationService {
     long appeal(Member member, long actionId, String account) {
         ModerationAction action = actions.findById(actionId)
                 .orElseThrow(() -> new Refused("There is no such decision."));
-        if (action.memberId() == null || action.memberId() != member.id()) {
+        // equals, not ==: both sides are Long, and reference comparison would work only
+        // while ids stayed inside the Long cache. It did work — for members numbered
+        // under 128 — which is exactly the shape of bug that passes a small test and
+        // reaches production, where it would tell every other member that the decision
+        // against them does not exist and quietly deny them §10.3's one Appeal.
+        if (!member.id().equals(action.memberId())) {
             throw new Refused("There is no such decision.");
         }
         if (appeals.existsByActionId(actionId)) {

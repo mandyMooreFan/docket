@@ -66,4 +66,7 @@ interface JobPostingRepository extends Repository<JobPosting, Long> {
 
     /** The poster's own standing postings; a removed one (§10.3) is not among them. */
     List<JobPosting> findByPosterIdAndRemovedAtIsNullOrderByPostedAtDesc(long posterId);
+
+    /** Every posting by a Member, removed included — for departure and the export. */
+    List<JobPosting> findByPosterIdOrderByPostedAtDesc(long posterId);
 }

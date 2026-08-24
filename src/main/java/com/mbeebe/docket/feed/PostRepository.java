@@ -17,6 +17,15 @@ interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByAuthorIdAndRemovedAtIsNullOrderByCreatedAtDescIdDesc(long authorId);
 
     /**
+     * Every Post by a Member, removed ones included — the two callers that must not
+     * filter. Departure (§11.2) has to delete the rows a moderator removed as well,
+     * or termination leaves them behind; the export (§11.1) has to carry them because
+     * a removed Post is still personal data the service holds about its author, and an
+     * export that quietly dropped it would answer the Article 15 request incompletely.
+     */
+    List<Post> findByAuthorIdOrderByCreatedAtDescIdDesc(long authorId);
+
+    /**
      * The feed's whole query (§5.1): the mutual graph and nothing else, strictly
      * after the read position, newest first. Ids break timestamp ties so the
      * order is total and the high-water mark never lets a Post show twice. A

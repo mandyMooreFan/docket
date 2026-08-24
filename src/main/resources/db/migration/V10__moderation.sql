@@ -185,20 +185,6 @@ create index public_form_request_contact_idx
 create index public_form_request_ip_idx
     on public_form_request (form, request_ip, created_at);
 
--- Termination (CONTEXT.md: the end of a Member). One row per Member, ever. The cause
--- distinguishes the ladder's fourth rung from §11.2's own front door — #39 owns the
--- member-facing flow and writes cause = 'MEMBER' behind the same port; moderation
--- writes cause = 'MODERATION' alongside its moderation_action row. Member references
--- across the product deliberately do not cascade, so terminating never deletes rows
--- that someone else's record depends on (§7.3, §11.1, §11.2).
-create table member_termination (
-    id            bigint generated always as identity primary key,
-    member_id     bigint not null unique references member (id),
-    cause         text not null check (cause in ('MODERATION', 'MEMBER')),
-    reason        text not null default '',
-    terminated_at timestamptz not null
-);
-
 -- Removal (§10.3 rung 1) as a dated fact on the item itself, in reply.removed_at's
 -- shape — the one complete remove-primitive the product already had (§5.3). Putting it
 -- here rather than in a moderation-owned table is deliberate: each module's read path
