@@ -193,6 +193,7 @@ public class ProfileService {
                 .sorted(Comparator.comparing(Position::current).reversed())
                 .map(position -> new PositionView(position.id(), position.title(),
                         position.company() == null ? "" : position.company().name(),
+                        position.company() == null ? null : position.company().id(),
                         span(position.start(), position.end()), position.description(),
                         position.current()))
                 .toList();

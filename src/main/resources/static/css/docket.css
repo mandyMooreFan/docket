@@ -229,6 +229,13 @@ textarea.input { font-family: var(--serif); font-size: var(--t-18); line-height:
 
 /* ---------- phone width (§14.1): one fluid column; the rail's contents are
    promoted to nav destinations by the pages that own them, never stacked ---------- */
+/* ---------- company page (#34): the logo sits where a portrait would ---------- */
+
+.logo {
+  width: 96px; height: 96px; border-radius: 12px; object-fit: contain;
+  background: var(--g1); margin-bottom: var(--s-6); display: block;
+}
+
 @media (max-width: 880px) {
   .with-rail { grid-template-columns: 1fr; gap: var(--s-12); }
   .rail { display: none; }

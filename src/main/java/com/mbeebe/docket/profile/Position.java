@@ -94,4 +94,9 @@ public class Position {
     void endAt(YearMonth end) {
         this.endMonth = end.atDay(1);
     }
+
+    /** A merge repoints the claim; the claim itself is untouched (§10.5). */
+    void moveTo(Company company) {
+        this.company = company;
+    }
 }

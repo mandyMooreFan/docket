@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${company.name} + ' — Docket'">Docket</title>
+</head>
+<body>
+<main class="page">
+    <header>
+        <img class="logo" th:if="${company.hasLogo()}"
+             th:src="'/images/' + ${company.logoImageId}" th:alt="${company.name} + ' logo'">
+        <div class="av av-96" th:unless="${company.hasLogo()}" th:text="${company.initial}">C</div>
+        <h1 class="title-serif" th:text="${company.name}">Company</h1>
+    </header>
+
+    <section class="block" th:if="${!company.description.isBlank()}">
+        <h2>About</h2>
+        <div class="prose"><p th:text="${company.description}">Description</p></div>
+    </section>
+
+    <section class="block">
+        <h2>Open postings</h2>
+        <!-- Postings arrive with the jobs board (#35); until then the empty state is honest (§13.4). -->
+        <p style="font-size: var(--t-14); color: var(--i500); margin: 0;">
+            No open postings right now. Postings appear here the moment a member posts one —
+            there's no backlog you can't see.
+        </p>
+    </section>
+
+    <section class="block">
+        <h2>People</h2>
+        <th:block th:if="${company.signedIn}">
+            <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-6);"
+               th:text="${company.peopleLine()}">1 member works here.</p>
+            <article class="entry" th:each="person : ${company.people}">
+                <h3><a th:href="'/p/' + ${person.memberId}" th:text="${person.name}">Name</a></h3>
+                <p class="org" th:if="${!person.headline.isBlank()}"
+                   th:text="${person.headline}">Headline</p>
+            </article>
+        </th:block>
+        <!-- §8.4: who works here is account-gated — logged-out, not even a count. -->
+        <p th:unless="${company.signedIn}"
+           style="font-size: var(--t-14); color: var(--i500); margin: 0;">
+            Who works here is shown to signed-in members.
+            <a href="/login">Sign in</a> or <a href="/join">join</a> to see the list.
+        </p>
+    </section>
+</main>
+</body>
+</html>
