@@ -14,10 +14,13 @@ class ProfileController {
 
     private final ProfileService service;
     private final ProfileGraphLookup graph;
+    private final ProfilePostsLookup posts;
 
-    ProfileController(ProfileService service, ProfileGraphLookup graph) {
+    ProfileController(ProfileService service, ProfileGraphLookup graph,
+                      ProfilePostsLookup posts) {
         this.service = service;
         this.graph = graph;
+        this.posts = posts;
     }
 
     /** The stable "me" address: your Profile lives at its public URL, owner or not. */
@@ -35,6 +38,7 @@ class ProfileController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("profile", page);
         model.addAttribute("graph", graph.onProfile(memberId, viewer));
+        model.addAttribute("posts", posts.postsOn(memberId, viewer));
         return "profile";
     }
 }

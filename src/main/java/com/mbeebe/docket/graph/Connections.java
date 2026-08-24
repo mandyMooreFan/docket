@@ -20,10 +20,13 @@ public class Connections implements ConnectionLookup {
 
     private final ConnectionRepository connections;
     private final MemberBlockRepository blocks;
+    private final ConnectionRequestRepository requests;
 
-    Connections(ConnectionRepository connections, MemberBlockRepository blocks) {
+    Connections(ConnectionRepository connections, MemberBlockRepository blocks,
+                ConnectionRequestRepository requests) {
         this.connections = connections;
         this.blocks = blocks;
+        this.requests = requests;
     }
 
     @Override
@@ -52,6 +55,16 @@ public class Connections implements ConnectionLookup {
     public List<Long> connectedTo(long memberId) {
         return connections.findByMemberAOrMemberBOrderByConnectedAtDesc(memberId, memberId)
                 .stream().map(connection -> connection.other(memberId)).toList();
+    }
+
+    /** Who is waiting on this Member's answer — the feed rail's real data (§2.3). */
+    @Transactional(readOnly = true)
+    public List<Long> pendingRequestersFor(long memberId) {
+        return requests.findByRecipientIdAndStateOrderBySentAt(
+                        memberId, ConnectionRequest.State.PENDING).stream()
+                .map(ConnectionRequest::requesterId)
+                .filter(requesterId -> !blocked(memberId, requesterId))
+                .toList();
     }
 
     /** Mutuals (CONTEXT.md): the Connections two Members share — Docket names no other relationship. */

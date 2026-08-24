@@ -19,15 +19,18 @@ import java.util.Optional;
 class PositionController {
 
     private final ProfileService service;
+    private final WorkChangeAnnouncer workChanges;
 
-    PositionController(ProfileService service) {
+    PositionController(ProfileService service, WorkChangeAnnouncer workChanges) {
         this.service = service;
+        this.workChanges = workChanges;
     }
 
     @PostMapping("/profile/positions")
     String add(@RequestParam String title, @RequestParam String company,
                @RequestParam int startMonth, @RequestParam int startYear,
                @RequestParam String description,
+               @RequestParam(required = false) String share,
                HttpServletRequest request, HttpServletResponse response, Model model) {
         Optional<Member> member = CurrentMember.get(request);
         if (member.isEmpty()) {
@@ -41,15 +44,22 @@ class PositionController {
         }
         service.addPosition(member.get().id(), title, company,
                 YearMonth.of(startYear, startMonth), description);
+        // §5.2.3: only the box ticked at this moment shares — never automatic.
+        if (share != null) {
+            workChanges.roleStarted(member.get().id(), title.strip(), company.strip());
+        }
         return "redirect:/profile/edit";
     }
 
     @PostMapping("/profile/positions/{id}/end")
     String end(@PathVariable long id, @RequestParam int endMonth, @RequestParam int endYear,
-               HttpServletRequest request) {
+               @RequestParam(required = false) String share, HttpServletRequest request) {
         long memberId = requireMember(request);
-        if (!service.endPosition(memberId, id, YearMonth.of(endYear, endMonth))) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        PositionView ended = service.endPosition(memberId, id, YearMonth.of(endYear, endMonth))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        // §5.2.3: only the box ticked at this moment shares — never automatic.
+        if (share != null) {
+            workChanges.roleEnded(memberId, ended.title(), ended.company());
         }
         return "redirect:/profile/edit";
     }

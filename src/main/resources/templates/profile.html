@@ -101,6 +101,16 @@
         </div>
     </section>
 
+    <!-- §5.4: the dated Posts list — older Posts are reached from here, not the
+         feed. A logged-out rendering omits minor-authored Posts, no placeholder. -->
+    <section class="block" th:if="${!posts.isEmpty()}">
+        <h2>Posts</h2>
+        <article class="entry" th:each="post : ${posts}">
+            <h3><a th:href="'/posts/' + ${post.postId}" th:text="${post.excerpt}">Excerpt</a></h3>
+            <p class="org"><span class="when" th:text="${post.when}">1 Aug 2026</span></p>
+        </article>
+    </section>
+
     <!-- §4.2: Mutuals — the only relationship Docket names between two members. -->
     <section class="block" th:if="${!graph.mutuals.isEmpty()}">
         <h2>Mutuals</h2>
