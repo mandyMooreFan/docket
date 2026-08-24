@@ -2,6 +2,7 @@ package com.mbeebe.docket.company;
 
 import com.mbeebe.docket.identity.CurrentMember;
 import com.mbeebe.docket.identity.Member;
+import com.mbeebe.docket.images.Images;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -30,12 +32,14 @@ class CompanyEditController {
     private final Companies companies;
     private final TrustGate trustGate;
     private final CompanyEditingService editing;
+    private final Images images;
 
     CompanyEditController(Companies companies, TrustGate trustGate,
-                          CompanyEditingService editing) {
+                          CompanyEditingService editing, Images images) {
         this.companies = companies;
         this.trustGate = trustGate;
         this.editing = editing;
+        this.images = images;
     }
 
     @GetMapping("/companies/{id}/edit")
@@ -59,6 +63,36 @@ class CompanyEditController {
             case NAME_TAKEN -> reshow(company, name, description, response, model,
                     "Another company already has that name. If they're really the same "
                             + "employer, that's a merge for moderation, not a rename.");
+        };
+    }
+
+    /**
+     * The product's first image upload (§10.4): the bytes go through the images
+     * module's checked store — a refused image never existed here.
+     */
+    @PostMapping("/companies/{id}/logo")
+    String logo(@PathVariable long id, @RequestParam("logo") MultipartFile logo,
+                HttpServletRequest request, HttpServletResponse response, Model model) {
+        Company company = gated(id, request);
+        long editorId = CurrentMember.get(request).orElseThrow().id();
+        byte[] bytes;
+        try {
+            bytes = logo.getBytes();
+        } catch (java.io.IOException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        Images.Stored stored = images.store(bytes, logo.getContentType());
+        return switch (stored.outcome()) {
+            case STORED -> {
+                editing.setLogo(company.id(), editorId, stored.imageId());
+                yield "redirect:/companies/" + company.id();
+            }
+            case WRONG_TYPE -> reshow(company, company.name(), company.description(),
+                    response, model, "A logo is a PNG or a JPEG.");
+            case TOO_LARGE -> reshow(company, company.name(), company.description(),
+                    response, model, "Logos are capped at 512 KB.");
+            case REFUSED -> reshow(company, company.name(), company.description(),
+                    response, model, "That image was refused by the upload checks.");
         };
     }
 
