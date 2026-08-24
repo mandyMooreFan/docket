@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Saved — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">Saved</h1>
+    <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-8);">
+        Your private bookmarks. Nobody else can see this page — there is no
+        save count anywhere, on purpose.
+    </p>
+
+    <p class="meta" th:if="${saved.isEmpty()}">Nothing saved yet.</p>
+
+    <article class="entry post" th:each="post : ${saved}">
+        <p class="org">
+            <a th:href="'/p/' + ${post.author.memberId}"
+               th:text="${post.author.displayName()}">Name</a> ·
+            <a class="when" th:href="'/posts/' + ${post.id}" th:text="${post.when}">1 Aug 2026</a>
+        </p>
+        <div class="prose" th:utext="${post.bodyHtml}"></div>
+        <p class="meta" style="margin-top: var(--s-2);">
+            <a th:href="'/posts/' + ${post.id}"
+               th:text="${post.replyCount == 0} ? 'Reply' : ${post.replyCountLabel()}">Reply</a>
+        </p>
+    </article>
+</main>
+</body>
+</html>

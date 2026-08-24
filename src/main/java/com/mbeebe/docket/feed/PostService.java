@@ -43,16 +43,19 @@ class PostService {
     private final PostRepository posts;
     private final PostImageRepository postImages;
     private final ReplyRepository replies;
+    private final SavedPostRepository saves;
     private final Images images;
     private final ProfileService profiles;
     private final ConnectionLookup graph;
     private final Clock clock;
 
     PostService(PostRepository posts, PostImageRepository postImages, ReplyRepository replies,
-                Images images, ProfileService profiles, ConnectionLookup graph, Clock clock) {
+                SavedPostRepository saves, Images images, ProfileService profiles,
+                ConnectionLookup graph, Clock clock) {
         this.posts = posts;
         this.postImages = postImages;
         this.replies = replies;
+        this.saves = saves;
         this.images = images;
         this.profiles = profiles;
         this.graph = graph;
@@ -199,7 +202,44 @@ class PostService {
                 postImages.findByPostIdOrderByPosition(post.id()).stream()
                         .map(PostImage::imageId).toList(),
                 PostBodies.previews(post.body()),
-                visibleReplies(post, viewer).size(), false, owns(viewer, post));
+                visibleReplies(post, viewer).size(),
+                viewer.map(member ->
+                        saves.existsByMemberIdAndPostId(member.id(), post.id())).orElse(false),
+                owns(viewer, post));
+    }
+
+    /** §5.3: the private Save. Idempotent; only a Post you can see can be kept. */
+    @Transactional
+    boolean save(Member member, long postId) {
+        Optional<Post> post = posts.findById(postId)
+                .filter(found -> visibleTo(found, Optional.of(member)));
+        if (post.isEmpty()) {
+            return false;
+        }
+        if (saves.findByMemberIdAndPostId(member.id(), postId).isEmpty()) {
+            saves.save(new SavedPost(member.id(), postId, clock.instant()));
+        }
+        return true;
+    }
+
+    @Transactional
+    boolean unsave(Member member, long postId) {
+        saves.findByMemberIdAndPostId(member.id(), postId).ifPresent(saves::delete);
+        return true;
+    }
+
+    /**
+     * The member's /saved page — theirs alone. A saved Post that has since
+     * left their audience (a Dial turned down, a Block) simply doesn't render;
+     * the Save itself stays private either way.
+     */
+    @Transactional(readOnly = true)
+    List<PostView> savedFor(Member member) {
+        return saves.findByMemberIdOrderBySavedAtDescIdDesc(member.id()).stream()
+                .flatMap(saved -> posts.findById(saved.postId()).stream())
+                .filter(post -> visibleTo(post, Optional.of(member)))
+                .map(post -> view(post, Optional.of(member)))
+                .toList();
     }
 
     /**

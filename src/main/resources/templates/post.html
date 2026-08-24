@@ -25,6 +25,18 @@
         <p class="link-preview" th:each="link : ${page.post.links}">
             <a th:href="${link.url}" rel="nofollow noopener" th:text="${link.domain}">domain</a>
         </p>
+
+        <!-- §5.3: the private Save — yours alone, counted nowhere (§5.6). -->
+        <div th:if="${page.viewerSignedIn}" style="margin-top: var(--s-4);">
+            <form th:if="${!page.post.saved}" method="post"
+                  th:action="'/posts/' + ${page.post.id} + '/save'">
+                <button class="btn quiet sm" type="submit">Save</button>
+            </form>
+            <form th:if="${page.post.saved}" method="post"
+                  th:action="'/posts/' + ${page.post.id} + '/unsave'">
+                <button class="btn quiet sm" type="submit">Saved — unsave</button>
+            </form>
+        </div>
     </article>
 
     <!-- §5.3: Replies — the count is this viewer's, and counts what this page shows. -->
