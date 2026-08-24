@@ -60,10 +60,56 @@ class PostController {
 
     @GetMapping("/posts/{id}")
     String page(@PathVariable long id, HttpServletRequest request, Model model) {
-        Optional<Member> viewer = CurrentMember.get(request);
-        PostView post = postService.pageFor(id, viewer)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        model.addAttribute("post", post);
+        model.addAttribute("page", postService.pageFor(id, CurrentMember.get(request))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
         return "post";
+    }
+
+    @PostMapping("/posts/{id}/replies")
+    String reply(@PathVariable long id, @RequestParam String body,
+                 HttpServletRequest request, HttpServletResponse response, Model model) {
+        Optional<Member> member = CurrentMember.get(request);
+        if (member.isEmpty()) {
+            return "redirect:/login";
+        }
+        try {
+            return switch (postService.reply(member.get(), id, body)) {
+                case DONE -> "redirect:/posts/" + id;
+                case NOT_THERE -> throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+                case REFUSED -> throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Replies are open to the author's connections.");
+            };
+        } catch (PostService.Refused refused) {
+            response.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value());
+            model.addAttribute("page", postService.pageFor(id, member)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
+            model.addAttribute("error", refused.getMessage());
+            return "post";
+        }
+    }
+
+    /** §5.3: the author curates their thread — remove a Reply, or close it. */
+    @PostMapping("/posts/{postId}/replies/{replyId}/remove")
+    String removeReply(@PathVariable long postId, @PathVariable long replyId,
+                       HttpServletRequest request) {
+        Member member = requireMember(request);
+        if (!postService.removeReply(member, postId, replyId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return "redirect:/posts/" + postId;
+    }
+
+    @PostMapping("/posts/{id}/close")
+    String closeThread(@PathVariable long id, HttpServletRequest request) {
+        Member member = requireMember(request);
+        if (!postService.closeThread(member, id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return "redirect:/posts/" + id;
+    }
+
+    private Member requireMember(HttpServletRequest request) {
+        return CurrentMember.get(request)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 }

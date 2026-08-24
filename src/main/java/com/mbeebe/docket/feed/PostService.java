@@ -2,6 +2,7 @@ package com.mbeebe.docket.feed;
 
 import com.mbeebe.docket.identity.Member;
 import com.mbeebe.docket.images.Images;
+import com.mbeebe.docket.profile.ConnectionLookup;
 import com.mbeebe.docket.profile.ProfileService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,16 +17,17 @@ import java.util.Locale;
 import java.util.Optional;
 
 /**
- * Posts themselves (§5.2, §5.4): writing one, and rendering one to the viewer
- * it is allowed to reach. Visibility is derived at read time (ADR-0002): a Post
- * rides its author's Profile Dial with the same floors — and §9.4's cap on top:
- * a Post authored as a minor is members-only regardless of everything else,
- * permanently.
+ * Posts and their threads (§5.2–§5.4). Visibility is derived at read time
+ * (ADR-0002): a Post rides its author's Profile Dial with the same floors —
+ * and §9.4's cap on top: content authored as a minor is members-only
+ * regardless of everything else, permanently. The reply count is derived per
+ * viewer and counts exactly what that viewer's rendering shows.
  */
 @Service
 class PostService {
 
     static final int MAX_BODY = 40_000;
+    static final int MAX_REPLY = 2_000;
     static final int MAX_IMAGES = 4;
 
     /** A refusal with an honest, member-facing reason; rolls the write back. */
@@ -35,18 +37,25 @@ class PostService {
         }
     }
 
+    /** GraphService's coarse shape: NOT_THERE renders as a 404, REFUSED as a 403. */
+    enum Outcome { DONE, NOT_THERE, REFUSED }
+
     private final PostRepository posts;
     private final PostImageRepository postImages;
+    private final ReplyRepository replies;
     private final Images images;
     private final ProfileService profiles;
+    private final ConnectionLookup graph;
     private final Clock clock;
 
-    PostService(PostRepository posts, PostImageRepository postImages, Images images,
-                ProfileService profiles, Clock clock) {
+    PostService(PostRepository posts, PostImageRepository postImages, ReplyRepository replies,
+                Images images, ProfileService profiles, ConnectionLookup graph, Clock clock) {
         this.posts = posts;
         this.postImages = postImages;
+        this.replies = replies;
         this.images = images;
         this.profiles = profiles;
+        this.graph = graph;
         this.clock = clock;
     }
 
@@ -94,19 +103,87 @@ class PostService {
         }
     }
 
-    /** The Post as this viewer may see it; empty — a plain 404 — when they may not. */
+    /** The Post's page as this viewer may see it; empty — a plain 404 — when they may not. */
     @Transactional(readOnly = true)
-    Optional<PostView> pageFor(long postId, Optional<Member> viewer) {
+    Optional<PostPage> pageFor(long postId, Optional<Member> viewer) {
         return posts.findById(postId)
                 .filter(post -> visibleTo(post, viewer))
-                .map(post -> view(post, viewer));
+                .map(post -> {
+                    List<ReplyView> replyViews = visibleReplies(post, viewer).stream()
+                            .map(reply -> new ReplyView(reply.id(),
+                                    profiles.cardFor(reply.authorId()),
+                                    when(reply.createdAt()),
+                                    PostBodies.toHtml(reply.body())))
+                            .toList();
+                    boolean isAuthor = owns(viewer, post);
+                    boolean mayReply = mayReply(post, viewer);
+                    return new PostPage(view(post, viewer), replyViews, mayReply,
+                            post.threadClosed(), isAuthor,
+                            viewer.isPresent() && !isAuthor && !mayReply && !post.threadClosed(),
+                            viewer.isPresent());
+                });
     }
 
     /**
-     * §5.4: a Post rides the author's single Dial — no per-Post visibility. The
-     * Profile page's own derivation (Dial, floors, Blocks) is reused wholesale:
-     * a Post is visible exactly when its author's page is. On top, §9.4: a Post
-     * authored as a minor is never visible logged-out, with no placeholder.
+     * §5.3: a Reply comes from one of the Post author's Connections — even on
+     * a Post a stranger can read — into a thread that is still open. The
+     * author may answer in their own thread. A Reply is not a Post
+     * (CONTEXT.md), so §3.2's POST capability is deliberately not asked for:
+     * the Connection itself was the earned thing.
+     */
+    @Transactional
+    Outcome reply(Member member, long postId, String rawBody) {
+        Optional<Post> post = posts.findById(postId)
+                .filter(found -> visibleTo(found, Optional.of(member)));
+        if (post.isEmpty()) {
+            return Outcome.NOT_THERE;
+        }
+        if (!mayReply(post.get(), Optional.of(member))) {
+            return Outcome.REFUSED;
+        }
+        String body = rawBody == null ? "" : rawBody.strip();
+        if (body.isEmpty()) {
+            throw new Refused("A reply needs words.");
+        }
+        if (body.length() > MAX_REPLY) {
+            throw new Refused("A reply can hold at most 2,000 characters.");
+        }
+        // §9.4: the authored-as-minor fact, fixed here and never after.
+        replies.save(new Reply(postId, member.id(), body, member.isMinor(), clock.instant()));
+        return Outcome.DONE;
+    }
+
+    /** §5.3: the author may remove any Reply from their thread. True when there was one. */
+    @Transactional
+    boolean removeReply(Member member, long postId, long replyId) {
+        if (!authoredBy(member, postId)) {
+            return false;
+        }
+        return replies.findById(replyId)
+                .filter(reply -> reply.postId() == postId)
+                .map(reply -> {
+                    reply.remove(clock.instant());
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    /** §5.3: the author may close the thread — no further Replies. */
+    @Transactional
+    boolean closeThread(Member member, long postId) {
+        if (!authoredBy(member, postId)) {
+            return false;
+        }
+        posts.findById(postId).orElseThrow().closeThread(clock.instant());
+        return true;
+    }
+
+    /**
+     * §5.4: a Post rides the author's single Dial — no per-Post visibility.
+     * The Profile page's own derivation (Dial, floors, Blocks) is reused
+     * wholesale: a Post is visible exactly when its author's page is. On top,
+     * §9.4: a Post authored as a minor is never visible logged-out, with no
+     * placeholder — and the 18 rollover never lifts that.
      */
     boolean visibleTo(Post post, Optional<Member> viewer) {
         if (viewer.isEmpty() && post.authoredAsMinor()) {
@@ -115,18 +192,51 @@ class PostService {
         return profiles.pageFor(post.authorId(), viewer).isPresent();
     }
 
+    /** The Post as one viewer sees it, reply count included — theirs, nobody's else. */
     PostView view(Post post, Optional<Member> viewer) {
         return new PostView(post.id(), profiles.cardFor(post.authorId()),
-                when(post), PostBodies.toHtml(post.body()),
+                when(post.createdAt()), PostBodies.toHtml(post.body()),
                 postImages.findByPostIdOrderByPosition(post.id()).stream()
                         .map(PostImage::imageId).toList(),
                 PostBodies.previews(post.body()),
-                0, false,
-                viewer.map(member -> member.id() == post.authorId()).orElse(false));
+                visibleReplies(post, viewer).size(), false, owns(viewer, post));
     }
 
-    private String when(Post post) {
+    /**
+     * §5.3 + §9.4: the Replies one viewer's rendering shows. Removed Replies
+     * are gone for everyone; a Block hides a Reply from the blocked viewer; a
+     * logged-out view omits minor-authored Replies with no placeholder. The
+     * count is this list's size — it can never disagree with the page.
+     */
+    private List<Reply> visibleReplies(Post post, Optional<Member> viewer) {
+        return replies.findByPostIdAndRemovedAtIsNullOrderByCreatedAtAscIdAsc(post.id()).stream()
+                .filter(reply -> viewer
+                        .map(member -> member.id() == reply.authorId()
+                                || !graph.blocked(member.id(), reply.authorId()))
+                        .orElse(!reply.authoredAsMinor()))
+                .toList();
+    }
+
+    private boolean mayReply(Post post, Optional<Member> viewer) {
+        if (viewer.isEmpty() || post.threadClosed()) {
+            return false;
+        }
+        long viewerId = viewer.get().id();
+        return viewerId == post.authorId() || graph.connected(viewerId, post.authorId());
+    }
+
+    private boolean authoredBy(Member member, long postId) {
+        return posts.findById(postId)
+                .map(post -> post.authorId() == member.id())
+                .orElse(false);
+    }
+
+    private static boolean owns(Optional<Member> viewer, Post post) {
+        return viewer.map(member -> member.id() == post.authorId()).orElse(false);
+    }
+
+    private String when(java.time.Instant instant) {
         return DateTimeFormatter.ofPattern("d MMM uuuu", Locale.UK)
-                .withZone(clock.getZone()).format(post.createdAt());
+                .withZone(clock.getZone()).format(instant);
     }
 }

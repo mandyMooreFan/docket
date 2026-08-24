@@ -8,24 +8,67 @@
 <main class="page">
     <article>
         <header style="display: flex; align-items: center; gap: var(--s-3); margin-bottom: var(--s-6);">
-            <a class="av av-40" th:href="'/p/' + ${post.author.memberId}"
-               th:text="${post.author.initials}">·</a>
+            <a class="av av-40" th:href="'/p/' + ${page.post.author.memberId}"
+               th:text="${page.post.author.initials}">·</a>
             <div>
                 <p style="margin: 0; font-family: var(--serif); font-size: var(--t-18); font-weight: 600;">
-                    <a th:href="'/p/' + ${post.author.memberId}" style="color: var(--i900);"
-                       th:text="${post.author.displayName()}">Name</a>
+                    <a th:href="'/p/' + ${page.post.author.memberId}" style="color: var(--i900);"
+                       th:text="${page.post.author.displayName()}">Name</a>
                 </p>
-                <p class="meta" style="margin: 0;" th:text="${post.when}">1 Aug 2026</p>
+                <p class="meta" style="margin: 0;" th:text="${page.post.when}">1 Aug 2026</p>
             </div>
         </header>
-        <div class="prose" th:utext="${post.bodyHtml}"></div>
-        <div class="post-images" th:if="${!post.imageIds.isEmpty()}">
-            <img th:each="imageId : ${post.imageIds}" th:src="'/images/' + ${imageId}" alt="">
+        <div class="prose" th:utext="${page.post.bodyHtml}"></div>
+        <div class="post-images" th:if="${!page.post.imageIds.isEmpty()}">
+            <img th:each="imageId : ${page.post.imageIds}" th:src="'/images/' + ${imageId}" alt="">
         </div>
-        <p class="link-preview" th:each="link : ${post.links}">
+        <p class="link-preview" th:each="link : ${page.post.links}">
             <a th:href="${link.url}" rel="nofollow noopener" th:text="${link.domain}">domain</a>
         </p>
     </article>
+
+    <!-- §5.3: Replies — the count is this viewer's, and counts what this page shows. -->
+    <section class="block">
+        <h2>Replies</h2>
+        <p class="meta" th:if="${page.post.replyCount > 0}"
+           th:text="${page.post.replyCountLabel()}">1 reply</p>
+
+        <article class="entry" th:each="reply : ${page.replies}">
+            <p class="org">
+                <a th:href="'/p/' + ${reply.author.memberId}"
+                   th:text="${reply.author.displayName()}">Name</a> ·
+                <span class="when" th:text="${reply.when}">1 Aug 2026</span>
+            </p>
+            <div class="prose" style="font-size: var(--t-16);" th:utext="${reply.bodyHtml}"></div>
+            <form th:if="${page.mayModerate}" method="post" style="margin-top: var(--s-2);"
+                  th:action="'/posts/' + ${page.post.id} + '/replies/' + ${reply.id} + '/remove'">
+                <button class="btn quiet sm" type="submit">Remove</button>
+            </form>
+        </article>
+
+        <p class="meta" th:if="${page.closed}">The author has closed this thread.</p>
+
+        <p class="label" th:if="${error}" th:text="${error}"
+           style="color: var(--ac); text-transform: none; letter-spacing: 0;">error</p>
+
+        <form th:if="${page.mayReply}" method="post" class="form" style="margin-top: var(--s-8);"
+              th:action="'/posts/' + ${page.post.id} + '/replies'">
+            <textarea class="input" name="body" rows="3"
+                      placeholder="A reply costs a sentence — that's the point."></textarea>
+            <div><button class="btn" type="submit">Reply</button></div>
+        </form>
+
+        <!-- §5.3: no reply affordance outside the author's connections — said plainly. -->
+        <p class="meta" th:if="${page.connectionsOnlyNote}"
+           th:text="'Replies are open to ' + ${page.post.author.displayName()} + '’s connections.'">
+            Replies are open to the author's connections.</p>
+
+        <form th:if="${page.mayModerate and !page.closed}" method="post"
+              style="margin-top: var(--s-6);"
+              th:action="'/posts/' + ${page.post.id} + '/close'">
+            <button class="btn quiet sm" type="submit">Close thread</button>
+        </form>
+    </section>
 </main>
 </body>
 </html>
