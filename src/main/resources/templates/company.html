@@ -11,7 +11,26 @@
              th:src="'/images/' + ${company.logoImageId}" th:alt="${company.name} + ' logo'">
         <div class="av av-96" th:unless="${company.hasLogo()}" th:text="${company.initial}">C</div>
         <h1 class="title-serif" th:text="${company.name}">Company</h1>
+        <p class="meta" th:if="${company.signedIn}">
+            <a th:href="'/companies/' + ${company.id} + '/history'">Page history</a>
+            <a th:if="${company.mayEdit}" th:href="'/companies/' + ${company.id} + '/edit'">Edit this page</a>
+        </p>
     </header>
+
+    <section class="panel" th:if="${verification != null}" style="margin-top: var(--s-8);">
+        <p style="margin: 0; font-size: var(--t-14); color: var(--i500);"
+           th:switch="${verification}">
+            <th:block th:case="'sent'">The link is on its way to that address. Following it
+                records the verification — nothing happens without it.</th:block>
+            <th:block th:case="'done'">Verified. That's now a dated fact: it records this
+                moment and never expires.</th:block>
+            <th:block th:case="'invalid'">That doesn't look like an address at a real mail
+                domain. Check it and try again.</th:block>
+            <th:block th:case="'limited'">Too many links asked for just now. Wait an hour
+                and try again.</th:block>
+            <th:block th:case="*"></th:block>
+        </p>
+    </section>
 
     <section class="block" th:if="${!company.description.isBlank()}">
         <h2>About</h2>
@@ -44,6 +63,27 @@
             Who works here is shown to signed-in members.
             <a href="/login">Sign in</a> or <a href="/join">join</a> to see the list.
         </p>
+    </section>
+
+    <!-- §6.2: the trust gate's front door — offered only to someone whose Profile
+         claims a current Position here and who doesn't hold the gate yet. -->
+    <section class="block" th:if="${company.canVerify}">
+        <h2>Verify that you work here</h2>
+        <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-6);">
+            This page belongs to the people who work here. To edit it — and to post jobs
+            for it — verify a work address: we send a link to an address at the company's
+            mail domain, and following it records a dated fact. It's a second address,
+            separate from the one you sign in with, and it's never shown to anyone.
+        </p>
+        <form method="post" th:action="'/companies/' + ${company.id} + '/verify'"
+              style="display: flex; gap: var(--s-2);">
+            <label class="field" style="flex: 1;">
+                <span class="label">Your work address</span>
+                <input class="input" type="email" name="address"
+                       placeholder="you@company.example" required>
+            </label>
+            <button class="btn primary" type="submit" style="align-self: flex-end;">Send the link</button>
+        </form>
     </section>
 </main>
 </body>

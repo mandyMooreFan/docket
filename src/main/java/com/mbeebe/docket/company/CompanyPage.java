@@ -8,7 +8,8 @@ import java.util.List;
  * so its absence is structural, not a template rule to remember.
  */
 public record CompanyPage(long id, String name, String initial, String description,
-                          Long logoImageId, boolean signedIn, List<PersonCard> people) {
+                          Long logoImageId, boolean signedIn, List<PersonCard> people,
+                          boolean mayEdit, boolean canVerify) {
 
     public boolean hasLogo() {
         return logoImageId != null;

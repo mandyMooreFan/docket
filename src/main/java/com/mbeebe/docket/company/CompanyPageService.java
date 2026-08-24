@@ -14,10 +14,13 @@ class CompanyPageService {
 
     private final CurrentPositions currentPositions;
     private final ProfileService profiles;
+    private final TrustGate trustGate;
 
-    CompanyPageService(CurrentPositions currentPositions, ProfileService profiles) {
+    CompanyPageService(CurrentPositions currentPositions, ProfileService profiles,
+                       TrustGate trustGate) {
         this.currentPositions = currentPositions;
         this.profiles = profiles;
+        this.trustGate = trustGate;
     }
 
     /**
@@ -35,8 +38,17 @@ class CompanyPageService {
                                 page.named() ? page.name() : "A member",
                                 page.headline(), page.initials()))
                         .toList();
+        // The two derived affordances (§6.2, ADR-0002): the edit right where the gate
+        // passes; the verify invitation where a current Position exists but the gate
+        // does not yet pass.
+        boolean mayEdit = viewer.map(member -> trustGate.passes(member.id(), company.id()))
+                .orElse(false);
+        boolean canVerify = !mayEdit && viewer
+                .map(member -> currentPositions.heldBy(member.id(), company.id()))
+                .orElse(false);
         return new CompanyPage(company.id(), company.name(), initial(company.name()),
-                company.description(), company.logoImageId(), viewer.isPresent(), people);
+                company.description(), company.logoImageId(), viewer.isPresent(), people,
+                mayEdit, canVerify);
     }
 
     private static String initial(String name) {

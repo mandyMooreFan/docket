@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 @Controller
@@ -25,13 +26,16 @@ class CompanyPageController {
      * it redirects to the one entity it now is (§10.5).
      */
     @GetMapping("/companies/{id}")
-    String page(@PathVariable long id, HttpServletRequest request, Model model) {
+    String page(@PathVariable long id,
+                @RequestParam(required = false) String verification,
+                HttpServletRequest request, Model model) {
         Company company = companies.find(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         if (company.merged()) {
             return "redirect:/companies/" + companies.resolved(company).id();
         }
         model.addAttribute("company", pages.pageFor(company, CurrentMember.get(request)));
+        model.addAttribute("verification", verification);
         return "company";
     }
 }

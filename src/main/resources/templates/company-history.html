@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${companyName} + ' — page history — Docket'">Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif" th:text="${companyName}">Company</h1>
+    <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-8);">
+        Every change to this page, newest first. Company pages belong to the people who
+        work there; this record is what keeps that honest.
+        <a th:href="'/companies/' + ${companyId}">Back to the page</a>.
+    </p>
+
+    <p th:if="${entries.isEmpty()}" style="font-size: var(--t-14); color: var(--i500); margin: 0;">
+        Nothing has been changed yet — this page still reads exactly as it was created.
+    </p>
+
+    <article class="entry" th:each="entry : ${entries}">
+        <h3>
+            <a th:href="'/p/' + ${entry.editorId}" th:text="${entry.editor}">Editor</a>
+            <th:block th:text="'changed the ' + ${entry.field}">changed the name</th:block>
+        </h3>
+        <p class="org"><span class="when" th:text="${entry.when}">12 Aug 2026</span></p>
+        <p th:if="${entry.showsValues()}">
+            <th:block th:if="${!entry.from.isBlank()}">
+                <span th:text="${entry.from}">old</span> →
+            </th:block>
+            <span th:text="${entry.to}">new</span>
+        </p>
+    </article>
+</main>
+</body>
+</html>
