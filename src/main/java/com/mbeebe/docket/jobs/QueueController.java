@@ -16,9 +16,14 @@ import java.util.Optional;
 /**
  * The poster's queue (§6.4) and the Application-scoped full-Profile view
  * (§6.3). Every route here is the posting author's alone — for anyone else the
- * pages do not exist, with no placeholder. There is deliberately no contact
- * affordance anywhere in the queue: the poster's reply channel is the
- * Application-scoped Thread, which is messaging's to build (#36).
+ * pages do not exist, with no placeholder.
+ *
+ * <p>The one contact affordance in the queue is the "Message" link on a row:
+ * the Application-scoped Thread (§7.1), shown only while that Application's
+ * channel is open and reaching nobody who did not apply. There is no other way
+ * to contact anyone from here, and messaging never mails — an "advanced"
+ * Outcome deliberately sends no mail, so the poster's actual words arrive only
+ * in the applicant's inbox (§7.4's one accepted cost).
  */
 @Controller
 class QueueController {

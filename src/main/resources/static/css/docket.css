@@ -271,6 +271,25 @@ textarea.input { font-family: var(--serif); font-size: var(--t-18); line-height:
 }
 .posting-card:hover { text-decoration: none; background: var(--g2); }
 
+/* ---------- messaging (#36, §7) ---------- */
+
+/* §7.4: the Unread count — the one badge in the product, so it is small, sans
+   and beside the nav word rather than a floating dot. Never rendered at zero. */
+.badge {
+  display: inline-block; margin-left: var(--s-1); padding: 0 var(--s-1);
+  min-width: 18px; border-radius: 999px; text-align: center;
+  background: var(--ac); color: var(--ac-ink);
+  font-size: var(--t-12); font-weight: 600; line-height: 18px;
+}
+
+/* §7.2: a Thread is correspondence, not chat — no bubbles, no tails, no
+   left/right sides. Entries down a reading column, space between them. */
+.thread { margin-top: var(--s-8); }
+.message + .message { margin-top: var(--s-8); }
+.message .org { font-size: var(--t-13); font-weight: 600; color: var(--i500); margin: 0 0 var(--s-2); }
+.message .org .when { font-weight: 400; color: var(--i400); }
+.message.mine .org { color: var(--i400); }
+
 /* ---------- search (#37, §8): one box, four groups, one impersonal order ---------- */
 
 /* the app-bar box: a flex item between the nav and the right-hand cluster, so
