@@ -41,9 +41,9 @@
 
         <!-- §13.4: the empty graph — the copy is spec surface, honest by design. -->
         <div class="prose" th:if="${!feed.hasConnections}" style="margin-top: var(--s-8);">
-            <p>Your feed shows what your connections write — you don't have any
-                connections yet. It stays empty until you do; nothing gets put here
-                for you. Find someone you know, or invite them.</p>
+            <p>Your feed shows what your connections write — you don't have any connections yet.
+                It stays empty until you do; nothing gets put here for you.
+                Find someone you know, or invite them.</p>
         </div>
 
         <th:block th:if="${feed.hasConnections}">
