@@ -12,7 +12,8 @@ import java.util.List;
  */
 public record FeedPage(boolean hasConnections, boolean mayPost,
                        List<ReplyNotice> repliesToYou, List<PostView> entries,
-                       List<PersonCard> pendingRequests) {
+                       List<PersonCard> pendingRequests,
+                       List<JobBoardLookup.AttachedPosting> networkJobs) {
 
     /** §5.5: one reply that reached you — to your Post or a thread you joined. */
     public record ReplyNotice(long postId, PersonCard author, String when, String excerpt) {

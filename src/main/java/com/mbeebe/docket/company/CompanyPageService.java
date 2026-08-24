@@ -15,12 +15,14 @@ class CompanyPageService {
     private final CurrentPositions currentPositions;
     private final ProfileService profiles;
     private final TrustGate trustGate;
+    private final CompanyPostings postings;
 
     CompanyPageService(CurrentPositions currentPositions, ProfileService profiles,
-                       TrustGate trustGate) {
+                       TrustGate trustGate, CompanyPostings postings) {
         this.currentPositions = currentPositions;
         this.profiles = profiles;
         this.trustGate = trustGate;
+        this.postings = postings;
     }
 
     /**
@@ -48,7 +50,7 @@ class CompanyPageService {
                 .orElse(false);
         return new CompanyPage(company.id(), company.name(), initial(company.name()),
                 company.description(), company.logoImageId(), viewer.isPresent(), people,
-                mayEdit, canVerify);
+                postings.openAt(company.id()), mayEdit, canVerify);
     }
 
     private static String initial(String name) {

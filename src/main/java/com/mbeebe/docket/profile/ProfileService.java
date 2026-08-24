@@ -83,6 +83,34 @@ public class ProfileService {
                 profile.dial(), profile.openToWork(), visibility.indexable()));
     }
 
+    /**
+     * §6.3's one deliberate exception to the single Dial: applying hands the
+     * poster a full view of the Profile FOR THAT APPLICATION, whatever the Dial
+     * — consent given by the act of applying, which is why this must not weaken
+     * {@link #pageFor}: the Dial, the floors and Blocks all stay untouched on
+     * every other surface, and only the jobs module's application queue renders
+     * this view, scoped to one Application. What it deliberately does NOT carry:
+     * the member's authored feed content (the §9.4 caps bind Posts and Replies,
+     * which are not the Profile and are not here), the open-to-work flag (it
+     * rides its own audience, and an application already says more), and any
+     * graph affordance. Empty only when the Member does not exist.
+     */
+    @Transactional(readOnly = true)
+    public Optional<ProfilePage> pageForApplication(long memberId) {
+        if (members.find(memberId).isEmpty()) {
+            return Optional.empty();
+        }
+        Profile profile = profiles.findById(memberId).orElseGet(() -> Profile.blankFor(memberId));
+        List<PositionView> positionViews = positionViews(memberId);
+        List<EducationView> educationViews = educationViews(memberId);
+        Completeness completeness =
+                Completeness.of(profile, positionViews.size(), educationViews.size());
+        return Optional.of(new ProfilePage(memberId, false, profile.name(), profile.headline(),
+                profile.location(), profile.summary(), initials(profile.name()), false,
+                positionViews, educationViews, skillViews(memberId), completeness,
+                profile.dial(), profile.openToWork(), false));
+    }
+
     /** How lists elsewhere point at a Member (#32's /network, Mutuals): a card, never the entity. */
     @Transactional(readOnly = true)
     public PersonCard cardFor(long memberId) {

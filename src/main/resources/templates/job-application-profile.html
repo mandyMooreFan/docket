@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${profile.named()} ? ${profile.name} + ' — Docket' : 'Docket'">Docket</title>
+</head>
+<body>
+<main class="page">
+    <!-- §6.3: the full Profile for one Application, whatever the Dial — consent
+         given by the act of applying. Rendered only to the posting's author,
+         only here. Deliberately absent: Posts (§9.4's caps bind authored
+         content, which is not the Profile), graph affordances, open-to-work,
+         and any way to contact anyone (the reply channel is #36's Thread). -->
+    <section class="panel" style="margin-bottom: var(--s-8);">
+        <p style="margin: 0; font-size: var(--t-14); color: var(--i500);">
+            Their application to
+            <a th:href="'/jobs/' + ${view.postingId}" th:text="${view.postingTitle}">the role</a>,
+            <span th:text="${view.appliedOn}">1 Aug 2026</span>. Applying shows you this
+            profile whole, for this application — that consent doesn't reach anywhere else.
+        </p>
+    </section>
+
+    <header>
+        <div class="av av-96" th:text="${profile.initials}">·</div>
+        <h1 class="title-serif" th:if="${profile.named()}" th:text="${profile.name}">Name</h1>
+        <h1 class="title-serif unnamed" th:unless="${profile.named()}">A member</h1>
+        <p class="headline" th:if="${!profile.headline.isBlank()}"
+           th:text="${profile.headline}">Headline</p>
+        <p class="meta">
+            <span th:if="${!profile.location.isBlank()}" th:text="${profile.location}">Location</span>
+        </p>
+    </header>
+
+    <section class="block" th:if="${!view.note.isBlank()}">
+        <h2>Their note</h2>
+        <div class="prose"><p th:text="${view.note}">Note</p></div>
+    </section>
+
+    <section class="block" th:if="${!profile.summary.isBlank()}">
+        <h2>About</h2>
+        <div class="prose"><p th:text="${profile.summary}">Summary</p></div>
+    </section>
+
+    <section class="block" th:if="${!profile.positions.isEmpty()}">
+        <h2>Positions</h2>
+        <article class="entry" th:each="position : ${profile.positions}">
+            <h3 th:text="${position.title}">Title</h3>
+            <p class="org">
+                <th:block th:if="${position.atCompany()}"><a th:href="'/companies/' + ${position.companyId}" th:text="${position.company}">Company</a> · </th:block>
+                <span class="when" th:text="${position.when}">Mar 2021 — Present</span>
+            </p>
+            <p th:if="${!position.description.isBlank()}" th:text="${position.description}">Description</p>
+        </article>
+    </section>
+
+    <section class="block" th:if="${!profile.education.isEmpty()}">
+        <h2>Education</h2>
+        <article class="entry" th:each="entry : ${profile.education}">
+            <h3 th:text="${entry.institution}">Institution</h3>
+            <p class="org">
+                <th:block th:if="${!entry.course.isBlank()}"><span th:text="${entry.course}">Course</span> · </th:block>
+                <span class="when" th:text="${entry.years}">2019 — 2023</span>
+            </p>
+        </article>
+    </section>
+
+    <section class="block" th:if="${!profile.skills.isEmpty()}">
+        <h2>Skills</h2>
+        <div class="chips">
+            <span th:each="skill : ${profile.skills}" th:text="${skill.name}">Skill</span>
+        </div>
+    </section>
+</main>
+</body>
+</html>

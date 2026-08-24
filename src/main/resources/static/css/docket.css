@@ -259,3 +259,14 @@ textarea.input { font-family: var(--serif); font-size: var(--t-18); line-height:
 .link-preview { font-size: var(--t-13); font-weight: 500; margin: var(--s-2) 0 0; }
 
 .entry.post .prose { margin-top: var(--s-2); }
+
+/* ---------- jobs (§6.3–6.5): salary is app-said — sans, never shy ---------- */
+
+.salary { font-weight: 600; color: var(--i700); }
+.posting-desc { white-space: pre-line; }
+.posting-card {
+  display: flex; flex-direction: column; margin-top: var(--s-4);
+  background: var(--g1); border-radius: 12px; padding: var(--s-3) var(--s-4);
+  font-size: var(--t-14); font-weight: 500; color: var(--i900);
+}
+.posting-card:hover { text-decoration: none; background: var(--g2); }

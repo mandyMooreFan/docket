@@ -29,4 +29,8 @@ interface PositionRepository extends Repository<Position, Long> {
 
     @Query("select p from Position p where p.company.id = :companyId")
     List<Position> findByCompanyId(@Param("companyId") long companyId);
+
+    @Query("select distinct p.company.id from Position p where p.memberId = :memberId "
+            + "and p.company is not null and p.endMonth is null")
+    List<Long> companyIdsCurrentFor(@Param("memberId") long memberId);
 }

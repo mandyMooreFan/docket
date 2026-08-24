@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${posting.title} + ' — Docket'">Docket</title>
+</head>
+<body>
+<main class="page">
+    <header>
+        <h1 class="title-serif" style="font-size: var(--t-30);"
+            th:text="${posting.title}">Title</h1>
+        <!-- §6.3: the salary at the top of the posting — the rule the board spends
+             its leverage on. App-said, so sans. -->
+        <p class="salary" style="font-size: var(--t-20); margin: var(--s-3) 0 0;"
+           th:text="${posting.salaryLine}">£45,000–£60,000</p>
+        <p class="meta" style="margin-top: var(--s-3);">
+            <a th:href="'/companies/' + ${posting.companyId}"
+               th:text="${posting.companyName}">Company</a>
+            <span th:text="${posting.placeLine}">Hybrid — Leeds</span>
+        </p>
+        <!-- §6.3: a posting is always authored by a person — named and linked. -->
+        <p class="meta" style="margin-top: var(--s-2);">
+            Posted by <a th:href="'/p/' + ${posting.poster.memberId}"
+                         th:text="${posting.poster.displayName()}">Name</a>
+            <span th:text="'on ' + ${posting.postedOn}">on 1 Aug 2026</span>
+            <span th:if="${posting.open}" th:text="'· open until ' + ${posting.closesOn}">
+                · open until 31 Aug 2026</span>
+            <span th:unless="${posting.open}">· closed</span>
+        </p>
+    </header>
+
+    <section class="block">
+        <h2>The role</h2>
+        <div class="prose posting-desc" th:text="${posting.description}">Description</div>
+    </section>
+
+    <!-- §6.3, §3.2: the Profile is the Application — one click plus an optional
+         note. The button simply reports the same checks the server enforces. -->
+    <section class="block">
+        <h2>Apply</h2>
+
+        <th:block th:if="${posting.apply.is('OPEN')}">
+            <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-6);">
+                Your profile is the application — applying shows it whole to the poster,
+                whatever your visibility dial says. There's nothing else to send.
+            </p>
+            <p class="label" th:if="${error}" th:text="${error}"
+               style="color: var(--ac); text-transform: none; letter-spacing: 0;">error</p>
+            <form method="post" class="form" th:action="'/jobs/' + ${posting.id} + '/apply'">
+                <label class="field">
+                    <span class="label">A note, if you want one</span>
+                    <textarea class="input" name="note" rows="3" maxlength="1000"
+                              style="font-family: var(--serif);"
+                              placeholder="Optional — a sentence or two."></textarea>
+                </label>
+                <div><button class="btn primary" type="submit">Apply with your profile</button></div>
+            </form>
+        </th:block>
+
+        <p class="meta" th:if="${posting.apply.is('SIGNED_OUT')}">
+            Applying takes a profile — <a href="/login">sign in</a> or
+            <a href="/join">join</a> to apply with yours.
+        </p>
+
+        <th:block th:if="${posting.apply.is('INCOMPLETE')}">
+            <p style="font-size: var(--t-14); color: var(--i500); margin: 0;">
+                Your profile is the application, and yours isn't complete yet — it still needs
+                <th:block th:text="${#strings.listJoin(posting.apply.missing, ', ')}"/>.
+                <a href="/profile/edit">Finish it</a> and the apply button opens.
+            </p>
+        </th:block>
+
+        <th:block th:if="${posting.apply.is('APPLIED')}">
+            <p class="meta">
+                You applied <span th:text="'on ' + ${posting.apply.appliedOn}">on 1 Aug 2026</span>
+                · <span th:text="${posting.apply.stateLabel}">Received</span>
+                · <a href="/applications">Your applications</a>
+            </p>
+        </th:block>
+
+        <p class="meta" th:if="${posting.apply.is('CLOSED')}">
+            This posting has closed.
+        </p>
+
+        <p class="meta" th:if="${posting.apply.is('YOURS')}">
+            Your posting — <a th:href="'/jobs/' + ${posting.id} + '/applications'">work its queue</a>.
+        </p>
+    </section>
+
+    <!-- §5.2.2: the only path from board to feed — a member writes a Post and
+         attaches this posting. Nothing auto-syndicates. -->
+    <section class="block" th:if="${posting.mayShare}">
+        <h2>Share it</h2>
+        <p class="label" th:if="${shareError}" th:text="${shareError}"
+           style="color: var(--ac); text-transform: none; letter-spacing: 0;">error</p>
+        <form method="post" class="form" th:action="'/jobs/' + ${posting.id} + '/share'">
+            <textarea class="input" name="body" rows="3" style="font-family: var(--serif);"
+                      placeholder="Say why it's worth someone's time — your words are the post; the posting rides along as a card."></textarea>
+            <div><button class="btn" type="submit">Post it to your feed</button></div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

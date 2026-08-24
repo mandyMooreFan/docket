@@ -42,11 +42,12 @@ class FeedService {
     private final Connections graph;
     private final CapabilityService capabilities;
     private final ProfileService profiles;
+    private final JobBoardLookup board;
     private final Clock clock;
 
     FeedService(PostRepository posts, ReplyRepository replies, PostService postService,
                 FeedVisitRepository visits, Connections graph, CapabilityService capabilities,
-                ProfileService profiles, Clock clock) {
+                ProfileService profiles, JobBoardLookup board, Clock clock) {
         this.posts = posts;
         this.replies = replies;
         this.postService = postService;
@@ -54,6 +55,7 @@ class FeedService {
         this.graph = graph;
         this.capabilities = capabilities;
         this.profiles = profiles;
+        this.board = board;
         this.clock = clock;
     }
 
@@ -94,7 +96,10 @@ class FeedService {
             latestOf(freshPosts, freshReplies)
                     .ifPresent(seenUpTo -> advanceMark(member.id(), seenUpTo));
         }
-        return new FeedPage(!connections.isEmpty(), mayPost, notices, entries, pending);
+        // §2.3's rail: open postings where a Connection works (#35) — a derived
+        // fact, unranked, honest when empty (§13.4).
+        return new FeedPage(!connections.isEmpty(), mayPost, notices, entries, pending,
+                board.openAtConnectedCompanies(member.id()));
     }
 
     /**

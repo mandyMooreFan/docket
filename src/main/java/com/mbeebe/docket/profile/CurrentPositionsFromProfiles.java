@@ -36,6 +36,12 @@ class CurrentPositionsFromProfiles implements CurrentPositions {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<Long> companiesHeldBy(long memberId) {
+        return positions.companyIdsCurrentFor(memberId);
+    }
+
+    @Override
     @Transactional
     public List<Long> repointAll(long fromCompanyId, long toCompanyId) {
         Company to = companies.find(toCompanyId).orElseThrow();

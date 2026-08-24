@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Jobs — Docket</title>
+</head>
+<body>
+<main class="page">
+    <header>
+        <h1 class="title-serif" style="font-size: var(--t-30);">Jobs</h1>
+        <p class="meta" style="margin-top: var(--s-2);">
+            One list, newest first. No ranking, no matching, no promoted postings.
+        </p>
+        <p class="meta" style="margin-top: var(--s-3);" th:if="${board.signedIn}">
+            <a href="/jobs/new">Post a job</a>
+            <a href="/applications">Your applications</a>
+        </p>
+    </header>
+
+    <!-- §6.5: seeker-chosen filters as GET params. They narrow the one list;
+         nothing reorders it, and nothing here is about the viewer except the
+         box the viewer ticks. -->
+    <section class="panel" style="margin-top: var(--s-8);">
+        <form method="get" action="/jobs" class="form" style="gap: var(--s-3);">
+            <div style="display: flex; gap: var(--s-3); flex-wrap: wrap;">
+                <label class="field" style="flex: 2; min-width: 10rem;">
+                    <span class="label">Keyword</span>
+                    <input class="input" type="text" name="q" th:value="${board.filters.q}">
+                </label>
+                <label class="field" style="flex: 1; min-width: 8rem;">
+                    <span class="label">Location</span>
+                    <input class="input" type="text" name="location"
+                           th:value="${board.filters.location}">
+                </label>
+                <label class="field">
+                    <span class="label">Remote</span>
+                    <select class="input" name="remote">
+                        <option value="" th:selected="${board.filters.remote == ''}">Any</option>
+                        <option value="ON_SITE"
+                                th:selected="${board.filters.remote == 'ON_SITE'}">On-site</option>
+                        <option value="HYBRID"
+                                th:selected="${board.filters.remote == 'HYBRID'}">Hybrid</option>
+                        <option value="REMOTE"
+                                th:selected="${board.filters.remote == 'REMOTE'}">Remote</option>
+                    </select>
+                </label>
+            </div>
+            <div style="display: flex; gap: var(--s-3); flex-wrap: wrap; align-items: flex-end;">
+                <label class="field" style="flex: 1; min-width: 8rem;">
+                    <span class="label">Salary floor</span>
+                    <input class="input" type="number" name="floor" min="1"
+                           th:value="${board.filters.floor}">
+                </label>
+                <label class="field">
+                    <span class="label">Currency</span>
+                    <select class="input" name="currency">
+                        <option th:each="code : ${ {'GBP','EUR','USD','CAD','AUD','CHF'} }"
+                                th:value="${code}" th:text="${code}"
+                                th:selected="${board.filters.currency == code}">GBP</option>
+                    </select>
+                </label>
+                <label class="field" style="flex: 1; min-width: 8rem;">
+                    <span class="label">Company</span>
+                    <input class="input" type="text" name="company"
+                           th:value="${board.filters.company}">
+                </label>
+                <!-- §6.5: a fact about the graph, chosen by the seeker — never a weight. -->
+                <label th:if="${board.signedIn}" class="field"
+                       style="flex-direction: row; align-items: center; gap: var(--s-2);
+                              padding-bottom: var(--s-2);">
+                    <input type="checkbox" name="known" value="on"
+                           th:checked="${board.filters.known}">
+                    <span style="font-size: var(--t-13); color: var(--i500);">
+                        Roles where I know someone</span>
+                </label>
+                <div style="padding-bottom: 0;">
+                    <button class="btn sm" type="submit">Filter</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <!-- §6.5: the opt-in saved search — created explicitly from the current
+         filter set, seeker-chosen frequency, one click to stop. Off by default:
+         nothing exists until this form is used. -->
+    <section class="panel" th:if="${board.signedIn}" style="margin-top: var(--s-3);">
+        <form method="post" action="/jobs/searches"
+              style="display: flex; gap: var(--s-3); align-items: center; flex-wrap: wrap;">
+            <input type="hidden" name="q" th:value="${board.filters.q}">
+            <input type="hidden" name="location" th:value="${board.filters.location}">
+            <input type="hidden" name="remote" th:value="${board.filters.remote}">
+            <input type="hidden" name="floor" th:value="${board.filters.floor}">
+            <input type="hidden" name="currency" th:value="${board.filters.currency}">
+            <input type="hidden" name="company" th:value="${board.filters.company}">
+            <input type="hidden" name="known" th:value="${board.filters.known} ? 'on' : ''">
+            <span style="font-size: var(--t-13); color: var(--i500);">
+                Email me new postings matching these filters</span>
+            <select class="input" name="frequency" style="width: auto;">
+                <option value="DAILY">Daily</option>
+                <option value="WEEKLY" selected>Weekly</option>
+            </select>
+            <button class="btn sm" type="submit">Save this search</button>
+        </form>
+        <div th:if="${!board.savedSearches.isEmpty()}" style="margin-top: var(--s-4);">
+            <p class="label" style="margin-bottom: var(--s-2);">Your saved searches</p>
+            <div th:each="search : ${board.savedSearches}"
+                 style="display: flex; gap: var(--s-3); align-items: center; margin-bottom: var(--s-2);">
+                <span style="font-size: var(--t-13); color: var(--i500);"
+                      th:text="${search.describes} + ' — ' + ${search.frequency}">search</span>
+                <form method="post" th:action="'/jobs/searches/' + ${search.id} + '/stop'">
+                    <button class="btn quiet sm" type="submit">Stop</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- §13.4: the empty board says what it is — spec copy, honest by design. -->
+    <div class="prose" th:if="${board.emptyBoard()}" style="margin-top: var(--s-8);">
+        <p>No open postings right now. Postings appear here the moment a member posts one —
+            there's no backlog you can't see.</p>
+        <p th:if="${board.signedIn}" style="font-size: var(--t-14); color: var(--i500);">
+            Save a search above and the moment one appears, it can come to you instead.</p>
+    </div>
+
+    <p class="meta" th:if="${board.emptyMatch()}" style="margin-top: var(--s-8);">
+        Nothing matches these filters.
+    </p>
+
+    <section class="block" th:if="${!board.rows.isEmpty()}">
+        <article class="entry" th:each="row : ${board.rows}">
+            <h3><a th:href="'/jobs/' + ${row.id}" th:text="${row.title}">Title</a></h3>
+            <p class="org">
+                <a th:href="'/companies/' + ${row.companyId}" th:text="${row.company}">Company</a> ·
+                <span class="salary" th:text="${row.salaryLine}">£45,000–£60,000</span> ·
+                <span class="when" th:text="${row.placeLine}">Hybrid — Leeds</span> ·
+                <span class="when" th:text="'Posted ' + ${row.postedOn}">Posted 1 Aug 2026</span>
+            </p>
+        </article>
+    </section>
+</main>
+</body>
+</html>
