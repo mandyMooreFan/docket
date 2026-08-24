@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Transparency log — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">Transparency log</h1>
+
+    <!--/* §10.3: reports received and actioned, by category, no names. The counts
+           arrive already grouped from the database through a projection with no column
+           for a member, so there is nothing here for a template edit to leak. */-->
+    <div class="prose">
+        <p>Everything reported on Docket, and what was done about it. No names — not
+            reporters, not the reported. §15.5 makes this permanent.</p>
+    </div>
+
+    <p class="meta" th:if="${log.empty()}">Nothing has been reported yet. When something
+        is, it will be counted here.</p>
+
+    <div class="block" th:if="${!log.empty()}">
+        <h2>Reports by category</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+            <tr>
+                <th class="label" style="text-align: left;">Category</th>
+                <th class="label" style="text-align: right;">Received</th>
+                <th class="label" style="text-align: right;">Upheld</th>
+                <th class="label" style="text-align: right;">Dismissed</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="row : ${log.rows()}">
+                <td th:text="${row.category().label()}">Category</td>
+                <td style="text-align: right;" th:text="${row.received()}">0</td>
+                <td style="text-align: right;" th:text="${row.upheld()}">0</td>
+                <td style="text-align: right;" th:text="${row.dismissed()}">0</td>
+            </tr>
+            </tbody>
+        </table>
+        <p class="meta">Dismissals are counted beside upholdings on purpose. A log that
+            published only the actions taken would flatter the person taking them.</p>
+    </div>
+
+    <div class="block" th:if="${!log.empty()}">
+        <h2>What was done</h2>
+        <div class="prose">
+            <ul>
+                <li><strong th:text="${log.removals()}">0</strong> items removed</li>
+                <li><strong th:text="${log.withdrawals()}">0</strong> capabilities withdrawn</li>
+                <li><strong th:text="${log.suspensions()}">0</strong> accounts made read-only</li>
+                <li><strong th:text="${log.terminations()}">0</strong> accounts terminated</li>
+            </ul>
+        </div>
+    </div>
+
+    <!--/* Outside the empty-state guard on purpose. The refusal is true of a log with
+           nothing in it, and that is precisely when a reader has no counts to infer it
+           from — so §10.3's outright refusal of visibility limiting and shadowbanning
+           is stated here unconditionally. */-->
+    <div class="block">
+        <h2>What is not counted here</h2>
+        <div class="prose">
+            <p>No entry for reach reduction or visibility limiting, because Docket does not do either.
+                There is no ranking to turn down, and a removal is total and disclosed to the person
+                it happened to.</p>
+        </div>
+    </div>
+</main>
+</body>
+</html>

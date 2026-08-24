@@ -34,6 +34,15 @@ public class Company {
     @Column(name = "merged_into_id")
     private Long mergedIntoId;
 
+    /**
+     * §10.3 rung 1, in {@code reply.removed_at}'s shape — §10.3's "joke/spam
+     * entities are cleaned up reactively". A removed Company stops rendering
+     * everywhere; the row stays, because removal is never a delete and a merge
+     * chain may still run through it.
+     */
+    @Column(name = "removed_at")
+    private Instant removedAt;
+
     private Instant createdAt;
 
     protected Company() {
@@ -84,5 +93,30 @@ public class Company {
     /** The merge fact's pointer (§10.5): the row stays, the identity moves. */
     void markMergedInto(long survivorId) {
         this.mergedIntoId = survivorId;
+    }
+
+    /**
+     * §10.3 rung 1. Public because a Company is the one reportable kind whose rows
+     * other modules render directly — the Position's employer line, for one.
+     */
+    public boolean removed() {
+        return removedAt != null;
+    }
+
+    /** §10.3 rung 1: idempotent — the first removal is the one that stands. */
+    void remove(Instant now) {
+        if (removedAt == null) {
+            removedAt = now;
+        }
+    }
+
+    /**
+     * §10.5: the dated fact lifted, the Company back exactly as it was. Idempotent
+     * — a Company that is not removed is left alone.
+     */
+    void restore() {
+        if (removedAt != null) {
+            removedAt = null;
+        }
     }
 }

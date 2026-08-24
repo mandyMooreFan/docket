@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Report an intimate image — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">Report an intimate image</h1>
+
+    <p class="label" th:if="${error}" th:text="${error}"
+       style="color: var(--ac); text-transform: none; letter-spacing: 0;">error</p>
+
+    <!--/* §10.5 / OSA s.20A. A distinct route, no account: the statute covers "users
+           and affected persons", and the person depicted is the least likely of anyone
+           to hold an account here. The declarations below are s.20A(2)'s prescribed
+           contents and the schema will not accept a row without them. */-->
+    <div class="prose">
+        <p>This form is for one thing: an intimate image of you, or of someone you are
+            acting for, posted on Docket without consent. It is not the ordinary report
+            route, and you do not need an account.</p>
+        <p><strong>If you can tell us where it is precisely enough for us to find it, it
+            is hidden the moment this form arrives</strong> — before anyone has looked at
+            it. A person then confirms the removal or puts it back, and both you and the
+            person who posted it are told either way.</p>
+        <p>If you cannot point at it precisely — because it is in a private conversation
+            you cannot see — send the form anyway and say what you know. It goes to the
+            front of the queue.</p>
+    </div>
+
+    <form method="post" action="/safety/intimate-image" class="form">
+        <label class="field">
+            <span class="label">Where it is, and what it is</span>
+            <textarea class="input" name="locator" rows="5"
+                      placeholder="A link if you have one. If not, whatever you can tell us."></textarea>
+        </label>
+
+        <div class="field">
+            <span class="label">Required by law</span>
+            <label class="field" style="flex-direction: row; align-items: flex-start; gap: var(--s-3);">
+                <input type="checkbox" name="subjectDeclared" value="true">
+                <span>I am the person shown in the image.</span>
+            </label>
+            <label class="field" style="flex-direction: row; align-items: flex-start; gap: var(--s-3);">
+                <input type="checkbox" name="actingFor" value="true">
+                <span>I am acting for the person shown in the image.</span>
+            </label>
+            <label class="field" style="flex-direction: row; align-items: flex-start; gap: var(--s-3);">
+                <input type="checkbox" name="goodFaith" value="true">
+                <span>I am making this report in good faith.</span>
+            </label>
+        </div>
+
+        <label class="field">
+            <span class="label">How to reach you</span>
+            <input class="input" type="email" name="contact" autocomplete="email">
+        </label>
+
+        <div class="prose" style="font-size: var(--t-14);">
+            <p>Content is taken down on the strength of this report, before it is
+                checked. That is a real cost borne by whoever posted it, and it is why the
+                declarations above are required and why a false report is itself
+                something that can be acted on.</p>
+        </div>
+
+        <div><button class="btn primary" type="submit">Send</button></div>
+    </form>
+</main>
+</body>
+</html>

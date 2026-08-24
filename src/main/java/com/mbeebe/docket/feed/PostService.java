@@ -189,8 +189,16 @@ class PostService {
      * wholesale: a Post is visible exactly when its author's page is. On top,
      * §9.4: a Post authored as a minor is never visible logged-out, with no
      * placeholder — and the 18 rollover never lifts that.
+     *
+     * <p>§10.3 rung 1 is asked first and of everyone, the author included: a
+     * removed Post is visible to nobody. Putting it here rather than at each
+     * surface is what makes the Post page, /saved, search and {@link
+     * PostImageAudience} agree without any of them restating the rule.
      */
     boolean visibleTo(Post post, Optional<Member> viewer) {
+        if (post.removed()) {
+            return false;
+        }
         if (viewer.isEmpty() && post.authoredAsMinor()) {
             return false;
         }

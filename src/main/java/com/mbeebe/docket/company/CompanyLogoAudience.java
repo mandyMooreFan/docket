@@ -15,9 +15,10 @@ import java.util.Optional;
  * an actor with a Dial to turn. That permanence is what earns the logo a shared,
  * immutable cache where nothing else gets one.
  *
- * <p>Only the logo a Company currently wears is claimed. A logo since replaced stops
- * being claimed and stops being served — the edit history records the change in words
- * and never renders the old bytes.
+ * <p>Only the logo a standing Company currently wears is claimed. A logo since
+ * replaced stops being claimed and stops being served — the edit history records the
+ * change in words and never renders the old bytes — and a removed Company (§10.3
+ * rung 1) stops claiming its logo for the same reason.
  */
 @Component
 class CompanyLogoAudience implements ImageAudience {
@@ -31,7 +32,7 @@ class CompanyLogoAudience implements ImageAudience {
     @Override
     @Transactional(readOnly = true)
     public Optional<Verdict> verdictFor(long imageId, Optional<Member> viewer) {
-        return companies.existsByLogoImageId(imageId)
+        return companies.existsByLogoImageIdAndRemovedAtIsNull(imageId)
                 ? Optional.of(Verdict.OPEN_WEB)
                 : Optional.empty();
     }

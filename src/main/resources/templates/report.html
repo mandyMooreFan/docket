@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Report — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif" style="font-size: var(--t-30);">Report this</h1>
+
+    <p class="label" th:if="${error}" th:text="${error}"
+       style="color: var(--ac); text-transform: none; letter-spacing: 0;">error</p>
+
+    <article class="entry" style="margin-bottom: var(--s-8);">
+        <p class="org"><a th:href="${item.href}" th:text="${item.href}">where</a></p>
+        <div class="prose" th:text="${item.summary}">what was said</div>
+    </article>
+
+    <form method="post" th:action="'/report/' + ${kind} + '/' + ${targetId}" class="form">
+        <div class="field">
+            <span class="label">Which rule</span>
+            <!--/* §10.6: the closed list is the only list. A reporter picks from the
+                   conduct policy because there is nothing else to pick from. */-->
+            <label class="field" th:each="category, i : ${categories}"
+                   style="flex-direction: row; align-items: center; gap: var(--s-3);">
+                <input type="radio" name="category" th:value="${category}"
+                       th:checked="${i.index == 0}">
+                <span th:text="${category.label()}">Category</span>
+            </label>
+        </div>
+        <label class="field">
+            <span class="label">What is wrong with it</span>
+            <textarea class="input" name="account" rows="5"
+                      placeholder="A sentence is enough."></textarea>
+        </label>
+        <div class="prose" style="font-size: var(--t-14);">
+            <p>One person reads these, usually within a few days. You will get an
+                acknowledgement now and the decision later, with its reasons. Nothing is
+                decided automatically.</p>
+            <p>If this is an intimate image of you, close this and use the
+                <a href="/safety/intimate-image">intimate image route</a> instead — it
+                hides the content immediately rather than waiting for a review.</p>
+        </div>
+        <div><button class="btn primary" type="submit">Send report</button></div>
+    </form>
+</main>
+</body>
+</html>

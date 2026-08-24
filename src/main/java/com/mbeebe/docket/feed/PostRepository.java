@@ -10,14 +10,28 @@ import java.util.List;
 
 interface PostRepository extends JpaRepository<Post, Long> {
 
+    /**
+     * One author's standing Posts, newest first. §10.3's removal is a predicate
+     * here rather than a filter at each call site, so a new caller inherits it.
+     */
+    List<Post> findByAuthorIdAndRemovedAtIsNullOrderByCreatedAtDescIdDesc(long authorId);
+
+    /**
+     * Every Post by a Member, removed ones included — the two callers that must not
+     * filter. Departure (§11.2) has to delete the rows a moderator removed as well,
+     * or termination leaves them behind; the export (§11.1) has to carry them because
+     * a removed Post is still personal data the service holds about its author, and an
+     * export that quietly dropped it would answer the Article 15 request incompletely.
+     */
     List<Post> findByAuthorIdOrderByCreatedAtDescIdDesc(long authorId);
 
     /**
      * The feed's whole query (§5.1): the mutual graph and nothing else, strictly
      * after the read position, newest first. Ids break timestamp ties so the
-     * order is total and the high-water mark never lets a Post show twice.
+     * order is total and the high-water mark never lets a Post show twice. A
+     * removed Post (§10.3) never enters it.
      */
-    List<Post> findByAuthorIdInAndCreatedAtAfterOrderByCreatedAtDescIdDesc(
+    List<Post> findByAuthorIdInAndRemovedAtIsNullAndCreatedAtAfterOrderByCreatedAtDescIdDesc(
             Collection<Long> authorIds, Instant after);
 
     /**
@@ -25,10 +39,13 @@ interface PostRepository extends JpaRepository<Post, Long> {
      * (§8.2). Candidates only — who may read each one is
      * {@link PostService#visibleTo}'s answer, derived after the match, so the
      * author's Dial and §9.4's permanent cap are never baked into the index.
+     * Removal (§10.3) is a predicate rather than a later filter — a removed Post
+     * is not a candidate at all.
      */
     @Query(value = """
             select p.* from post p
-            where p.body_tsv @@ to_tsquery('english'::regconfig, cast(:tsquery as text))
+            where p.removed_at is null
+              and p.body_tsv @@ to_tsquery('english'::regconfig, cast(:tsquery as text))
             order by ts_rank(p.body_tsv, to_tsquery('english'::regconfig, cast(:tsquery as text))) desc,
                      p.id asc
             limit :limit

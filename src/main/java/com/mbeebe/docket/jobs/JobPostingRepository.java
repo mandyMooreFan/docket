@@ -18,12 +18,13 @@ interface JobPostingRepository extends Repository<JobPosting, Long> {
      * §6.5: one list, newest first — open means the window edge is still ahead
      * of the clock and no sweep has recorded a close. Every filter narrows this.
      */
-    @Query("select p from JobPosting p where p.closedAt is null and p.closesAt > :now "
+    @Query("select p from JobPosting p where p.removedAt is null "
+            + "and p.closedAt is null and p.closesAt > :now "
             + "order by p.postedAt desc, p.id desc")
     List<JobPosting> openAt(@Param("now") Instant now);
 
     @Query("select p from JobPosting p where p.companyId = :companyId "
-            + "and p.closedAt is null and p.closesAt > :now "
+            + "and p.removedAt is null and p.closedAt is null and p.closesAt > :now "
             + "order by p.postedAt desc, p.id desc")
     List<JobPosting> openAtCompany(@Param("companyId") long companyId, @Param("now") Instant now);
 
@@ -37,7 +38,7 @@ interface JobPostingRepository extends Repository<JobPosting, Long> {
      */
     @Query(value = """
             select p.* from job_posting p
-            where p.closed_at is null and p.closes_at > :now
+            where p.removed_at is null and p.closed_at is null and p.closes_at > :now
               and p.text_tsv @@ to_tsquery('english'::regconfig, cast(:tsquery as text))
             order by p.posted_at desc, p.id desc
             """, nativeQuery = true)
@@ -50,7 +51,7 @@ interface JobPostingRepository extends Repository<JobPosting, Long> {
      */
     @Query(value = """
             select p.* from job_posting p
-            where p.closed_at is null and p.closes_at > :now
+            where p.removed_at is null and p.closed_at is null and p.closes_at > :now
               and p.text_tsv @@ to_tsquery('english'::regconfig, cast(:tsquery as text))
             order by ts_rank(p.text_tsv, to_tsquery('english'::regconfig, cast(:tsquery as text))) desc,
                      p.id asc
@@ -63,5 +64,9 @@ interface JobPostingRepository extends Repository<JobPosting, Long> {
     @Query("select p from JobPosting p where p.closedAt is null and p.closesAt <= :now")
     List<JobPosting> dueToClose(@Param("now") Instant now);
 
+    /** The poster's own standing postings; a removed one (§10.3) is not among them. */
+    List<JobPosting> findByPosterIdAndRemovedAtIsNullOrderByPostedAtDesc(long posterId);
+
+    /** Every posting by a Member, removed included — for departure and the export. */
     List<JobPosting> findByPosterIdOrderByPostedAtDesc(long posterId);
 }

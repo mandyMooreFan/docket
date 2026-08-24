@@ -17,6 +17,9 @@
             <a th:href="'/companies/' + ${posting.companyId}"
                th:text="${posting.companyName}">Company</a>
             <span th:text="${posting.placeLine}">Hybrid — Leeds</span>
+            <!--/* §10.2: Job postings are reportable. */-->
+            <span th:if="${currentMember != null}">·
+                <a th:href="'/report/JOB_POSTING/' + ${posting.id}">Report</a></span>
         </p>
         <!-- §6.3: a posting is always authored by a person — named and linked. -->
         <p class="meta" style="margin-top: var(--s-2);">

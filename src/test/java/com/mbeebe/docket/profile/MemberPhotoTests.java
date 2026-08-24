@@ -197,6 +197,12 @@ class MemberPhotoTests extends GraphTestBase {
         long faceOnlyId = memberId(faceOnly);
         setPhoto(faceOnly, "face-only".getBytes(StandardCharsets.UTF_8));
         for (Capability capability : Capability.values()) {
+            // REPLY is skipped because §3.2 never withheld replying in the first place
+            // (#38): it is a Capability only so §10.3 can withdraw it, so it is never
+            // NOT_YET_EARNED for anyone, with or without a face.
+            if (!capability.earnedByCompleteness()) {
+                continue;
+            }
             assertThat(capabilities.may(faceOnlyId, capability))
                     .as("a photo does not earn %s", capability)
                     .isEqualTo(CapabilityAnswer.NOT_YET_EARNED);

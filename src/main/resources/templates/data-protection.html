@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Data protection complaint — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">Data protection complaint</h1>
+
+    <p class="label" th:if="${error}" th:text="${error}"
+       style="color: var(--ac); text-transform: none; letter-spacing: 0;">error</p>
+
+    <!--/* §11.3 / DUAA s.164A. Its own form, because the statute makes it one — and
+           deliberately not reachable through the report flow, which is about content
+           rather than about how Docket handles personal data. */-->
+    <div class="prose">
+        <p>This form is for complaints about how Docket handles personal data — yours or
+            someone else's. It is not the route for reporting a post or a member; that is
+            on the <a href="/safety">safety page</a>, and it is a different thing.</p>
+        <p>You do not need an account. Your data may have been handled here without your
+            ever having joined, and that is exactly the case this route exists for.</p>
+        <p>We acknowledge complaints straight away — the law allows 30 days, and waiting
+            for the thirtieth would be following the letter of it. Then we respond
+            properly.</p>
+    </div>
+
+    <form method="post" action="/data-protection" class="form">
+        <label class="field">
+            <span class="label">How to reach you</span>
+            <input class="input" type="email" name="contact" autocomplete="email">
+        </label>
+        <label class="field">
+            <span class="label">What the complaint is</span>
+            <textarea class="input" name="account" rows="8"></textarea>
+        </label>
+        <div class="prose" style="font-size: var(--t-14);">
+            <p>If you are unhappy with how we handle this, you can complain to the
+                Information Commissioner's Office at ico.org.uk. You can go to them
+                first if you would rather; you do not have to come here at all.</p>
+        </div>
+        <div><button class="btn primary" type="submit">Send complaint</button></div>
+    </form>
+</main>
+</body>
+</html>

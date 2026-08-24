@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Data protection complaints — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif" style="font-size: var(--t-30);">Data protection complaints</h1>
+    <p class="meta"><a href="/moderation">Back to the queue</a></p>
+
+    <p class="meta" th:if="${complaints.isEmpty()}">Nothing open.</p>
+
+    <article class="entry" th:each="complaint : ${complaints}">
+        <p class="org" th:text="${complaint.contact()}">who</p>
+        <div class="prose" th:text="${complaint.account()}">what</div>
+        <form method="post" th:action="'/moderation/complaints/' + ${complaint.id()}" class="form">
+            <label class="field">
+                <span class="label">Response</span>
+                <textarea class="input" name="response" rows="4"></textarea>
+            </label>
+            <div><button class="btn primary" type="submit">Respond</button></div>
+        </form>
+    </article>
+</main>
+</body>
+</html>

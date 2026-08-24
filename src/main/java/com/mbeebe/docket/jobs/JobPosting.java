@@ -53,6 +53,14 @@ class JobPosting {
 
     private Instant closedAt;
 
+    /**
+     * §10.3 rung 1, in {@code reply.removed_at}'s shape, and deliberately NOT
+     * {@code closedAt}: a closed posting is a finished one and still reads as the
+     * real thing it was, while a removed posting was never legitimate and stops
+     * rendering outright. Two different facts, kept apart.
+     */
+    private Instant removedAt;
+
     protected JobPosting() {
     }
 
@@ -133,6 +141,27 @@ class JobPosting {
     void markClosed(Instant now) {
         if (closedAt == null) {
             closedAt = now;
+        }
+    }
+
+    boolean removed() {
+        return removedAt != null;
+    }
+
+    /** §10.3 rung 1: idempotent — the first removal is the one that stands. */
+    void remove(Instant now) {
+        if (removedAt == null) {
+            removedAt = now;
+        }
+    }
+
+    /**
+     * §10.5: the dated fact lifted, the item back exactly as it was. Idempotent —
+     * a posting that is not removed is left alone.
+     */
+    void restore() {
+        if (removedAt != null) {
+            removedAt = null;
         }
     }
 }

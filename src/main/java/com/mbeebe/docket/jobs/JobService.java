@@ -158,16 +158,21 @@ class JobService {
      */
     @Transactional(readOnly = true)
     Optional<String> blockReason(long posterId) {
-        List<JobApplication> neglected = applications.neglectedOnPostingsOf(posterId);
-        if (neglected.isEmpty()) {
+        List<String> titles = applications.neglectedOnPostingsOf(posterId).stream()
+                .map(JobApplication::postingId).distinct()
+                .flatMap(id -> postings.findById(id).stream())
+                // §10.3: a removed posting is not quoted back at anyone, and its
+                // queue no longer blocks — there is nothing left to give an
+                // Outcome on that the poster could still act on.
+                .filter(posting -> !posting.removed())
+                .map(posting -> "“" + posting.title() + "”")
+                .toList();
+        if (titles.isEmpty()) {
             return Optional.empty();
         }
-        String titles = neglected.stream()
-                .map(JobApplication::postingId).distinct()
-                .map(id -> "“" + postings.findById(id).orElseThrow().title() + "”")
-                .collect(Collectors.joining(", "));
         return Optional.of("You can post a new job when you've given an outcome to the "
-                + "applications that closed without response on " + titles + ".");
+                + "applications that closed without response on "
+                + String.join(", ", titles) + ".");
     }
 
     /** The Companies this member may post for right now — the §6.2 gate, listed. */
@@ -277,10 +282,14 @@ class JobService {
         return haystack.toLowerCase(Locale.ROOT).contains(needle.toLowerCase(Locale.ROOT));
     }
 
-    /** The posting page for anyone, signed in or out (§8.4); empty is the 404. */
+    /**
+     * The posting page for anyone, signed in or out (§8.4); empty is the 404 — and
+     * a removed posting (§10.3 rung 1) is exactly that 404, for the poster too. Not
+     * the same thing as closed: a closed posting still renders, saying so.
+     */
     @Transactional(readOnly = true)
     Optional<PostingPage> postingPage(long id, Optional<Member> viewer) {
-        return postings.findById(id).map(posting -> {
+        return postings.findById(id).filter(posting -> !posting.removed()).map(posting -> {
             boolean open = posting.openAt(clock.instant());
             Company company = companies.findResolved(posting.companyId()).orElseThrow();
             boolean mayShare = open && viewer.isPresent() && capabilities
@@ -333,6 +342,7 @@ class JobService {
     @Transactional
     void apply(Member applicant, long postingId, String rawNote) {
         JobPosting posting = postings.findById(postingId)
+                .filter(found -> !found.removed())
                 .orElseThrow(java.util.NoSuchElementException::new);
         if (posting.posterId() == applicant.id()) {
             throw new NotAllowed("This is your posting — its queue is yours to work, not join.");
@@ -360,17 +370,22 @@ class JobService {
         mails.received(applicant.email(), posting, companyName);
     }
 
-    /** §6.4: the applicant can always see their Applications' states — all of them. */
+    /**
+     * §6.4: the applicant can always see their Applications' states — all of them,
+     * except where the posting itself has been removed (§10.3), which takes the
+     * row with it rather than leaving a title nobody may read any more.
+     */
     @Transactional(readOnly = true)
     List<MineRow> applicationsOf(long memberId) {
         return applications.findByApplicantIdOrderByAppliedAtDescIdDesc(memberId).stream()
-                .map(application -> {
-                    JobPosting posting = postings.findById(application.postingId()).orElseThrow();
-                    String company = companies.findResolved(posting.companyId())
-                            .map(Company::name).orElse("");
-                    return new MineRow(posting.id(), posting.title(), company,
-                            day(application.appliedAt()), stateLabel(application.state()));
-                })
+                .flatMap(application -> postings.findById(application.postingId())
+                        .filter(posting -> !posting.removed())
+                        .map(posting -> new MineRow(posting.id(), posting.title(),
+                                companies.findResolved(posting.companyId())
+                                        .map(Company::name).orElse(""),
+                                day(application.appliedAt()),
+                                stateLabel(application.state())))
+                        .stream())
                 .toList();
     }
 
@@ -382,6 +397,7 @@ class JobService {
     @Transactional(readOnly = true)
     Optional<QueuePage> queueFor(long postingId, Member member) {
         return postings.findById(postingId)
+                .filter(posting -> !posting.removed())
                 .filter(posting -> posting.posterId() == member.id())
                 .map(posting -> new QueuePage(posting.id(), posting.title(),
                         posting.openAt(clock.instant()), day(posting.closesAt()),
@@ -414,6 +430,7 @@ class JobService {
     boolean resolve(Member poster, long postingId, long applicationId,
                     JobApplication.Outcome outcome) {
         Optional<JobPosting> posting = postings.findById(postingId)
+                .filter(found -> !found.removed())
                 .filter(found -> found.posterId() == poster.id());
         if (posting.isEmpty()) {
             return false;
@@ -442,6 +459,7 @@ class JobService {
     Optional<ApplicationProfile> applicationProfile(long postingId, long applicationId,
                                                     Member member) {
         return postings.findById(postingId)
+                .filter(posting -> !posting.removed())
                 .filter(posting -> posting.posterId() == member.id())
                 .flatMap(posting -> applications.findById(applicationId)
                         .filter(application -> application.postingId() == postingId)

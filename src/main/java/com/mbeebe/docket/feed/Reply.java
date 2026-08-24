@@ -71,9 +71,23 @@ class Reply {
         return createdAt;
     }
 
+    boolean removed() {
+        return removedAt != null;
+    }
+
     void remove(Instant now) {
         if (removedAt == null) {
             removedAt = now;
+        }
+    }
+
+    /**
+     * §10.5: the dated fact lifted, the item back exactly as it was. Idempotent —
+     * a Reply that is not removed is left alone.
+     */
+    void restore() {
+        if (removedAt != null) {
+            removedAt = null;
         }
     }
 }

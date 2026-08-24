@@ -16,7 +16,12 @@
                     <a th:href="'/p/' + ${page.post.author.memberId}" style="color: var(--i900);"
                        th:text="${page.post.author.displayName()}">Name</a>
                 </p>
-                <p class="meta" style="margin: 0;" th:text="${page.post.when}">1 Aug 2026</p>
+                <p class="meta" style="margin: 0;">
+                    <span th:text="${page.post.when}">1 Aug 2026</span>
+                    <!--/* §10.2: reportable in-product, by anyone who can see it. */-->
+                    <span th:if="${currentMember != null}">·
+                        <a th:href="'/report/POST/' + ${page.post.id}">Report</a></span>
+                </p>
             </div>
         </header>
         <div class="prose" th:utext="${page.post.bodyHtml}"></div>
@@ -62,6 +67,8 @@
                 <a th:href="${reply.author.former} ? null : '/p/' + ${reply.author.memberId}"
                    th:text="${reply.author.displayName()}">Name</a> ·
                 <span class="when" th:text="${reply.when}">1 Aug 2026</span>
+                <span th:if="${currentMember != null}">·
+                    <a th:href="'/report/REPLY/' + ${reply.id}">Report</a></span>
             </p>
             <div class="prose" style="font-size: var(--t-16);" th:utext="${reply.bodyHtml}"></div>
             <form th:if="${page.mayModerate}" method="post" style="margin-top: var(--s-2);"
