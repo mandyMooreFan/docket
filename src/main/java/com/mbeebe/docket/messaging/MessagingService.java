@@ -1,5 +1,6 @@
 package com.mbeebe.docket.messaging;
 
+import com.mbeebe.docket.graph.Connections;
 import com.mbeebe.docket.identity.Member;
 import com.mbeebe.docket.identity.Members;
 import com.mbeebe.docket.images.Images;
@@ -66,6 +67,8 @@ class MessagingService {
     private final MessageImageRepository messageImages;
     private final ThreadReadRepository marks;
     private final ConnectionLookup graph;
+    /** Only §13.4's zero state needs more of the graph than the two-question port. */
+    private final Connections connections;
     private final ApplicationChannel applications;
     private final CapabilityService capabilities;
     private final ProfileService profiles;
@@ -75,7 +78,8 @@ class MessagingService {
 
     MessagingService(MessageThreadRepository threads, MessageRepository messages,
                      MessageImageRepository messageImages, ThreadReadRepository marks,
-                     ConnectionLookup graph, ApplicationChannel applications,
+                     ConnectionLookup graph, Connections connections,
+                     ApplicationChannel applications,
                      CapabilityService capabilities, ProfileService profiles, Members members,
                      Images images, Clock clock) {
         this.threads = threads;
@@ -83,6 +87,7 @@ class MessagingService {
         this.messageImages = messageImages;
         this.marks = marks;
         this.graph = graph;
+        this.connections = connections;
         this.applications = applications;
         this.capabilities = capabilities;
         this.profiles = profiles;
@@ -224,7 +229,9 @@ class MessagingService {
                         Prose.excerpt(latest.message().body()),
                         when(latest.message().createdAt())))
                 .toList();
-        return new InboxPage(rows);
+        // §13.4: which empty this is. The graph is asked only to keep the zero
+        // state's copy honest — an inbox with no rows means two different things.
+        return new InboxPage(rows, connections.countFor(viewer.id()) > 0);
     }
 
     private record Latest(MessageThread thread, Message message) {

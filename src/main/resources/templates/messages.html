@@ -10,10 +10,18 @@
         <h1 class="title-serif" style="font-size: var(--t-30);">Messages</h1>
     </header>
 
-    <!-- §13.4: the empty inbox says what it is. This copy is spec surface. -->
+    <!-- §13.4: the empty inbox says what it is. This copy is spec surface — and
+         it says WHICH empty this is, because an inbox with no rows means two
+         different things and only one of them is §13.4's cold start. -->
     <div class="prose" th:if="${inbox.rows.isEmpty()}" style="margin-top: var(--s-8);">
-        <p>Messages open when you're connected to someone, or when someone applies to your
-            posting. No connections yet — your inbox is waiting on the graph, not on you.</p>
+        <p th:if="${inbox.noGraphYet()}">Messages open when you're connected to someone,
+            or when someone applies to your posting. No connections yet — your inbox is
+            waiting on the graph, not on you.</p>
+        <!-- Connected already: "no connections yet" would simply be untrue, and
+             §13.4's copy is editable in tone, not in honesty. -->
+        <p th:if="${inbox.nothingSaidYet()}">Messages open when you're connected to someone,
+            or when someone applies to your posting. Nothing has been written yet — this
+            fills up the moment one of you starts.</p>
     </div>
 
     <!-- §7.2: the inbox is a list of people, newest correspondence first. No per-row
