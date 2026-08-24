@@ -40,3 +40,26 @@ create table position (
 );
 create index position_member_idx on position (member_id);
 create index position_company_idx on position (company_id);
+
+-- An education entry: the §3.2 bar's other half — a Position or one of these.
+create table education_entry (
+    id          bigint generated always as identity primary key,
+    member_id   bigint not null references member (id) on delete cascade,
+    institution text not null,
+    course      text not null default '',
+    start_year  integer,
+    end_year    integer,
+    created_at  timestamptz not null
+);
+create index education_member_idx on education_entry (member_id);
+
+-- Skills: self-declared words, one row each. Nobody may attest to anyone's Skill —
+-- there is deliberately nowhere for an endorsement to live.
+create table skill (
+    id         bigint generated always as identity primary key,
+    member_id  bigint not null references member (id) on delete cascade,
+    name       text not null,
+    created_at timestamptz not null
+);
+create unique index skill_member_name_key on skill (member_id, lower(name));
+create index skill_member_idx on skill (member_id);

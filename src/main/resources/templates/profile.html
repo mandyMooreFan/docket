@@ -46,6 +46,24 @@
             <p th:if="${!position.description.isBlank()}" th:text="${position.description}">Description</p>
         </article>
     </section>
+
+    <section class="block" th:if="${!profile.education.isEmpty()}">
+        <h2>Education</h2>
+        <article class="entry" th:each="entry : ${profile.education}">
+            <h3 th:text="${entry.institution}">Institution</h3>
+            <p class="org">
+                <th:block th:if="${!entry.course.isBlank()}"><span th:text="${entry.course}">Course</span> · </th:block>
+                <span class="when" th:text="${entry.years}">2019 — 2023</span>
+            </p>
+        </article>
+    </section>
+
+    <section class="block" th:if="${!profile.skills.isEmpty()}">
+        <h2>Skills</h2>
+        <div class="chips">
+            <span th:each="skill : ${profile.skills}" th:text="${skill.name}">Skill</span>
+        </div>
+    </section>
 </main>
 </body>
 </html>

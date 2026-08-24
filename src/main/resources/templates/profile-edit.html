@@ -93,6 +93,68 @@
             <div><button class="btn" type="submit">Add position</button></div>
         </form>
     </section>
+
+    <section class="block">
+        <h2>Education</h2>
+        <article class="entry" th:each="entry : ${edit.education}">
+            <h3 th:text="${entry.institution}">Institution</h3>
+            <p class="org">
+                <th:block th:if="${!entry.course.isBlank()}"><span th:text="${entry.course}">Course</span> · </th:block>
+                <span class="when" th:text="${entry.years}">2019 — 2023</span>
+            </p>
+            <form method="post" th:action="'/profile/education/' + ${entry.id} + '/delete'"
+                  style="margin-top: var(--s-2);">
+                <button class="btn sm quiet" type="submit">Remove</button>
+            </form>
+        </article>
+
+        <form method="post" action="/profile/education" class="form" style="margin-top: var(--s-8);">
+            <label class="field">
+                <span class="label">Institution</span>
+                <input class="input" type="text" name="institution" required>
+            </label>
+            <label class="field">
+                <span class="label">Course or qualification</span>
+                <input class="input" type="text" name="course">
+            </label>
+            <div style="display: flex; gap: var(--s-2);">
+                <label class="field">
+                    <span class="label">From year</span>
+                    <input class="input" style="width: 8rem;" type="number" name="startYear"
+                           min="1900" max="2100" placeholder="YYYY">
+                </label>
+                <label class="field">
+                    <span class="label">To year</span>
+                    <input class="input" style="width: 8rem;" type="number" name="endYear"
+                           min="1900" max="2100" placeholder="YYYY">
+                </label>
+            </div>
+            <div><button class="btn" type="submit">Add education</button></div>
+        </form>
+    </section>
+
+    <section class="block">
+        <h2>Skills</h2>
+        <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-6);">
+            A plain list of words you declare about yourself. Nobody can endorse them —
+            there's nowhere for that to happen.
+        </p>
+        <div class="chips" th:if="${!edit.skills.isEmpty()}" style="margin-bottom: var(--s-6);">
+            <form th:each="skill : ${edit.skills}" method="post"
+                  th:action="'/profile/skills/' + ${skill.id} + '/delete'" style="display: contents;">
+                <button class="btn sm" type="submit" th:title="'Remove ' + ${skill.name}">
+                    <span th:text="${skill.name}">Skill</span> ×
+                </button>
+            </form>
+        </div>
+        <form method="post" action="/profile/skills" style="display: flex; gap: var(--s-2);">
+            <label class="field" style="flex: 1;">
+                <span class="label">Skill</span>
+                <input class="input" type="text" name="name" required>
+            </label>
+            <button class="btn" type="submit" style="align-self: flex-end;">Add</button>
+        </form>
+    </section>
 </main>
 </body>
 </html>

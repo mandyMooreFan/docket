@@ -23,15 +23,20 @@ public class ProfileService {
 
     private final ProfileRepository profiles;
     private final PositionRepository positions;
+    private final EducationRepository education;
+    private final SkillRepository skills;
     private final Members members;
     private final Companies companies;
     private final ConnectionLookup connections;
     private final Clock clock;
 
-    ProfileService(ProfileRepository profiles, PositionRepository positions, Members members,
+    ProfileService(ProfileRepository profiles, PositionRepository positions,
+                   EducationRepository education, SkillRepository skills, Members members,
                    Companies companies, ConnectionLookup connections, Clock clock) {
         this.profiles = profiles;
         this.positions = positions;
+        this.education = education;
+        this.skills = skills;
         this.members = members;
         this.companies = companies;
         this.connections = connections;
@@ -56,7 +61,9 @@ public class ProfileService {
         }
         Profile profile = profiles.findById(memberId).orElseGet(() -> Profile.blankFor(memberId));
         List<PositionView> positionViews = positionViews(memberId);
-        Completeness completeness = Completeness.of(profile, positionViews.size(), 0);
+        List<EducationView> educationViews = educationViews(memberId);
+        Completeness completeness =
+                Completeness.of(profile, positionViews.size(), educationViews.size());
         EffectiveVisibility visibility =
                 EffectiveVisibility.of(profile.dial(), completeness.complete(), owner.get().isMinor());
         if (!visibility.visibleTo(memberId, viewer, connections)) {
@@ -65,7 +72,8 @@ public class ProfileService {
         boolean isOwner = viewer.map(member -> member.id() == memberId).orElse(false);
         return Optional.of(new ProfilePage(memberId, isOwner, profile.name(), profile.headline(),
                 profile.location(), profile.summary(), initials(profile.name()),
-                openToWorkShown(profile, memberId, viewer, isOwner), positionViews, completeness,
+                openToWorkShown(profile, memberId, viewer, isOwner), positionViews,
+                educationViews, skillViews(memberId), completeness,
                 profile.dial(), profile.openToWork(), visibility.indexable()));
     }
 
@@ -74,7 +82,8 @@ public class ProfileService {
     public ProfileEdit editView(long memberId) {
         Profile profile = ownProfile(memberId);
         return new ProfileEdit(profile.name(), profile.headline(), profile.location(),
-                profile.summary(), profile.dial(), profile.openToWork(), positionViews(memberId));
+                profile.summary(), profile.dial(), profile.openToWork(), positionViews(memberId),
+                educationViews(memberId), skillViews(memberId));
     }
 
     @Transactional
@@ -111,6 +120,54 @@ public class ProfileService {
                     return true;
                 })
                 .orElse(false);
+    }
+
+    @Transactional
+    public void addEducation(long memberId, String institution, String course,
+                             Integer startYear, Integer endYear) {
+        education.save(new EducationEntry(memberId, institution.strip(), course.strip(),
+                startYear, endYear, clock.instant()));
+    }
+
+    @Transactional
+    public boolean deleteEducation(long memberId, long entryId) {
+        return education.findByIdAndMemberId(entryId, memberId)
+                .map(entry -> {
+                    education.delete(entry);
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    /** Adding a word you already declared is a quiet no-op, not an error. */
+    @Transactional
+    public void addSkill(long memberId, String name) {
+        if (skills.findByMemberIdAndNameIgnoringCase(memberId, name.strip()).isEmpty()) {
+            skills.save(new Skill(memberId, name.strip(), clock.instant()));
+        }
+    }
+
+    @Transactional
+    public boolean deleteSkill(long memberId, long skillId) {
+        return skills.findByIdAndMemberId(skillId, memberId)
+                .map(skill -> {
+                    skills.delete(skill);
+                    return true;
+                })
+                .orElse(false);
+    }
+
+    private List<EducationView> educationViews(long memberId) {
+        return education.findByMemberIdOrderByCreatedAt(memberId).stream()
+                .map(entry -> new EducationView(entry.id(), entry.institution(), entry.course(),
+                        entry.years()))
+                .toList();
+    }
+
+    private List<SkillView> skillViews(long memberId) {
+        return skills.findByMemberIdOrderByCreatedAt(memberId).stream()
+                .map(skill -> new SkillView(skill.id(), skill.name()))
+                .toList();
     }
 
     private List<PositionView> positionViews(long memberId) {
