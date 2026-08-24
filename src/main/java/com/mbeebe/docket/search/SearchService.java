@@ -60,9 +60,15 @@ class SearchService {
             return SearchResults.unasked(query, connectedOnly, viewer.isPresent());
         }
         String asked = tsquery.get();
+        List<PersonCard> matched = viewer.isEmpty()
+                // §8.4's account gate. The seam refuses too — this is the page
+                // declining to ask, so the reason can be rendered in its place.
+                ? List.of()
+                : people.named(asked, viewer, GROUP_LIMIT);
+        List<SearchResults.PersonRow> rows = peopleRows(matched, connectedOnly, viewer);
         return new SearchResults(query, connectedOnly, true, viewer.isPresent(),
-                viewer.isEmpty(), peopleRows(asked, connectedOnly, viewer),
-                companies.matching(asked, GROUP_LIMIT),
+                viewer.isEmpty(), connectedOnly && rows.isEmpty() && !matched.isEmpty(),
+                rows, companies.matching(asked, GROUP_LIMIT),
                 posts.matching(asked, viewer, GROUP_LIMIT),
                 postings.matching(asked, GROUP_LIMIT));
     }
@@ -74,15 +80,14 @@ class SearchService {
      * where I know someone", and emphatically not a weight applied on anyone's
      * behalf (§8.2, §5.6).
      */
-    private List<SearchResults.PersonRow> peopleRows(String tsquery, boolean connectedOnly,
+    private List<SearchResults.PersonRow> peopleRows(List<PersonCard> matched,
+                                                     boolean connectedOnly,
                                                      Optional<Member> viewer) {
         if (viewer.isEmpty()) {
-            // §8.4's account gate. The seam refuses too — this is the page
-            // declining to ask, so that the reason can be rendered instead.
             return List.of();
         }
         long viewerId = viewer.get().id();
-        return people.named(tsquery, viewer, GROUP_LIMIT).stream()
+        return matched.stream()
                 .filter(card -> !connectedOnly || graph.connected(viewerId, card.memberId()))
                 .map(card -> new SearchResults.PersonRow(card, mutualNames(viewerId, card)))
                 .toList();

@@ -17,9 +17,14 @@ import java.util.List;
  *                     browse-all surface (§8.5)
  * @param peopleGated  §8.4: the viewer is signed out, so the People group
  *                     explains itself instead of pretending nobody matched
+ * @param hiddenByGraphFilter people matched, and the ticked graph filter is
+ *                     what emptied the group — §13.4 again: an empty part says
+ *                     which empty it is, and "nobody by that name" would be a
+ *                     lie told by a filter the seeker can untick
  */
 public record SearchResults(String query, boolean connectedOnly, boolean asked,
                             boolean signedIn, boolean peopleGated,
+                            boolean hiddenByGraphFilter,
                             List<PersonRow> people, List<CompanySearch.Hit> companies,
                             List<PostSearch.Hit> posts, List<PostingSearch.Hit> jobs) {
 
@@ -39,12 +44,12 @@ public record SearchResults(String query, boolean connectedOnly, boolean asked,
 
     /** Nothing to ask: no query, or one below §8.5's floor. */
     static SearchResults unasked(String query, boolean connectedOnly, boolean signedIn) {
-        return new SearchResults(query, connectedOnly, false, signedIn, !signedIn,
+        return new SearchResults(query, connectedOnly, false, signedIn, !signedIn, false,
                 List.of(), List.of(), List.of(), List.of());
     }
 
     /** §13.4's no-results state for the one group that has spec copy of its own. */
     public boolean noPeople() {
-        return asked && !peopleGated && people.isEmpty();
+        return asked && !peopleGated && !hiddenByGraphFilter && people.isEmpty();
     }
 }

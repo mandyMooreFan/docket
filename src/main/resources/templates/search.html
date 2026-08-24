@@ -60,6 +60,15 @@
                 <a href="/login">Sign in</a> or <a href="/join">join</a>.
             </p>
 
+            <!-- §13.4 again: an empty part says WHICH empty it is. People
+                 matched, and the seeker's own ticked filter is what emptied
+                 the group — saying "nobody by that name" here would be a lie
+                 told on behalf of a box they can untick. -->
+            <p class="meta" th:if="${results.hiddenByGraphFilter}">
+                Nobody by that name among the people you share a connection with.
+                Untick the filter to see everyone that name reaches.
+            </p>
+
             <!-- §13.4's copy, verbatim: spec surface, honest by design. -->
             <p class="meta" th:if="${results.noPeople()}">
                 Nobody by that name yet. People search matches names only — that's deliberate.

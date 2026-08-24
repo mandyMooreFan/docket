@@ -159,6 +159,16 @@ class SearchTests extends JobsTestBase {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         assertThat(ticked).contains("Umbrelloq Prime").doesNotContain("Umbrelloq Second");
+
+        // §13.4: when the seeker's own tick is what emptied the group, the page
+        // says so. "Nobody by that name" would be a lie told by a filter.
+        String emptied = mvc.perform(get("/search").param("q", "Umbrelloq Second")
+                        .param("connected", "on").cookie(viewer))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertThat(emptied).contains("among the people you share a connection with");
+        assertThat(emptied).doesNotContain("Nobody by that name yet");
+        assertThat(emptied).doesNotContain("/p/" + memberId(prime));
     }
 
     @Test
