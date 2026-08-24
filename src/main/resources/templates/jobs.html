@@ -80,10 +80,46 @@
         </form>
     </section>
 
+    <!-- §6.5: the opt-in saved search — created explicitly from the current
+         filter set, seeker-chosen frequency, one click to stop. Off by default:
+         nothing exists until this form is used. -->
+    <section class="panel" th:if="${board.signedIn}" style="margin-top: var(--s-3);">
+        <form method="post" action="/jobs/searches"
+              style="display: flex; gap: var(--s-3); align-items: center; flex-wrap: wrap;">
+            <input type="hidden" name="q" th:value="${board.filters.q}">
+            <input type="hidden" name="location" th:value="${board.filters.location}">
+            <input type="hidden" name="remote" th:value="${board.filters.remote}">
+            <input type="hidden" name="floor" th:value="${board.filters.floor}">
+            <input type="hidden" name="currency" th:value="${board.filters.currency}">
+            <input type="hidden" name="company" th:value="${board.filters.company}">
+            <input type="hidden" name="known" th:value="${board.filters.known} ? 'on' : ''">
+            <span style="font-size: var(--t-13); color: var(--i500);">
+                Email me new postings matching these filters</span>
+            <select class="input" name="frequency" style="width: auto;">
+                <option value="DAILY">Daily</option>
+                <option value="WEEKLY" selected>Weekly</option>
+            </select>
+            <button class="btn sm" type="submit">Save this search</button>
+        </form>
+        <div th:if="${!board.savedSearches.isEmpty()}" style="margin-top: var(--s-4);">
+            <p class="label" style="margin-bottom: var(--s-2);">Your saved searches</p>
+            <div th:each="search : ${board.savedSearches}"
+                 style="display: flex; gap: var(--s-3); align-items: center; margin-bottom: var(--s-2);">
+                <span style="font-size: var(--t-13); color: var(--i500);"
+                      th:text="${search.describes} + ' — ' + ${search.frequency}">search</span>
+                <form method="post" th:action="'/jobs/searches/' + ${search.id} + '/stop'">
+                    <button class="btn quiet sm" type="submit">Stop</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
     <!-- §13.4: the empty board says what it is — spec copy, honest by design. -->
     <div class="prose" th:if="${board.emptyBoard()}" style="margin-top: var(--s-8);">
         <p>No open postings right now. Postings appear here the moment a member posts one —
             there's no backlog you can't see.</p>
+        <p th:if="${board.signedIn}" style="font-size: var(--t-14); color: var(--i500);">
+            Save a search above and the moment one appears, it can come to you instead.</p>
     </div>
 
     <p class="meta" th:if="${board.emptyMatch()}" style="margin-top: var(--s-8);">

@@ -43,6 +43,27 @@ class JobMails {
                 .formatted(posting.title(), companyName, baseUrl));
     }
 
+    /** One matching posting in a saved-search digest. */
+    record DigestEntry(long postingId, String line) {
+    }
+
+    /**
+     * §6.5: the saved-search digest — matching postings since the last send and
+     * the one-click stop link, nothing else. No "jobs you might like", ever.
+     */
+    void savedSearch(String to, java.util.List<DigestEntry> entries, String stopToken) {
+        String lines = String.join("\n", entries.stream()
+                .map(entry -> "%s\n%s/jobs/%d\n".formatted(entry.line(), baseUrl,
+                        entry.postingId()))
+                .toList());
+        mailer.send(to, "New postings for your saved search", """
+                Postings that match a search you saved, since the last time we wrote:
+
+                %s
+                You asked for these. One click stops them, no sign-in needed:
+                %s/jobs/searches/stop/%s""".formatted(lines, baseUrl, stopToken));
+    }
+
     void closedWithoutResponse(String to, JobPosting posting, String companyName) {
         mailer.send(to, "Your application closed — " + posting.title(), """
                 The posting “%s” at %s closed without a response to your \

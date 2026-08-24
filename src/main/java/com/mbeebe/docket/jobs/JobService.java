@@ -64,12 +64,13 @@ class JobService {
     private final Connections graph;
     private final Members members;
     private final JobMails mails;
+    private final JobSearchService searches;
     private final Clock clock;
 
     JobService(JobPostingRepository postings, JobApplicationRepository applications,
                Companies companies, TrustGate trustGate, CurrentPositions positions,
                CapabilityService capabilities, ProfileService profiles, Connections graph,
-               Members members, JobMails mails, Clock clock) {
+               Members members, JobMails mails, JobSearchService searches, Clock clock) {
         this.postings = postings;
         this.applications = applications;
         this.companies = companies;
@@ -80,6 +81,7 @@ class JobService {
         this.graph = graph;
         this.members = members;
         this.mails = mails;
+        this.searches = searches;
         this.clock = clock;
     }
 
@@ -191,10 +193,11 @@ class JobService {
                 .filter(posting -> matches(posting, filters, knownCompanies))
                 .map(this::row)
                 .toList();
-        return new BoardPage(rows, filters, viewer.isPresent(), List.of());
+        return new BoardPage(rows, filters, viewer.isPresent(),
+                viewer.map(member -> searches.listFor(member.id())).orElse(List.of()));
     }
 
-    private boolean matches(JobPosting posting, JobFilters filters, Set<Long> knownCompanies) {
+    boolean matches(JobPosting posting, JobFilters filters, Set<Long> knownCompanies) {
         String companyName = companies.findResolved(posting.companyId())
                 .map(Company::name).orElse("");
         if (!filters.q().isBlank()

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Search stopped — Docket</title>
+</head>
+<body>
+<main class="page">
+    <header>
+        <h1 class="title-serif" style="font-size: var(--t-30);"
+            th:text="${stopped} ? 'Stopped.' : 'Nothing to stop.'">Stopped.</h1>
+        <p class="meta" style="margin-top: var(--s-3);" th:if="${stopped}">
+            That saved search won't email you again. The board is still there whenever
+            you want it: <a href="/jobs">docket.social/jobs</a>.
+        </p>
+        <p class="meta" style="margin-top: var(--s-3);" th:unless="${stopped}">
+            That link doesn't match a saved search — it may already be stopped.
+        </p>
+    </header>
+</main>
+</body>
+</html>
