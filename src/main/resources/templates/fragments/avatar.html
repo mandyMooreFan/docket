@@ -1,0 +1,23 @@
+<!--/*
+  The one avatar concept in the product (§2's layout), inserted into whatever
+  element a page already uses for its avatar — an <a> in the app bar and the Post
+  byline, a <span> or <div> in a list or a page header. The host keeps its own
+  .av size class; only the contents come from here, which is why extending this
+  across five modules is one attribute per call site.
+
+  Initials are FIRST in the markup, and that is the whole fallback design. They
+  are always in the DOM; the photo, when there is one, is laid over them. So a
+  member with no photo (a permanent, entirely ordinary state — §3.2) reads
+  exactly as before, and a photo the viewer may not have — /images/{id} 404s it
+  per request, per the Dial (§8.5) — quietly leaves the initials showing rather
+  than a broken picture.
+
+  alt="" on purpose: the avatar is decorative here. Every place one is drawn, the
+  person's name is the adjacent text, and the initials underneath are the
+  accessible content. A photo is never the only thing that says who this is.
+*/-->
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="face (initials, photoImageId)">
+    <span th:text="${initials}">·</span>
+    <img class="av-photo" alt="" th:if="${photoImageId != null}"
+         th:src="'/images/' + ${photoImageId}">
+</th:block>

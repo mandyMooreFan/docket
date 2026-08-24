@@ -8,9 +8,14 @@ public record ProfilePage(long memberId, boolean owner, String name, String head
                           List<PositionView> positions, List<EducationView> education,
                           List<SkillView> skills, Completeness completeness,
                           Profile.Dial dial, Profile.OpenToWork openToWorkAudience,
-                          boolean indexable) {
+                          boolean indexable, Long photoImageId) {
 
     public boolean named() {
         return !name.isBlank();
+    }
+
+    /** Whether to draw the photo. Initials render underneath either way (§2). */
+    public boolean hasPhoto() {
+        return photoImageId != null;
     }
 }
