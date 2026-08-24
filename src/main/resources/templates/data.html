@@ -1,0 +1,88 @@
+<!doctype html>
+<!--/*
+    Your data (SPEC.md §11).
+
+    The order of this page is the spec: the export is offered first and the
+    deletion is underneath it (§11.2). Nothing on the deletion path checks whether
+    the button above was ever pressed.
+
+    The copy here is spec surface, not UI decoration — §11.2's accepted cost and
+    §11.3's backups position are both said in the member's own words, and both are
+    said before the button rather than after it.
+*/-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Your data — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">Your data</h1>
+    <div class="prose">
+        <p>Everything Docket knows about you, and the way out. Neither one costs
+            anything, and neither depends on the other.</p>
+    </div>
+
+    <section class="block">
+        <h2>Take a copy</h2>
+        <div class="prose">
+            <p>One file with everything in it: your profile, your posts and replies,
+                who you are connected to, the jobs you applied for and what happened to
+                them, the recommendations people wrote about you, your pictures, and
+                your conversations — whole, both sides.</p>
+            <p>It comes as a zip. Inside there are pages you can read and a JSON file
+                for a machine, plus a note about what we use your data for, who else
+                sees it, how long we keep it, and what is not in there and why.</p>
+            <p><strong>Other people's words are in there.</strong> Your conversations
+                come out whole because half a conversation is not a record of
+                anything. They are yours to keep — not to publish, and not to build a
+                picture of someone who did not ask you to.</p>
+        </div>
+        <p><a class="btn primary" href="/settings/data/export.zip">Download my data</a></p>
+    </section>
+
+    <section class="block">
+        <h2>Leave Docket</h2>
+        <div class="prose">
+            <p>You can delete your account whenever you want. You do not have to
+                download anything first.</p>
+            <p><strong>What goes.</strong> Your profile — your name, headline, where you
+                are, your summary, your positions, your education, your skills and your
+                photo. The posts you wrote. Your saved posts and saved searches. Your
+                connections and any requests. Your job applications. You stop appearing
+                in search, and your profile page stops existing.</p>
+            <p><strong>What stays.</strong> Your side of every conversation stays where
+                it is, marked as written by a former member. So do the recommendations
+                you wrote about other people, and the replies you left under other
+                people's posts. This is the honest part: <em>you cannot completely
+                disappear from Docket.</em> The alternative would be letting one person
+                delete a colleague's correspondence into a monologue of holes, and
+                that is somebody else's record, not yours to erase.</p>
+            <p><strong>Backups.</strong> We take backups, like anyone who does not want
+                to lose your data to a broken disk. When you delete your account, your
+                data goes from Docket straight away. In the backups it is put beyond
+                use — nobody reads it, nobody restores it, and it is not used for
+                anything — until those backups roll over on their normal schedule, and
+                then it is gone from those too.</p>
+            <p><strong>If you think we got this wrong.</strong> You can complain to us
+                about how we have handled your data. We will acknowledge it within 30
+                days and tell you what we decided. You can also complain to the
+                Information Commissioner's Office, whether or not you complain to us
+                first.</p>
+        </div>
+        <p class="warn" th:if="${!confirmed}">Tick the box first — this cannot be
+            undone.</p>
+        <form method="post" action="/settings/data/leave">
+            <p><label><input type="checkbox" name="confirm" value="yes">
+                I have read what stays behind, and I want to delete my account.</label></p>
+            <button class="btn" type="submit">Delete my account</button>
+        </form>
+    </section>
+
+    <section class="block">
+        <h2>Elsewhere</h2>
+        <p><a href="/settings/sessions">Where you are signed in</a></p>
+    </section>
+</main>
+</body>
+</html>
