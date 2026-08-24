@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${profile.named()} ? ${profile.name} + ' — Docket' : 'Docket'">Docket</title>
+</head>
+<body>
+<main class="page">
+    <header>
+        <div class="av av-96" th:text="${profile.initials}">·</div>
+        <h1 class="title-serif" th:if="${profile.named()}" th:text="${profile.name}">Name</h1>
+        <h1 class="title-serif unnamed" th:unless="${profile.named()}">A member</h1>
+        <p class="headline" th:if="${!profile.headline.isBlank()}" th:text="${profile.headline}">Headline</p>
+        <p class="meta">
+            <span th:if="${!profile.location.isBlank()}" th:text="${profile.location}">Location</span>
+            <span class="flag" th:if="${profile.openToWork}">Open to work</span>
+        </p>
+        <div th:if="${profile.owner}" style="margin-top: var(--s-6);">
+            <a class="btn" href="/profile/edit">Edit profile</a>
+        </div>
+    </header>
+
+    <section class="panel" th:if="${profile.owner and !profile.completeness.complete()}"
+             style="margin-top: var(--s-8);">
+        <h3>Finish your profile</h3>
+        <p style="margin: 0; font-size: var(--t-14); color: var(--i500);">
+            Until it carries <th:block th:text="${#strings.listJoin(profile.completeness.missing(), ', ')}"/>,
+            your profile is visible to signed-in members only and stays out of search engines.
+            Connecting, messaging and posting open up when it's done.
+        </p>
+    </section>
+
+    <section class="block" th:if="${!profile.summary.isBlank()}">
+        <h2>About</h2>
+        <div class="prose"><p th:text="${profile.summary}">Summary</p></div>
+    </section>
+
+    <section class="block" th:if="${!profile.positions.isEmpty()}">
+        <h2>Positions</h2>
+        <article class="entry" th:each="position : ${profile.positions}">
+            <h3 th:text="${position.title}">Title</h3>
+            <p class="org">
+                <th:block th:if="${position.atCompany()}"><span th:text="${position.company}">Company</span> · </th:block>
+                <span class="when" th:text="${position.when}">Mar 2021 — Present</span>
+            </p>
+            <p th:if="${!position.description.isBlank()}" th:text="${position.description}">Description</p>
+        </article>
+    </section>
+
+    <section class="block" th:if="${!profile.education.isEmpty()}">
+        <h2>Education</h2>
+        <article class="entry" th:each="entry : ${profile.education}">
+            <h3 th:text="${entry.institution}">Institution</h3>
+            <p class="org">
+                <th:block th:if="${!entry.course.isBlank()}"><span th:text="${entry.course}">Course</span> · </th:block>
+                <span class="when" th:text="${entry.years}">2019 — 2023</span>
+            </p>
+        </article>
+    </section>
+
+    <section class="block" th:if="${!profile.skills.isEmpty()}">
+        <h2>Skills</h2>
+        <div class="chips">
+            <span th:each="skill : ${profile.skills}" th:text="${skill.name}">Skill</span>
+        </div>
+    </section>
+</main>
+</body>
+</html>

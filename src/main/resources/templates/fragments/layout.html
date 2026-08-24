@@ -21,7 +21,7 @@
             <!-- AGPL §13: durable Source link, reachable from every page, logged in or out -->
             <a class="source-link" href="https://github.com/mandyMooreFan/docket">Source</a>
             <th:block th:if="${currentMember != null}">
-                <a class="av av-32" href="/settings/sessions" th:text="${currentMember.initial}"
+                <a class="av av-32" href="/profile" th:text="${currentMember.initial}"
                    th:title="${currentMember.email}">D</a>
             </th:block>
             <th:block th:if="${currentMember == null}">

@@ -176,6 +176,17 @@ img { max-width: 100%; }
   background: var(--g1); border-radius: 8px; padding: var(--s-2) var(--s-3);
 }
 
+/* forms: filled fields, no strokes — the same surface language as .search (§2.3) */
+.form { display: flex; flex-direction: column; gap: var(--s-6); }
+.field { display: flex; flex-direction: column; gap: var(--s-2); }
+.field .label { margin: 0; }
+.input {
+  font: inherit; font-size: var(--t-16); color: var(--i900);
+  background: var(--g1); border: 0; border-radius: 8px; padding: var(--s-3);
+}
+.input::placeholder { color: var(--i400); }
+textarea.input { font-family: var(--serif); font-size: var(--t-18); line-height: 1.7; resize: vertical; }
+
 /* buttons: solid primary, tinted secondary, no outline styles */
 .btn {
   font: inherit; font-size: var(--t-14); font-weight: 600; border: 0; border-radius: 8px;
@@ -203,6 +214,12 @@ img { max-width: 100%; }
 }
 .av-32 { width: 32px; height: 32px; font-size: var(--t-12); }
 .av-40 { width: 40px; height: 40px; font-size: var(--t-13); }
+.av-96 { width: 96px; height: 96px; font-size: var(--t-30); border-radius: 12px; margin-bottom: var(--s-6); }
+
+/* profile header: the one person-written line under the name (§2.1) */
+.headline { font-family: var(--serif); font-size: var(--t-20); color: var(--i700); margin: 0 0 var(--s-2); }
+.meta { display: flex; align-items: center; gap: var(--s-3); font-size: var(--t-13); color: var(--i400); margin: 0; }
+.title-serif.unnamed { color: var(--i400); }
 
 /* page-level heading: the profile-name treatment (§2.1) */
 .title-serif {

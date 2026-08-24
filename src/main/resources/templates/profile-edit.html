@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Edit profile — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">Edit profile</h1>
+    <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-8);">
+        Everything here is yours to word as you like. The name is the one you're professionally
+        known by — it's the only required field. <a href="/profile">View your page</a> ·
+        <a href="/settings/sessions">Your sessions</a>.
+    </p>
+
+    <p class="label" th:if="${error}" th:text="${error}"
+       style="color: var(--ac); text-transform: none; letter-spacing: 0;">error</p>
+
+    <form method="post" action="/profile/basics" class="form">
+        <label class="field">
+            <span class="label">Name</span>
+            <input class="input" type="text" name="name" th:value="${edit.name}" autocomplete="name">
+        </label>
+        <label class="field">
+            <span class="label">Headline</span>
+            <input class="input" type="text" name="headline" th:value="${edit.headline}"
+                   placeholder="What you do, in your words">
+        </label>
+        <label class="field">
+            <span class="label">Location</span>
+            <input class="input" type="text" name="location" th:value="${edit.location}">
+        </label>
+        <label class="field">
+            <span class="label">About</span>
+            <textarea class="input" name="summary" rows="6" th:text="${edit.summary}"></textarea>
+        </label>
+        <div><button class="btn primary" type="submit">Save</button></div>
+    </form>
+
+    <section class="block">
+        <h2>Who can see your page</h2>
+        <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-6);">
+            One setting for the whole page. Until your profile is complete — and always while
+            you're under 18 — it stays visible to signed-in members only, whatever you pick here.
+        </p>
+        <form method="post" action="/profile/dial" class="form">
+            <label class="field" style="flex-direction: row; align-items: center; gap: var(--s-3);">
+                <input type="radio" name="dial" value="PUBLIC"
+                       th:checked="${edit.dial.name() == 'PUBLIC'}">
+                <span style="font-size: var(--t-14);">Public — anyone on the web, search engines included</span>
+            </label>
+            <label class="field" style="flex-direction: row; align-items: center; gap: var(--s-3);">
+                <input type="radio" name="dial" value="MEMBERS_ONLY"
+                       th:checked="${edit.dial.name() == 'MEMBERS_ONLY'}">
+                <span style="font-size: var(--t-14);">Members only — anyone signed in to Docket</span>
+            </label>
+            <label class="field" style="flex-direction: row; align-items: center; gap: var(--s-3);">
+                <input type="radio" name="dial" value="CONNECTIONS_ONLY"
+                       th:checked="${edit.dial.name() == 'CONNECTIONS_ONLY'}">
+                <span style="font-size: var(--t-14);">Connections only</span>
+            </label>
+            <div><button class="btn" type="submit">Set visibility</button></div>
+        </form>
+    </section>
+
+    <section class="block">
+        <h2>Open to work</h2>
+        <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-6);">
+            A quiet flag on your page, off unless you turn it on. It's shown only to the audience
+            you choose, is never searchable, and never appears on the logged-out page.
+        </p>
+        <form method="post" action="/profile/open-to-work" class="form">
+            <label class="field" style="flex-direction: row; align-items: center; gap: var(--s-3);">
+                <input type="radio" name="audience" value="OFF"
+                       th:checked="${edit.openToWork.name() == 'OFF'}">
+                <span style="font-size: var(--t-14);">Off</span>
+            </label>
+            <label class="field" style="flex-direction: row; align-items: center; gap: var(--s-3);">
+                <input type="radio" name="audience" value="CONNECTIONS"
+                       th:checked="${edit.openToWork.name() == 'CONNECTIONS'}">
+                <span style="font-size: var(--t-14);">Shown to your connections</span>
+            </label>
+            <label class="field" style="flex-direction: row; align-items: center; gap: var(--s-3);">
+                <input type="radio" name="audience" value="MEMBERS"
+                       th:checked="${edit.openToWork.name() == 'MEMBERS'}">
+                <span style="font-size: var(--t-14);">Shown to signed-in members</span>
+            </label>
+            <div><button class="btn" type="submit">Set flag</button></div>
+        </form>
+    </section>
+
+    <section class="block">
+        <h2>Positions</h2>
+        <article class="entry" th:each="position : ${edit.positions}">
+            <h3 th:text="${position.title}">Title</h3>
+            <p class="org">
+                <th:block th:if="${position.atCompany()}"><span th:text="${position.company}">Company</span> · </th:block>
+                <span class="when" th:text="${position.when}">Mar 2021 — Present</span>
+            </p>
+            <div style="display: flex; gap: var(--s-4); align-items: center; margin-top: var(--s-2);">
+                <form th:if="${position.current}" method="post"
+                      th:action="'/profile/positions/' + ${position.id} + '/end'"
+                      style="display: flex; gap: var(--s-2); align-items: center;">
+                    <span class="label" style="margin: 0;">Ended</span>
+                    <input class="input" style="width: 4.5rem; padding: var(--s-1) var(--s-2);"
+                           type="number" name="endMonth" min="1" max="12" placeholder="MM" required>
+                    <input class="input" style="width: 6rem; padding: var(--s-1) var(--s-2);"
+                           type="number" name="endYear" min="1900" max="2100" placeholder="YYYY" required>
+                    <button class="btn sm" type="submit">Mark as ended</button>
+                </form>
+                <form method="post" th:action="'/profile/positions/' + ${position.id} + '/delete'">
+                    <button class="btn sm quiet" type="submit">Remove</button>
+                </form>
+            </div>
+        </article>
+
+        <form method="post" action="/profile/positions" class="form" style="margin-top: var(--s-8);">
+            <label class="field">
+                <span class="label">Title</span>
+                <input class="input" type="text" name="title" required>
+            </label>
+            <label class="field">
+                <span class="label">Company</span>
+                <input class="input" type="text" name="company" list="company-options"
+                       placeholder="Leave blank if there isn't one"
+                       hx-get="/companies/options" hx-trigger="input changed delay:200ms"
+                       hx-target="#company-options" hx-swap="outerHTML" autocomplete="off">
+                <datalist id="company-options"></datalist>
+            </label>
+            <div style="display: flex; gap: var(--s-2);">
+                <label class="field">
+                    <span class="label">Start month</span>
+                    <input class="input" style="width: 6rem;" type="number" name="startMonth"
+                           min="1" max="12" placeholder="MM" required>
+                </label>
+                <label class="field">
+                    <span class="label">Start year</span>
+                    <input class="input" style="width: 8rem;" type="number" name="startYear"
+                           min="1900" max="2100" placeholder="YYYY" required>
+                </label>
+            </div>
+            <label class="field">
+                <span class="label">What you did</span>
+                <textarea class="input" name="description" rows="3"></textarea>
+            </label>
+            <div><button class="btn" type="submit">Add position</button></div>
+        </form>
+    </section>
+
+    <section class="block">
+        <h2>Education</h2>
+        <article class="entry" th:each="entry : ${edit.education}">
+            <h3 th:text="${entry.institution}">Institution</h3>
+            <p class="org">
+                <th:block th:if="${!entry.course.isBlank()}"><span th:text="${entry.course}">Course</span> · </th:block>
+                <span class="when" th:text="${entry.years}">2019 — 2023</span>
+            </p>
+            <form method="post" th:action="'/profile/education/' + ${entry.id} + '/delete'"
+                  style="margin-top: var(--s-2);">
+                <button class="btn sm quiet" type="submit">Remove</button>
+            </form>
+        </article>
+
+        <form method="post" action="/profile/education" class="form" style="margin-top: var(--s-8);">
+            <label class="field">
+                <span class="label">Institution</span>
+                <input class="input" type="text" name="institution" required>
+            </label>
+            <label class="field">
+                <span class="label">Course or qualification</span>
+                <input class="input" type="text" name="course">
+            </label>
+            <div style="display: flex; gap: var(--s-2);">
+                <label class="field">
+                    <span class="label">From year</span>
+                    <input class="input" style="width: 8rem;" type="number" name="startYear"
+                           min="1900" max="2100" placeholder="YYYY">
+                </label>
+                <label class="field">
+                    <span class="label">To year</span>
+                    <input class="input" style="width: 8rem;" type="number" name="endYear"
+                           min="1900" max="2100" placeholder="YYYY">
+                </label>
+            </div>
+            <div><button class="btn" type="submit">Add education</button></div>
+        </form>
+    </section>
+
+    <section class="block">
+        <h2>Skills</h2>
+        <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-6);">
+            A plain list of words you declare about yourself. Nobody can endorse them —
+            there's nowhere for that to happen.
+        </p>
+        <div class="chips" th:if="${!edit.skills.isEmpty()}" style="margin-bottom: var(--s-6);">
+            <form th:each="skill : ${edit.skills}" method="post"
+                  th:action="'/profile/skills/' + ${skill.id} + '/delete'" style="display: contents;">
+                <button class="btn sm" type="submit" th:title="'Remove ' + ${skill.name}">
+                    <span th:text="${skill.name}">Skill</span> ×
+                </button>
+            </form>
+        </div>
+        <form method="post" action="/profile/skills" style="display: flex; gap: var(--s-2);">
+            <label class="field" style="flex: 1;">
+                <span class="label">Skill</span>
+                <input class="input" type="text" name="name" required>
+            </label>
+            <button class="btn" type="submit" style="align-self: flex-end;">Add</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>
