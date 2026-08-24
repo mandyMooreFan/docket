@@ -44,6 +44,12 @@
                         th:if="${!stat.last}">,</th:block>
                 </th:block>
             </p>
+            <!-- §7.1: the poster's reply channel — the Application-scoped Thread.
+                 Shown only while that channel is open, and never for anyone who
+                 did not apply (§6.3). No mail goes with it (§7.4). -->
+            <p class="meta" th:if="${row.mayMessage}" style="margin-top: var(--s-2);">
+                <a th:href="'/messages/' + ${row.applicant.memberId}">Message</a>
+            </p>
             <div th:if="${row.unresolved}"
                  style="display: flex; gap: var(--s-2); margin-top: var(--s-3);">
                 <form method="post"
