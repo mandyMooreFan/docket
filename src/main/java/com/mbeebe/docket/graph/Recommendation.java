@@ -47,6 +47,14 @@ class Recommendation {
         return authorId;
     }
 
+    long subjectId() {
+        return subjectId;
+    }
+
+    Instant writtenAt() {
+        return writtenAt;
+    }
+
     String text() {
         return text;
     }

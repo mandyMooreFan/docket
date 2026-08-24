@@ -12,6 +12,9 @@ interface ReplyRepository extends JpaRepository<Reply, Long> {
 
     List<Reply> findByPostIdAndRemovedAtIsNullOrderByCreatedAtAscIdAsc(long postId);
 
+    /** §11.1's export and §11.2's keep: everything this Member replied, newest first. */
+    List<Reply> findByAuthorIdOrderByCreatedAtDescIdDesc(long authorId);
+
     /** §5.5's raw material: fresh, unremoved replies across a set of threads. */
     List<Reply> findByPostIdInAndRemovedAtIsNullAndCreatedAtAfterOrderByCreatedAtDescIdDesc(
             Collection<Long> postIds, Instant after);

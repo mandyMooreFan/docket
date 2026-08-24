@@ -1,0 +1,49 @@
+<!doctype html>
+<!--/*
+    The two fragments every readable archive page is built from (§11.1).
+
+    One renderer for every section, because an archive is a copy of stored facts
+    and stored facts are all the same shape at this level — labelled rows (see
+    leaving.ExportRecord). A per-module renderer would be seven templates that all
+    have to be remembered when the archive grows an eighth contributor.
+
+    `entries` recurses into itself for the one nested case the spec names: a Thread
+    and the Messages inside it, exported whole, both halves (§11.1).
+*/-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<th:block th:fragment="sections (sections)">
+    <section th:each="section : ${sections}" th:id="${section.key}">
+        <h2 th:text="${section.title}">Section</h2>
+        <!--/* §11.1's plain-language note, above the words it is about — never below. */-->
+        <div class="note" th:if="${!#strings.isEmpty(section.note)}">
+            <p th:text="${section.note}">Note</p>
+        </div>
+        <!--/* §13.4: empty is honest, and says so rather than rendering nothing. */-->
+        <p class="empty" th:if="${section.empty}">Nothing here.</p>
+        <th:block th:replace="~{export/parts :: entries(${section.records})}"></th:block>
+    </section>
+</th:block>
+
+<th:block th:fragment="entries (records)">
+    <div class="entry" th:each="record : ${records}">
+        <h3 th:if="${!#strings.isEmpty(record.label)}" th:text="${record.label}">Label</h3>
+        <dl th:if="${!record.fields.isEmpty()}">
+            <th:block th:each="field : ${record.fields}">
+                <dt th:text="${field.label}">Field</dt>
+                <dd th:text="${field.value}">Value</dd>
+            </th:block>
+        </dl>
+        <figure th:each="image : ${record.media}">
+            <img th:src="${image.path}" src="" alt="">
+            <figcaption th:text="${image.path}">media/…</figcaption>
+        </figure>
+        <div class="nested" th:if="${!record.entries.isEmpty()}">
+            <th:block th:replace="~{export/parts :: entries(${record.entries})}"></th:block>
+        </div>
+    </div>
+</th:block>
+
+</body>
+</html>

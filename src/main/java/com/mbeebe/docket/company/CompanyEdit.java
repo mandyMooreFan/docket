@@ -55,6 +55,10 @@ class CompanyEdit {
         return id;
     }
 
+    Long companyId() {
+        return companyId;
+    }
+
     Long memberId() {
         return memberId;
     }
