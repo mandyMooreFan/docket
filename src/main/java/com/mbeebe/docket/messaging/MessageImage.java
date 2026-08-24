@@ -10,8 +10,9 @@ import jakarta.persistence.Table;
 /**
  * A still image on a Message (§7.2), in the feed's post_image shape — a
  * reference into the one §10.4 image store, written only after that store's
- * checks passed. Correspondence is private, so the bytes are never served from
- * the shared /images path: see MessagesController's thread-scoped route.
+ * checks passed. Who may read the bytes back is answered by
+ * {@link MessageImageAudience}, the messaging module's contribution to the one
+ * guard in front of /images/{id}.
  */
 @Entity
 @Table(name = "message_image")
@@ -35,6 +36,10 @@ class MessageImage {
         this.messageId = messageId;
         this.imageId = imageId;
         this.position = position;
+    }
+
+    long messageId() {
+        return messageId;
     }
 
     long imageId() {

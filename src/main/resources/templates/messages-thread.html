@@ -30,11 +30,12 @@
                 </p>
                 <!-- Serif: a person wrote these words (§2). -->
                 <div class="prose" th:utext="${message.bodyHtml}"></div>
-                <!-- §7.2: still images, served only to the two people in this Thread. -->
+                <!-- §7.2: still images. The one guarded /images route serves them,
+                     and MessageImageAudience answers for who may have the bytes —
+                     the two people in this Thread, and nobody else (§10.2). -->
                 <div class="post-images" th:if="${!message.imageIds.isEmpty()}">
                     <img th:each="imageId : ${message.imageIds}"
-                         th:src="'/messages/' + ${page.otherId} + '/images/' + ${imageId}"
-                         alt="">
+                         th:src="'/images/' + ${imageId}" alt="">
                 </div>
             </article>
         </div>

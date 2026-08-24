@@ -241,20 +241,6 @@ class MessagingService {
         return unread > 0 ? Optional.of((int) unread) : Optional.empty();
     }
 
-    /**
-     * The private, participation-scoped image read path. Correspondence is
-     * private by construction (§10.2), so an image on a Message is served only
-     * to the two people in the Thread, and only if it really belongs to a
-     * Message in that Thread. Empty is a 404 with no placeholder.
-     */
-    @Transactional(readOnly = true)
-    Optional<Images.StoredImage> imageInThreadWith(Member viewer, long otherId, long imageId) {
-        return findThread(viewer.id(), otherId)
-                .filter(thread -> thread.includes(viewer.id()))
-                .filter(thread -> messageImages.countInThread(thread.id(), imageId) > 0)
-                .flatMap(thread -> images.load(imageId));
-    }
-
     private Optional<MessageThread> findThread(long one, long other) {
         return threads.findByMemberAAndMemberB(Math.min(one, other), Math.max(one, other));
     }

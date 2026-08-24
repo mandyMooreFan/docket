@@ -19,15 +19,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * SPEC.md §7.2: a Message carries text, links and still images, through the one
- * §10.4 upload pipeline. The read path is the part that is messaging's own
- * problem: correspondence is private by construction (§10.2), so a Message's
- * image is served only to the two people in the Thread, and never from the
- * shared /images path where an id can simply be guessed.
+ * §10.4 upload pipeline. The read path matters just as much: correspondence is
+ * private by construction (§10.2), and image ids are sequential, so /images/{id}
+ * must hand a Message's bytes to the two people in the Thread and to nobody else
+ * — asked of MessageImageAudience on every request (#51's port, §8.5).
  */
 class MessagingImageTests extends MessagingTestBase {
 
-    private static final Pattern MESSAGE_IMAGE =
-            Pattern.compile("/messages/(\\d+)/images/(\\d+)");
+    private static final Pattern IMAGE_URL = Pattern.compile("/images/(\\d+)");
 
     @Autowired
     JdbcTemplate jdbc;
@@ -62,18 +61,15 @@ class MessagingImageTests extends MessagingTestBase {
                         .cookie(nia))
                 .andExpect(status().is3xxRedirection());
 
-        // The recipient's page points at the thread-scoped route, not /images/{id}.
         String page = threadPage(oto, niaId);
-        Matcher matcher = MESSAGE_IMAGE.matcher(page);
+        Matcher matcher = IMAGE_URL.matcher(page);
         assertThat(matcher.find()).as("the message shows its image").isTrue();
         String url = matcher.group(0);
-        long imageId = Long.parseLong(matcher.group(2));
-        assertThat(page).doesNotContain("src=\"/images/");
 
-        // Both participants may fetch it, and it is never cached publicly.
+        // Both participants may fetch it, and it is never cached publicly — a
+        // Thread is not the open web, so nothing in one may ride a shared cache.
         for (Cookie participant : new Cookie[] {nia, oto}) {
-            long other = participant == nia ? otoId : niaId;
-            mvc.perform(get("/messages/" + other + "/images/" + imageId).cookie(participant))
+            mvc.perform(get(url).cookie(participant))
                     .andExpect(status().isOk())
                     .andExpect(header().string("Content-Type", "image/png"))
                     .andExpect(header().string("Cache-Control",
@@ -82,20 +78,11 @@ class MessagingImageTests extends MessagingTestBase {
         }
 
         // §10.2: private is private by construction. A member outside the Thread
-        // cannot reach the bytes, by either end of the pair — and neither can a
-        // visitor with no session at all. 404, with no placeholder.
+        // cannot reach the bytes, and neither can a visitor with no session at
+        // all — 404 either way, with no placeholder to confirm the image exists.
         Cookie pim = completeMember("msg-img-pim@example.org", "Pim Outside");
         mvc.perform(get(url).cookie(pim)).andExpect(status().isNotFound());
-        mvc.perform(get("/messages/" + otoId + "/images/" + imageId).cookie(pim))
-                .andExpect(status().isNotFound());
-        mvc.perform(get("/messages/" + niaId + "/images/" + imageId).cookie(pim))
-                .andExpect(status().isNotFound());
         mvc.perform(get(url)).andExpect(status().isNotFound());
-
-        // An image that is real but belongs to no Message in this Thread is a 404
-        // too: participation alone is not enough.
-        mvc.perform(get("/messages/" + niaId + "/images/999999999").cookie(oto))
-                .andExpect(status().isNotFound());
     }
 
     @Test

@@ -11,6 +11,8 @@ interface MessageRepository extends Repository<Message, Long> {
 
     Message save(Message message);
 
+    Optional<Message> findById(long id);
+
     List<Message> findByThreadIdOrderByIdAsc(long threadId);
 
     Optional<Message> findFirstByThreadIdOrderByIdDesc(long threadId);

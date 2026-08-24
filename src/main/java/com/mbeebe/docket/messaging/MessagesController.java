@@ -2,13 +2,9 @@ package com.mbeebe.docket.messaging;
 
 import com.mbeebe.docket.identity.CurrentMember;
 import com.mbeebe.docket.identity.Member;
-import com.mbeebe.docket.images.Images;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +22,11 @@ import java.util.Optional;
  * addressed by the other person, never by a thread id — there is exactly one
  * Thread per pair (ADR-0001), so the pair is the address, and no id has to be
  * looked up or leaked to name a correspondence.
+ *
+ * <p>Images on a Message are deliberately NOT served from here: they go
+ * through the one guarded /images/{id} route, with
+ * {@link MessageImageAudience} answering for who may have the bytes — one
+ * guard for the whole product rather than a special case for messaging.
  *
  * <p>A Thread you have no business with does not exist: 404, no placeholder,
  * the same shape the profile and queue pages already use. A Thread you may read
@@ -111,25 +112,6 @@ class MessagesController {
             model.addAttribute("error", refused.getMessage());
             return "messages-thread";
         }
-    }
-
-    /**
-     * A still image on a Message, served only to the two people in the Thread.
-     * Correspondence is private by construction (§10.2), so these bytes
-     * deliberately do not travel on the shared /images path: this route re-asks
-     * the participation question on every request and caches privately. Storage
-     * still goes through the one §10.4 store — this is the read path only.
-     */
-    @GetMapping("/messages/{otherId}/images/{imageId}")
-    ResponseEntity<byte[]> image(@PathVariable long otherId, @PathVariable long imageId,
-                                 HttpServletRequest request) {
-        Images.StoredImage image = CurrentMember.get(request)
-                .flatMap(member -> messaging.imageInThreadWith(member, otherId, imageId))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(image.contentType()))
-                .cacheControl(CacheControl.noStore().cachePrivate())
-                .body(image.data());
     }
 
     private ThreadPage page(Member viewer, long otherId) {
