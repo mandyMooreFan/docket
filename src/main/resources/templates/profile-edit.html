@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Edit profile — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">Edit profile</h1>
+    <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-8);">
+        Everything here is yours to word as you like. The name is the one you're professionally
+        known by — it's the only required field. <a href="/profile">View your page</a>.
+    </p>
+
+    <p class="label" th:if="${error}" th:text="${error}"
+       style="color: var(--ac); text-transform: none; letter-spacing: 0;">error</p>
+
+    <form method="post" action="/profile/basics" class="form">
+        <label class="field">
+            <span class="label">Name</span>
+            <input class="input" type="text" name="name" th:value="${edit.name}" autocomplete="name">
+        </label>
+        <label class="field">
+            <span class="label">Headline</span>
+            <input class="input" type="text" name="headline" th:value="${edit.headline}"
+                   placeholder="What you do, in your words">
+        </label>
+        <label class="field">
+            <span class="label">Location</span>
+            <input class="input" type="text" name="location" th:value="${edit.location}">
+        </label>
+        <label class="field">
+            <span class="label">About</span>
+            <textarea class="input" name="summary" rows="6" th:text="${edit.summary}"></textarea>
+        </label>
+        <div><button class="btn primary" type="submit">Save</button></div>
+    </form>
+</main>
+</body>
+</html>

@@ -51,6 +51,20 @@ public class ProfileService {
                 profile.openToWork(), visibility.indexable()));
     }
 
+    /** What the edit page shows: your own facts, exactly as stored. */
+    @Transactional
+    public ProfileEdit editView(long memberId) {
+        Profile profile = ownProfile(memberId);
+        return new ProfileEdit(profile.name(), profile.headline(), profile.location(),
+                profile.summary(), profile.dial(), profile.openToWork());
+    }
+
+    @Transactional
+    public void editBasics(long memberId, String name, String headline, String location,
+                           String summary) {
+        ownProfile(memberId).editBasics(name, headline, location, summary);
+    }
+
     /** The quiet flag renders only inside its chosen audience — and never logged-out. */
     private boolean openToWorkShown(Profile profile, long ownerId, Optional<Member> viewer,
                                     boolean isOwner) {
