@@ -7,6 +7,12 @@
 <body>
 <main class="page">
     <h1 class="title-serif">Network</h1>
+    <!-- §13.2: the Invite is the seeding mechanism, so it has to stay reachable
+         after the zero states that point at it have gone. One quiet line, here,
+         where the graph already is. -->
+    <p class="meta" style="margin-top: var(--s-2);">
+        <a href="/invite">Invite someone who isn't here yet</a>
+    </p>
 
     <section class="block">
         <h2>Pending requests</h2>
@@ -29,8 +35,12 @@
 
     <section class="block">
         <h2>Connections</h2>
+        <!-- §13.4: this zero state points where the feed's does, for the same
+             reason — search and the Invite are the only two doors a member with
+             no graph can walk through (§8.3, §13.3). -->
         <p class="meta" th:if="${network.connections.isEmpty()}">No connections yet.
-            A connection starts from a profile — find someone you know.</p>
+            A connection starts from a profile — <a href="/search">find someone you
+            know</a>, or <a href="/invite">invite them</a>.</p>
         <article class="entry" th:each="person : ${network.connections}">
             <h3><a th:href="'/p/' + ${person.memberId}"
                    th:text="${person.displayName()}">Name</a></h3>

@@ -39,11 +39,19 @@
             </article>
         </section>
 
-        <!-- §13.4: the empty graph — the copy is spec surface, honest by design. -->
+        <!-- §13.4: the empty graph — the copy is spec surface, honest by design.
+             It says what this zero state is and then points somewhere useful, and
+             §13.4 names the three places: search, the Invite (§13.3), the jobs
+             board. Two of them work with no graph at all, which is the point. -->
         <div class="prose" th:if="${!feed.hasConnections}" style="margin-top: var(--s-8);">
             <p>Your feed shows what your connections write — you don't have any connections yet.
                 It stays empty until you do; nothing gets put here for you.
                 Find someone you know, or invite them.</p>
+            <p class="meta">
+                <a href="/search">Search for someone by name</a> ·
+                <a href="/invite">Invite someone who isn't here yet</a> ·
+                <a href="/jobs">The jobs board</a>
+            </p>
         </div>
 
         <th:block th:if="${feed.hasConnections}">
