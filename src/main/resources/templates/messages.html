@@ -28,13 +28,17 @@
          count, dot or unread mark — §5.6 refuses those, and §7.4's one exception is
          the single count on the Messages nav item. -->
     <section class="block" th:if="${!inbox.rows.isEmpty()}">
-        <article class="entry" th:each="row : ${inbox.rows}">
-            <h3><a th:href="'/messages/' + ${row.otherId}"
-                   th:text="${row.person.displayName()}">Name</a></h3>
-            <p class="org">
-                <span class="when" th:text="${row.when}">1 Aug 2026, 09:12</span>
-            </p>
-            <p th:text="${row.latest}">Their latest words</p>
+        <article class="entry person" th:each="row : ${inbox.rows}">
+            <span class="av av-40"
+                  th:insert="~{fragments/avatar :: face(${row.person.initials}, ${row.person.photoImageId})}">·</span>
+            <div class="said">
+                <h3><a th:href="'/messages/' + ${row.otherId}"
+                       th:text="${row.person.displayName()}">Name</a></h3>
+                <p class="org">
+                    <span class="when" th:text="${row.when}">1 Aug 2026, 09:12</span>
+                </p>
+                <p th:text="${row.latest}">Their latest words</p>
+            </div>
         </article>
     </section>
 </main>

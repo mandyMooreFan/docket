@@ -207,11 +207,25 @@ textarea.input { font-family: var(--serif); font-size: var(--t-18); line-height:
 }
 .flag::before { content: ""; width: 6px; height: 6px; border-radius: 999px; background: var(--ac); }
 
-/* avatar: initials on a neutral fill (photo treatment stays open — §2) */
+/* avatar: a member's photo when they have one, initials on a neutral fill when
+   they don't (§4.1, #52). §2's one open visual detail — "whether real photos
+   render plain or greyscaled" — is SETTLED HERE, and the answer is PLAIN: there
+   is no filter on an avatar, and there is none anywhere else in this file
+   either. Company logos (#34) and Post images (#33) already ship untouched, so
+   greyscaling would single out faces alone — a house style imposed on how people
+   choose to present themselves, in a product whose whole argument is that the
+   page belongs to the member. The initials fill stays: it is the fallback, not a
+   placeholder waiting to be replaced. */
 .av {
   border-radius: 999px; background: var(--g2); color: var(--i500);
   display: flex; align-items: center; justify-content: center; font-weight: 600; flex: none;
+  position: relative; overflow: hidden;
 }
+/* the photo sits OVER the initials, so a 404 (the Dial said no — §8.5) simply
+   uncovers them again. No filter, no tint, no ring. */
+.av-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* an avatar that is also a link: the anchor is the box, nothing else changes */
+a.av { text-decoration: none; }
 .av-32 { width: 32px; height: 32px; font-size: var(--t-12); }
 .av-40 { width: 40px; height: 40px; font-size: var(--t-13); }
 .av-96 { width: 96px; height: 96px; font-size: var(--t-30); border-radius: 12px; margin-bottom: var(--s-6); }
@@ -300,3 +314,13 @@ textarea.input { font-family: var(--serif); font-size: var(--t-18); line-height:
    because a shared Connection is something the app worked out, not something
    a person wrote */
 .mutuals { font-size: var(--t-13); color: var(--i400); margin: var(--s-1) 0 0; }
+
+/* ---------- the member photo (#52, §4.1): person rows ---------- */
+
+/* A list of people now shows faces, so the row becomes an avatar beside its
+   words — 12px between the two (inside a group), the entry's own 32px still
+   between rows. .entry's type rules are untouched: the name stays serif, the
+   supporting line stays sans. */
+.entry.person { display: flex; align-items: flex-start; gap: var(--s-3); }
+.entry.person > .said { flex: 1; min-width: 0; }
+.entry.person > .said > :first-child { margin-top: 0; }

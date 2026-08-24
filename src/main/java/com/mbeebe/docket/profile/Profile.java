@@ -45,6 +45,13 @@ public class Profile {
     @Column(name = "open_to_work")
     private OpenToWork openToWork;
 
+    /**
+     * The §4.1 photo: a pointer into the one image store (§10.4), null for the many
+     * Profiles that will never have one. Never part of Completeness (§3.2) — nothing
+     * derived from this column decides what its owner may do.
+     */
+    private Long photoImageId;
+
     protected Profile() {
     }
 
@@ -88,6 +95,10 @@ public class Profile {
         return openToWork;
     }
 
+    public Long photoImageId() {
+        return photoImageId;
+    }
+
     void editBasics(String name, String headline, String location, String summary) {
         this.name = name.strip();
         this.headline = headline.strip();
@@ -101,5 +112,10 @@ public class Profile {
 
     void setOpenToWork(OpenToWork openToWork) {
         this.openToWork = openToWork;
+    }
+
+    /** Setting and clearing are the same move — null is "back to initials". */
+    void setPhoto(Long imageId) {
+        this.photoImageId = imageId;
     }
 }
