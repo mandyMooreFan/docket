@@ -55,6 +55,18 @@ class ConnectionRequest {
         return requesterId;
     }
 
+    long recipientId() {
+        return recipientId;
+    }
+
+    State state() {
+        return state;
+    }
+
+    Instant sentAt() {
+        return sentAt;
+    }
+
     String note() {
         return note;
     }

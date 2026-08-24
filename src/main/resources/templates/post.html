@@ -57,8 +57,9 @@
            th:text="${page.post.replyCountLabel()}">1 reply</p>
 
         <article class="entry" th:each="reply : ${page.replies}">
+            <!--/* §11.2: a former member is named but not linked — their Profile 404s. */-->
             <p class="org">
-                <a th:href="'/p/' + ${reply.author.memberId}"
+                <a th:href="${reply.author.former} ? null : '/p/' + ${reply.author.memberId}"
                    th:text="${reply.author.displayName()}">Name</a> ·
                 <span class="when" th:text="${reply.when}">1 Aug 2026</span>
             </p>
