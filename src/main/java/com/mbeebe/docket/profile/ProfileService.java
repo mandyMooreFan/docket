@@ -77,6 +77,14 @@ public class ProfileService {
                 profile.dial(), profile.openToWork(), visibility.indexable()));
     }
 
+    /** The §3.2 bar, computed fresh from the stored facts — never cached, never stored. */
+    @Transactional(readOnly = true)
+    public Completeness completenessOf(long memberId) {
+        Profile profile = profiles.findById(memberId).orElseGet(() -> Profile.blankFor(memberId));
+        return Completeness.of(profile, positions.countByMemberId(memberId),
+                education.countByMemberId(memberId));
+    }
+
     /** What the edit page shows: your own facts, exactly as stored. */
     @Transactional
     public ProfileEdit editView(long memberId) {
