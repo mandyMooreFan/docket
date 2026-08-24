@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -180,10 +181,62 @@ class JobService {
     /** §6.5: one list, newest first, no ranking. Filters narrow; nothing reorders. */
     @Transactional(readOnly = true)
     BoardPage board(JobFilters filters, Optional<Member> viewer) {
+        // "Roles where I know someone": companies where the seeker has a
+        // Connection holding a current Position — a fact about the graph,
+        // seeker-chosen, computed only when the box is ticked (§6.5, §8.2).
+        Set<Long> knownCompanies = filters.known() && viewer.isPresent()
+                ? companiesWhereIKnowSomeone(viewer.get().id())
+                : null;
         List<PostingRow> rows = postings.openAt(clock.instant()).stream()
+                .filter(posting -> matches(posting, filters, knownCompanies))
                 .map(this::row)
                 .toList();
         return new BoardPage(rows, filters, viewer.isPresent(), List.of());
+    }
+
+    private boolean matches(JobPosting posting, JobFilters filters, Set<Long> knownCompanies) {
+        String companyName = companies.findResolved(posting.companyId())
+                .map(Company::name).orElse("");
+        if (!filters.q().isBlank()
+                && !containsIgnoringCase(posting.title(), filters.q())
+                && !containsIgnoringCase(posting.description(), filters.q())
+                && !containsIgnoringCase(companyName, filters.q())) {
+            return false;
+        }
+        if (!filters.location().isBlank()
+                && !containsIgnoringCase(posting.location(), filters.location())) {
+            return false;
+        }
+        if (!filters.remote().isBlank()
+                && !posting.remotePolicy().name().equals(filters.remote())) {
+            return false;
+        }
+        // The floor: postings whose range can pay it, compared only within the
+        // floor's own currency — Docket holds no exchange rates (§6.5).
+        if (!filters.floor().isBlank()) {
+            Optional<Long> floor = parseLong(filters.floor());
+            if (floor.isPresent() && (!posting.currency().equals(filters.currency())
+                    || posting.salaryMax() < floor.get())) {
+                return false;
+            }
+        }
+        if (!filters.company().isBlank()
+                && !containsIgnoringCase(companyName, filters.company())) {
+            return false;
+        }
+        return knownCompanies == null || knownCompanies.contains(posting.companyId());
+    }
+
+    private Set<Long> companiesWhereIKnowSomeone(long memberId) {
+        return graph.connectedTo(memberId).stream()
+                .flatMap(connectionId -> positions.companiesHeldBy(connectionId).stream())
+                .flatMap(companyId -> companies.findResolved(companyId).stream())
+                .map(Company::id)
+                .collect(Collectors.toSet());
+    }
+
+    private static boolean containsIgnoringCase(String haystack, String needle) {
+        return haystack.toLowerCase(Locale.ROOT).contains(needle.toLowerCase(Locale.ROOT));
     }
 
     /** The posting page for anyone, signed in or out (§8.4); empty is the 404. */

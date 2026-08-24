@@ -17,6 +17,69 @@
         </p>
     </header>
 
+    <!-- §6.5: seeker-chosen filters as GET params. They narrow the one list;
+         nothing reorders it, and nothing here is about the viewer except the
+         box the viewer ticks. -->
+    <section class="panel" style="margin-top: var(--s-8);">
+        <form method="get" action="/jobs" class="form" style="gap: var(--s-3);">
+            <div style="display: flex; gap: var(--s-3); flex-wrap: wrap;">
+                <label class="field" style="flex: 2; min-width: 10rem;">
+                    <span class="label">Keyword</span>
+                    <input class="input" type="text" name="q" th:value="${board.filters.q}">
+                </label>
+                <label class="field" style="flex: 1; min-width: 8rem;">
+                    <span class="label">Location</span>
+                    <input class="input" type="text" name="location"
+                           th:value="${board.filters.location}">
+                </label>
+                <label class="field">
+                    <span class="label">Remote</span>
+                    <select class="input" name="remote">
+                        <option value="" th:selected="${board.filters.remote == ''}">Any</option>
+                        <option value="ON_SITE"
+                                th:selected="${board.filters.remote == 'ON_SITE'}">On-site</option>
+                        <option value="HYBRID"
+                                th:selected="${board.filters.remote == 'HYBRID'}">Hybrid</option>
+                        <option value="REMOTE"
+                                th:selected="${board.filters.remote == 'REMOTE'}">Remote</option>
+                    </select>
+                </label>
+            </div>
+            <div style="display: flex; gap: var(--s-3); flex-wrap: wrap; align-items: flex-end;">
+                <label class="field" style="flex: 1; min-width: 8rem;">
+                    <span class="label">Salary floor</span>
+                    <input class="input" type="number" name="floor" min="1"
+                           th:value="${board.filters.floor}">
+                </label>
+                <label class="field">
+                    <span class="label">Currency</span>
+                    <select class="input" name="currency">
+                        <option th:each="code : ${ {'GBP','EUR','USD','CAD','AUD','CHF'} }"
+                                th:value="${code}" th:text="${code}"
+                                th:selected="${board.filters.currency == code}">GBP</option>
+                    </select>
+                </label>
+                <label class="field" style="flex: 1; min-width: 8rem;">
+                    <span class="label">Company</span>
+                    <input class="input" type="text" name="company"
+                           th:value="${board.filters.company}">
+                </label>
+                <!-- §6.5: a fact about the graph, chosen by the seeker — never a weight. -->
+                <label th:if="${board.signedIn}" class="field"
+                       style="flex-direction: row; align-items: center; gap: var(--s-2);
+                              padding-bottom: var(--s-2);">
+                    <input type="checkbox" name="known" value="on"
+                           th:checked="${board.filters.known}">
+                    <span style="font-size: var(--t-13); color: var(--i500);">
+                        Roles where I know someone</span>
+                </label>
+                <div style="padding-bottom: 0;">
+                    <button class="btn sm" type="submit">Filter</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
     <!-- §13.4: the empty board says what it is — spec copy, honest by design. -->
     <div class="prose" th:if="${board.emptyBoard()}" style="margin-top: var(--s-8);">
         <p>No open postings right now. Postings appear here the moment a member posts one —
