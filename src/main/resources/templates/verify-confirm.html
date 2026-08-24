@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">One more click</h1>
+    <div class="prose">
+        <p>Press the button to record the verification: a dated fact that you could
+            receive mail at this address's domain today. (The button exists so an email
+            scanner following your link can't use it up on your behalf.)</p>
+    </div>
+    <form method="post" action="/verify" style="margin-top: var(--s-6);">
+        <input type="hidden" name="token" th:value="${token}">
+        <button class="btn primary" type="submit">Verify this address</button>
+    </form>
+</main>
+</body>
+</html>

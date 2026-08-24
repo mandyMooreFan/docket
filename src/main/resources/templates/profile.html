@@ -76,7 +76,7 @@
         <article class="entry" th:each="position : ${profile.positions}">
             <h3 th:text="${position.title}">Title</h3>
             <p class="org">
-                <th:block th:if="${position.atCompany()}"><span th:text="${position.company}">Company</span> · </th:block>
+                <th:block th:if="${position.atCompany()}"><a th:href="'/companies/' + ${position.companyId}" th:text="${position.company}">Company</a> · </th:block>
                 <span class="when" th:text="${position.when}">Mar 2021 — Present</span>
             </p>
             <p th:if="${!position.description.isBlank()}" th:text="${position.description}">Description</p>

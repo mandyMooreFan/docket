@@ -11,9 +11,13 @@ interface CompanyRepository extends Repository<Company, Long> {
 
     Company save(Company company);
 
+    Optional<Company> findById(Long id);
+
     @Query("select c from Company c where lower(c.name) = lower(:name)")
     Optional<Company> findByNameIgnoringCase(@Param("name") String name);
 
-    @Query("select c from Company c where lower(c.name) like lower(concat(:prefix, '%')) order by c.name")
+    /** Autocomplete never advertises an absorbed Company's name (§10.5's tidy-up). */
+    @Query("select c from Company c where c.mergedIntoId is null "
+            + "and lower(c.name) like lower(concat(:prefix, '%')) order by c.name")
     List<Company> findByNamePrefix(@Param("prefix") String prefix);
 }

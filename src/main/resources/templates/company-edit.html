@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="'Edit ' + ${companyEdit.name} + ' — Docket'">Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">Edit this page</h1>
+    <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-8);">
+        Nobody owns this page — everyone verified here edits it equally, and every change
+        is kept in the <a th:href="'/companies/' + ${companyEdit.id} + '/history'">page
+        history</a> with your name on it.
+        <a th:href="'/companies/' + ${companyEdit.id}">Back to the page</a>.
+    </p>
+
+    <p class="label" th:if="${error}" th:text="${error}"
+       style="color: var(--ac); text-transform: none; letter-spacing: 0;">error</p>
+
+    <form method="post" th:action="'/companies/' + ${companyEdit.id} + '/edit'" class="form">
+        <label class="field">
+            <span class="label">Name</span>
+            <input class="input" type="text" name="name" th:value="${companyEdit.name}">
+        </label>
+        <label class="field">
+            <span class="label">Description</span>
+            <textarea class="input" name="description" rows="6"
+                      th:text="${companyEdit.description}"></textarea>
+        </label>
+        <div><button class="btn primary" type="submit">Save</button></div>
+    </form>
+
+    <section class="block">
+        <h2>Logo</h2>
+        <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-6);">
+            PNG or JPEG, up to 512&nbsp;KB.
+        </p>
+        <img class="logo" th:if="${companyEdit.logoImageId != null}"
+             th:src="'/images/' + ${companyEdit.logoImageId}" alt="Current logo">
+        <form method="post" th:action="'/companies/' + ${companyEdit.id} + '/logo'"
+              enctype="multipart/form-data" style="display: flex; gap: var(--s-2);">
+            <label class="field" style="flex: 1;">
+                <span class="label">New logo</span>
+                <input class="input" type="file" name="logo" accept="image/png,image/jpeg" required>
+            </label>
+            <button class="btn" type="submit" style="align-self: flex-end;">Upload</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>
