@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Post a job — Docket</title>
+</head>
+<body>
+<main class="page">
+    <header>
+        <h1 class="title-serif" style="font-size: var(--t-30);">Post a job</h1>
+    </header>
+
+    <!-- §6.4: the queue block, said as the one sentence the poster can act on. -->
+    <section class="panel" th:if="${blockReason != null}" style="margin-top: var(--s-8);">
+        <p style="margin: 0; font-size: var(--t-14); color: var(--i500);"
+           th:text="${blockReason}">Resolve your queue first.</p>
+    </section>
+
+    <!-- §6.2, §3.2: no gate passed yet — the same check the POST enforces, reported. -->
+    <section class="panel" th:if="${blockReason == null and companies.isEmpty()}"
+             style="margin-top: var(--s-8);">
+        <p style="margin: 0; font-size: var(--t-14); color: var(--i500);">
+            Posting a job takes three things: a complete profile, a current position at the
+            company on that profile, and a verified work address at the company's mail
+            domain. Verify yours from the company's own page — the postings you may write
+            appear here the moment the last piece is in place.
+        </p>
+    </section>
+
+    <section class="block" th:if="${blockReason == null and !companies.isEmpty()}">
+        <p class="label" th:if="${error}" th:text="${error}"
+           style="color: var(--ac); text-transform: none; letter-spacing: 0;">error</p>
+        <form method="post" action="/jobs" class="form">
+            <label class="field">
+                <span class="label">Company</span>
+                <select class="input" name="companyId">
+                    <option th:each="option : ${companies}" th:value="${option.id}"
+                            th:text="${option.name}">Company</option>
+                </select>
+            </label>
+            <label class="field">
+                <span class="label">Title</span>
+                <input class="input" type="text" name="title" maxlength="200"
+                       style="font-family: var(--serif);" placeholder="What the role is called">
+            </label>
+            <div style="display: flex; gap: var(--s-3);">
+                <label class="field" style="flex: 1;">
+                    <span class="label">Location</span>
+                    <input class="input" type="text" name="location"
+                           placeholder="Leeds — or blank for fully remote">
+                </label>
+                <label class="field">
+                    <span class="label">Remote policy</span>
+                    <select class="input" name="remotePolicy">
+                        <option value="ON_SITE">On-site</option>
+                        <option value="HYBRID">Hybrid</option>
+                        <option value="REMOTE">Remote</option>
+                    </select>
+                </label>
+            </div>
+            <!-- §6.3: the mandatory real salary range. No "competitive", no single number. -->
+            <div style="display: flex; gap: var(--s-3);">
+                <label class="field" style="flex: 1;">
+                    <span class="label">Salary, from</span>
+                    <input class="input" type="number" name="salaryMin" min="1" placeholder="45000">
+                </label>
+                <label class="field" style="flex: 1;">
+                    <span class="label">to</span>
+                    <input class="input" type="number" name="salaryMax" min="1" placeholder="60000">
+                </label>
+                <label class="field">
+                    <span class="label">Currency</span>
+                    <select class="input" name="currency">
+                        <option value="GBP">GBP</option>
+                        <option value="EUR">EUR</option>
+                        <option value="USD">USD</option>
+                        <option value="CAD">CAD</option>
+                        <option value="AUD">AUD</option>
+                        <option value="CHF">CHF</option>
+                    </select>
+                </label>
+            </div>
+            <label class="field">
+                <span class="label">Description</span>
+                <textarea class="input" name="description" rows="10"
+                          style="font-family: var(--serif);"
+                          placeholder="What the work is, plainly."></textarea>
+            </label>
+            <p class="meta">
+                It runs for thirty days, then closes on its own. Every application must be
+                marked advanced or not selected — anything untouched at close is told
+                "closed without response", and an unresolved queue blocks your next posting.
+            </p>
+            <div><button class="btn primary" type="submit">Post it</button></div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

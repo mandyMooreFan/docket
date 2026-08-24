@@ -39,11 +39,19 @@
 
     <section class="block">
         <h2>Open postings</h2>
-        <!-- Postings arrive with the jobs board (#35); until then the empty state is honest (§13.4). -->
-        <p style="font-size: var(--t-14); color: var(--i500); margin: 0;">
+        <!-- §6.1: the Company's postings. Empty says what it is (§13.4). -->
+        <p th:if="${company.postings.isEmpty()}"
+           style="font-size: var(--t-14); color: var(--i500); margin: 0;">
             No open postings right now. Postings appear here the moment a member posts one —
             there's no backlog you can't see.
         </p>
+        <article class="entry" th:each="posting : ${company.postings}">
+            <h3><a th:href="'/jobs/' + ${posting.id}" th:text="${posting.title}">Title</a></h3>
+            <p class="org">
+                <span class="salary" th:text="${posting.salaryLine}">£45,000–£60,000</span> ·
+                <span class="when" th:text="${posting.placeLine}">Hybrid — Leeds</span>
+            </p>
+        </article>
     </section>
 
     <section class="block">

@@ -9,6 +9,7 @@ import java.util.List;
  */
 public record CompanyPage(long id, String name, String initial, String description,
                           Long logoImageId, boolean signedIn, List<PersonCard> people,
+                          List<CompanyPostings.Entry> postings,
                           boolean mayEdit, boolean canVerify) {
 
     public boolean hasLogo() {

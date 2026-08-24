@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Jobs — Docket</title>
+</head>
+<body>
+<main class="page">
+    <header>
+        <h1 class="title-serif" style="font-size: var(--t-30);">Jobs</h1>
+        <p class="meta" style="margin-top: var(--s-2);">
+            One list, newest first. No ranking, no matching, no promoted postings.
+        </p>
+        <p class="meta" style="margin-top: var(--s-3);" th:if="${board.signedIn}">
+            <a href="/jobs/new">Post a job</a>
+            <a href="/applications">Your applications</a>
+        </p>
+    </header>
+
+    <!-- §13.4: the empty board says what it is — spec copy, honest by design. -->
+    <div class="prose" th:if="${board.emptyBoard()}" style="margin-top: var(--s-8);">
+        <p>No open postings right now. Postings appear here the moment a member posts one —
+            there's no backlog you can't see.</p>
+    </div>
+
+    <p class="meta" th:if="${board.emptyMatch()}" style="margin-top: var(--s-8);">
+        Nothing matches these filters.
+    </p>
+
+    <section class="block" th:if="${!board.rows.isEmpty()}">
+        <article class="entry" th:each="row : ${board.rows}">
+            <h3><a th:href="'/jobs/' + ${row.id}" th:text="${row.title}">Title</a></h3>
+            <p class="org">
+                <a th:href="'/companies/' + ${row.companyId}" th:text="${row.company}">Company</a> ·
+                <span class="salary" th:text="${row.salaryLine}">£45,000–£60,000</span> ·
+                <span class="when" th:text="${row.placeLine}">Hybrid — Leeds</span> ·
+                <span class="when" th:text="'Posted ' + ${row.postedOn}">Posted 1 Aug 2026</span>
+            </p>
+        </article>
+    </section>
+</main>
+</body>
+</html>

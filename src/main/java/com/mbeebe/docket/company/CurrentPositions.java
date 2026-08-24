@@ -18,6 +18,13 @@ public interface CurrentPositions {
     List<Long> membersAt(long companyId);
 
     /**
+     * Every Company where this Member holds a current Position — the candidate
+     * set the jobs board (#35) intersects with the trust gate, and the far side
+     * of "roles where I know someone" (§6.5).
+     */
+    List<Long> companiesHeldBy(long memberId);
+
+    /**
      * Move every Position — current and past — from one Company to another, for a
      * merge. Returns the moved Position ids so the merge can record them (§10.5:
      * audited, reversible).
