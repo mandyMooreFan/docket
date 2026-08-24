@@ -20,4 +20,22 @@ interface CompanyRepository extends Repository<Company, Long> {
     @Query("select c from Company c where c.mergedIntoId is null "
             + "and lower(c.name) like lower(concat(:prefix, '%')) order by c.name")
     List<Company> findByNamePrefix(@Param("prefix") String prefix);
+
+    /**
+     * §8's company group: the name index, and the same rule autocomplete keeps
+     * — an absorbed Company is never advertised (§6.1's auto-merge, §10.5). The
+     * merge is read from merged_into_id at query time, not baked into the
+     * index, because a merge is a reversible fact.
+     *
+     * <p>§8.2's order: ts_rank, then the id, so it is total and impersonal.
+     */
+    @Query(value = """
+            select c.* from company c
+            where c.merged_into_id is null
+              and c.name_tsv @@ to_tsquery('simple'::regconfig, cast(:tsquery as text))
+            order by ts_rank(c.name_tsv, to_tsquery('simple'::regconfig, cast(:tsquery as text))) desc,
+                     c.id asc
+            limit :limit
+            """, nativeQuery = true)
+    List<Company> nameMatches(@Param("tsquery") String tsquery, @Param("limit") int limit);
 }

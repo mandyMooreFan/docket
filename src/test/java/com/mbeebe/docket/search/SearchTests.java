@@ -87,20 +87,25 @@ class SearchTests extends JobsTestBase {
         // The attribute words reach nobody: people search matches names only (§8.1).
         String byAttribute = search("Vexillographer", seeker);
         assertThat(byAttribute).doesNotContain("Plain Persson");
-        // §13.4's no-results copy, verbatim.
+        // §13.4's no-results copy, verbatim — it is static template text, so it
+        // reaches the page exactly as the spec writes it, apostrophe and all.
         assertThat(byAttribute).contains(
-                "Nobody by that name yet. People search matches names only — that&#39;s deliberate.");
+                "Nobody by that name yet. People search matches names only — that's deliberate.");
         // The name still works.
         assertThat(search("Persson", seeker)).contains("Plain Persson");
     }
 
     @Test
     void prefixMatchesTheStartOfEachNameWord() throws Exception {
-        completeMember("srch-prefix-person@example.org", "Zyggurat Quandle");
+        Cookie person = completeMember("srch-prefix-person@example.org", "Zyggurat Quandle");
         Cookie seeker = completeMember("srch-prefix-seeker@example.org", "Pre Fixseeker");
-        assertThat(search("Zygg", seeker)).contains("Zyggurat Quandle");
-        assertThat(search("Quand", seeker)).contains("Zyggurat Quandle");
-        assertThat(search("Zyggurat Quandle", seeker)).contains("Zyggurat Quandle");
+        // A name search is what people type while they are still typing, so
+        // every term is a prefix — asserted on the row's link, not on the name,
+        // which the form echoes back into its own box.
+        String row = "/p/" + memberId(person);
+        assertThat(search("Zygg", seeker)).contains("Zyggurat Quandle").contains(row);
+        assertThat(search("Quand", seeker)).contains("Zyggurat Quandle").contains(row);
+        assertThat(search("Zyggurat Quandle", seeker)).contains(row);
     }
 
     @Test
@@ -174,10 +179,11 @@ class SearchTests extends JobsTestBase {
         assertThat(search("harbour notes")).contains("Just harbour notes today.");
 
         // People search requires an account — said plainly, never dressed up as
-        // an empty result (§8.4, §13.4).
+        // an empty result (§8.4, §13.4). Asserted on the absence of the row and
+        // of any profile link at all, not on the word the form echoes back.
         String people = search("Fenwhistle");
         assertThat(people).contains("People search requires an account");
-        assertThat(people).doesNotContain("Fenwhistle");
+        assertThat(people).doesNotContain("Orla Fenwhistle");
         assertThat(people).doesNotContain("/p/");
         assertThat(people).doesNotContain("Nobody by that name yet");
     }
@@ -241,12 +247,16 @@ class SearchTests extends JobsTestBase {
         Cookie poster = posterAt("srch-openjob-poster@example.org", "Jo Openjobs",
                 "Snerdlum Works", "snerdlum-sj.example");
         long company = companies.named("Snerdlum Works").id();
-        postJob(poster, company, "Snerdlum Archivist");
+        long jobId = postJob(poster, company, "Snerdlum Archivist");
 
-        assertThat(search("Snerdlum Archivist")).contains("Snerdlum Archivist");
+        assertThat(search("Snerdlum Archivist"))
+                .contains("Snerdlum Archivist").contains("/jobs/" + jobId);
 
-        // §6.3's window closes; the search stops answering with it (§8: open only).
+        // §6.3's window closes; the search stops answering with it (§8: open
+        // only), derived from the window against the clock with no sweep in
+        // between. Asserted on the row's link: the title itself is the query,
+        // and the form honestly echoes the query back into its own box.
         clock.advance(Duration.ofDays(31));
-        assertThat(search("Snerdlum Archivist")).doesNotContain("Snerdlum Archivist");
+        assertThat(search("Snerdlum Archivist")).doesNotContain("/jobs/" + jobId);
     }
 }

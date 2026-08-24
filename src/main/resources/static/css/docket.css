@@ -270,3 +270,14 @@ textarea.input { font-family: var(--serif); font-size: var(--t-18); line-height:
   font-size: var(--t-14); font-weight: 500; color: var(--i900);
 }
 .posting-card:hover { text-decoration: none; background: var(--g2); }
+
+/* ---------- search (#37, §8): one box, four groups, one impersonal order ---------- */
+
+/* the app-bar box: a flex item between the nav and the right-hand cluster, so
+   it keeps the bar's 60px rhythm and the .search field's own surface language */
+.appbar-search { display: flex; align-items: center; }
+
+/* §8.2: Mutuals ride the row and never reorder it — the palest ink, sans,
+   because a shared Connection is something the app worked out, not something
+   a person wrote */
+.mutuals { font-size: var(--t-13); color: var(--i400); margin: var(--s-1) 0 0; }
