@@ -26,7 +26,10 @@
     </p>
 
     <section class="block" th:if="${!queue.rows.isEmpty()}">
-        <article class="entry" th:each="row : ${queue.rows}">
+        <article class="entry person" th:each="row : ${queue.rows}">
+            <span class="av av-40"
+                  th:insert="~{fragments/avatar :: face(${row.applicant.initials}, ${row.applicant.photoImageId})}">·</span>
+            <div class="said">
             <!-- §6.3: the Application grants the full Profile for THIS application. -->
             <h3><a th:href="'/jobs/' + ${queue.postingId} + '/applications/' + ${row.applicationId} + '/profile'"
                    th:text="${row.applicant.displayName()}">Name</a></h3>
@@ -60,6 +63,7 @@
                       th:action="'/jobs/' + ${queue.postingId} + '/applications/' + ${row.applicationId} + '/not-select'">
                     <button class="btn sm" type="submit">Not selected</button>
                 </form>
+            </div>
             </div>
         </article>
     </section>

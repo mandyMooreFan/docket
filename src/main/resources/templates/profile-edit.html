@@ -37,6 +37,35 @@
         <div><button class="btn primary" type="submit">Save</button></div>
     </form>
 
+    <!-- §4.1's photo. Said plainly: it is optional, and the copy does not nudge.
+         §3.2 keeps a photo off the Completeness bar on purpose ("exclusionary;
+         generated faces are free"), so this section must never read like a step
+         left undone. Removing is one button beside the picture — as easy as
+         setting one, which is the whole rule. -->
+    <section class="block">
+        <h2>Photo</h2>
+        <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-6);">
+            Optional, and it stays optional — your initials do the job perfectly well, and
+            nothing on Docket opens up because you added a face. A PNG or JPEG, up to 512 KB.
+            It's visible to exactly whoever your page is visible to.
+        </p>
+        <div style="display: flex; align-items: center; gap: var(--s-6); margin-bottom: var(--s-6);">
+            <span class="av av-96" style="margin-bottom: 0;"
+                  th:insert="~{fragments/avatar :: face(${edit.initials}, ${edit.photoImageId})}">·</span>
+            <form th:if="${edit.hasPhoto()}" method="post" action="/profile/photo/delete">
+                <button class="btn quiet sm" type="submit">Remove photo</button>
+            </form>
+        </div>
+        <form method="post" action="/profile/photo" enctype="multipart/form-data"
+              class="form" style="gap: var(--s-3);">
+            <label class="field">
+                <span class="label" th:text="${edit.hasPhoto()} ? 'Replace it' : 'Add a photo'">Add a photo</span>
+                <input class="input" type="file" name="photo" accept="image/png,image/jpeg" required>
+            </label>
+            <div><button class="btn" type="submit">Save photo</button></div>
+        </form>
+    </section>
+
     <section class="block">
         <h2>Who can see your page</h2>
         <p style="font-size: var(--t-14); color: var(--i500); margin: 0 0 var(--s-6);">

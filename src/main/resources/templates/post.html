@@ -9,7 +9,8 @@
     <article>
         <header style="display: flex; align-items: center; gap: var(--s-3); margin-bottom: var(--s-6);">
             <a class="av av-40" th:href="'/p/' + ${page.post.author.memberId}"
-               th:text="${page.post.author.initials}">·</a>
+               th:insert="~{fragments/avatar :: face(${page.post.author.initials},
+                            ${page.post.author.photoImageId})}">·</a>
             <div>
                 <p style="margin: 0; font-family: var(--serif); font-size: var(--t-18); font-weight: 600;">
                     <a th:href="'/p/' + ${page.post.author.memberId}" style="color: var(--i900);"

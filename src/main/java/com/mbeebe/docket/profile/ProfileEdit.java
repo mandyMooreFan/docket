@@ -6,5 +6,9 @@ import java.util.List;
 public record ProfileEdit(String name, String headline, String location, String summary,
                           Profile.Dial dial, Profile.OpenToWork openToWork,
                           List<PositionView> positions, List<EducationView> education,
-                          List<SkillView> skills) {
+                          List<SkillView> skills, String initials, Long photoImageId) {
+
+    public boolean hasPhoto() {
+        return photoImageId != null;
+    }
 }
