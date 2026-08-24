@@ -23,13 +23,16 @@ class CompanyPageController {
 
     /**
      * The Company page (§6.1). An absorbed Company's URL is not broken by a merge —
-     * it redirects to the one entity it now is (§10.5).
+     * it redirects to the one entity it now is (§10.5). A removed Company (§10.3
+     * rung 1) is a plain 404 instead, with no placeholder and no redirect: its
+     * name, description, logo, people and postings section all go with it.
      */
     @GetMapping("/companies/{id}")
     String page(@PathVariable long id,
                 @RequestParam(required = false) String verification,
                 HttpServletRequest request, Model model) {
         Company company = companies.find(id)
+                .filter(found -> !found.removed())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         if (company.merged()) {
             return "redirect:/companies/" + companies.resolved(company).id();

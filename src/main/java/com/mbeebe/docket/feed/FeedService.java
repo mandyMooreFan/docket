@@ -86,7 +86,7 @@ class FeedService {
         List<Long> connections = graph.connectedTo(member.id());
         List<Post> freshPosts = connections.isEmpty()
                 ? List.of()
-                : posts.findByAuthorIdInAndCreatedAtAfterOrderByCreatedAtDescIdDesc(
+                : posts.findByAuthorIdInAndRemovedAtIsNullAndCreatedAtAfterOrderByCreatedAtDescIdDesc(
                         connections, mark);
         List<PostView> entries = freshPosts.stream()
                 .map(post -> postService.view(post, Optional.of(member)))
@@ -110,7 +110,7 @@ class FeedService {
      */
     private List<Reply> repliesToYou(Member member, Instant mark) {
         Set<Long> threadIds = new LinkedHashSet<>();
-        posts.findByAuthorIdOrderByCreatedAtDescIdDesc(member.id())
+        posts.findByAuthorIdAndRemovedAtIsNullOrderByCreatedAtDescIdDesc(member.id())
                 .forEach(post -> threadIds.add(post.id()));
         threadIds.addAll(replies.postIdsJoinedBy(member.id()));
         if (threadIds.isEmpty()) {

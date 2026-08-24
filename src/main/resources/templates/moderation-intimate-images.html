@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Intimate image reports — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif" style="font-size: var(--t-30);">Intimate image reports</h1>
+    <p class="meta"><a href="/moderation">Back to the queue</a></p>
+
+    <div class="prose">
+        <p>Content named precisely enough is already hidden — it was hidden when the
+            report arrived. Confirming makes that permanent; restoring puts it back
+            exactly as it was.</p>
+    </div>
+
+    <p class="meta" th:if="${reports.isEmpty()}">Nothing open.</p>
+
+    <article class="entry" th:each="report : ${reports}">
+        <div class="prose" th:text="${report.locator()}">where they said</div>
+        <form method="post" th:action="'/moderation/intimate-images/' + ${report.id()}" class="form">
+            <label class="field">
+                <span class="label">Reason</span>
+                <input class="input" type="text" name="reason">
+            </label>
+            <div>
+                <button class="btn primary" type="submit" name="decision" value="CONFIRMED">Confirm removal</button>
+                <button class="btn" type="submit" name="decision" value="RESTORED">Restore</button>
+            </div>
+        </form>
+    </article>
+</main>
+</body>
+</html>

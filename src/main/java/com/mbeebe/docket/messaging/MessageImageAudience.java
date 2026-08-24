@@ -18,6 +18,10 @@ import java.util.Optional;
  * not sensitive to Blocks or Disconnects either: §7.3 and §11.1 keep the
  * history readable to both sides after an ending, and an image that vanished
  * from a kept correspondence would be one person destroying the other's record.
+ *
+ * <p>§10.3 rung 1 is the one thing that does reach in here: an image on a removed
+ * Message is HIDDEN from both correspondents, because the Message itself has
+ * stopped rendering and its bytes must not outlive it.
  */
 @Component
 class MessageImageAudience implements ImageAudience {
@@ -38,9 +42,9 @@ class MessageImageAudience implements ImageAudience {
     public Optional<Verdict> verdictFor(long imageId, Optional<Member> viewer) {
         return messageImages.findFirstByImageId(imageId)
                 .flatMap(attachment -> messages.findById(attachment.messageId()))
-                .flatMap(message -> threads.findById(message.threadId()))
-                .map(thread -> viewer
-                        .filter(member -> thread.includes(member.id()))
-                        .isPresent() ? Verdict.THIS_VIEWER : Verdict.HIDDEN);
+                .flatMap(message -> threads.findById(message.threadId())
+                        .map(thread -> !message.removed() && viewer
+                                .filter(member -> thread.includes(member.id()))
+                                .isPresent() ? Verdict.THIS_VIEWER : Verdict.HIDDEN));
     }
 }

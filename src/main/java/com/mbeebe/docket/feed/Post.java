@@ -39,6 +39,13 @@ class Post {
 
     private Instant threadClosedAt;
 
+    /**
+     * §10.3 rung 1: removal as a dated fact, in {@code reply.removed_at}'s shape.
+     * A removed Post stops rendering everywhere and stops counting; the row stays,
+     * because removal is never a delete.
+     */
+    private Instant removedAt;
+
     private Instant createdAt;
 
     /** §5.2.2: set only on a JOB_ATTACHED Post — the board reference it carries. */
@@ -91,6 +98,27 @@ class Post {
     void closeThread(Instant now) {
         if (threadClosedAt == null) {
             threadClosedAt = now;
+        }
+    }
+
+    boolean removed() {
+        return removedAt != null;
+    }
+
+    /** §10.3 rung 1: idempotent — the first removal is the one that stands. */
+    void remove(Instant now) {
+        if (removedAt == null) {
+            removedAt = now;
+        }
+    }
+
+    /**
+     * §10.5: the dated fact lifted, the item back exactly as it was. Idempotent —
+     * a Post that is not removed is left alone.
+     */
+    void restore() {
+        if (removedAt != null) {
+            removedAt = null;
         }
     }
 

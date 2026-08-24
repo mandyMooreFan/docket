@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Safety — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">Safety</h1>
+
+    <!--/* §10.1: the real response expectation, in plain words. The spec is explicit
+           that the product must not imply a staffed desk, so this page says the
+           uncomfortable thing first rather than burying it under process. */-->
+    <div class="prose">
+        <p><strong>One person reviews reports.</strong> Not a team, not a shift — one
+            person, in one timezone, working through a queue in the order things arrive.
+            Usually that means a few days. That is the honest expectation and not a
+            service level, and you should read everything below knowing it.</p>
+        <p>Nothing here is decided by software. There are no keyword filters, no
+            classifiers, and no automatic account actions — everything is reported by a
+            person and judged by a person. Two narrow exceptions exist and are listed at
+            the bottom of this page.</p>
+    </div>
+
+    <div class="block">
+        <h2>Report something on Docket</h2>
+        <p class="meta">You need an account, and you can report what you can see.</p>
+        <div class="prose">
+            <p>Profiles, posts, replies, job postings and company pages all carry a
+                report link. So do messages in a thread you are part of — and only those:
+                a thread you are not in cannot be reported, because it cannot be read.
+                That is not an oversight to be fixed later. It is the design.</p>
+            <p>What counts as breaking a rule is a short, closed list. Read the
+                <a href="/conduct">member conduct policy</a> — everything it does not
+                name is not an offence.</p>
+        </div>
+    </div>
+
+    <div class="block">
+        <h2>Intimate images</h2>
+        <div class="prose">
+            <p>If an intimate image of you is on Docket, there is a
+                <a href="/safety/intimate-image">separate form</a>, and you do not need an
+                account to use it. It is deliberately not the ordinary report route.</p>
+            <p><strong>The content is hidden when the report arrives, before anyone has
+                looked at it</strong> — if you can tell us where it is precisely enough
+                for us to find it. A person then either confirms the removal or puts it
+                back. Both you and the person who posted it are told.</p>
+        </div>
+    </div>
+
+    <div class="block">
+        <h2>How Docket handles your data</h2>
+        <div class="prose">
+            <p>A complaint about data protection is a different thing again, with its own
+                <a href="/data-protection">form</a> and its own legal clock. No account
+                needed for that one either.</p>
+        </div>
+    </div>
+
+    <div class="block">
+        <h2>If you have no account</h2>
+        <div class="prose">
+            <p th:if="${publishedAddress}">For illegal content you have seen without
+                signing in, write to
+                <a th:href="'mailto:' + ${publishedAddress}" th:text="${publishedAddress}">address</a>.
+                The same address is the contact point for authorities.</p>
+            <p th:if="${publishedAddress == null}">This instance has not published a
+                contact address, which means there is nobody named to answer a report sent
+                from outside. That is a gap in how it has been set up, and saying so is
+                better than printing an address that reaches no one.</p>
+        </div>
+    </div>
+
+    <div class="block">
+        <h2>What happens after a report</h2>
+        <div class="prose">
+            <p>You get an acknowledgement straight away, and a second message with the
+                decision and the reasons for it. If something of yours is removed or
+                restricted, you are told what was done, why, and how to
+                <a href="/appeals">appeal</a> — once. An appeal is the same person looking
+                again with new information. Docket is not going to pretend it has an
+                independent panel.</p>
+            <p><strong>What Docket will not do:</strong> quietly reduce who sees your
+                posts, or shadowban. There is no ranking to turn down, and hiding a
+                decision from the person it was made about is a lie about their own
+                account. Removals are total and you are told about them.</p>
+            <p>Counts of what has been reported and what was done about it are published
+                on the <a href="/transparency">transparency log</a>, with no names.</p>
+        </div>
+    </div>
+
+    <div class="block">
+        <h2>The two things that are automatic</h2>
+        <div class="prose">
+            <p>Every image uploaded is checked against hashes of known child sexual abuse
+                material, and against a local list of images taken down here under the
+                intimate image route, before it is stored. That is the complete list of
+                automation. Neither is a judgement about what anyone said.</p>
+        </div>
+    </div>
+</main>
+</body>
+</html>

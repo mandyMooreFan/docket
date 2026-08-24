@@ -39,7 +39,12 @@ class BoardForFeed implements JobBoardLookup {
     @Override
     @Transactional(readOnly = true)
     public Optional<AttachedPosting> attached(long postingId) {
-        return postings.findById(postingId).map(this::card);
+        // §10.3: a removed posting is a reference the board can no longer answer,
+        // so the job-attached Post simply renders no card — the same shape §5.2.2
+        // already gives a posting that has gone.
+        return postings.findById(postingId)
+                .filter(posting -> !posting.removed())
+                .map(this::card);
     }
 
     @Override

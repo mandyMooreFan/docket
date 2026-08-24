@@ -28,6 +28,14 @@ class Message {
 
     private String body;
 
+    /**
+     * §10.3 rung 1, in {@code reply.removed_at}'s shape. Immutability binds the
+     * two correspondents, not moderation: neither may edit or destroy the other's
+     * record, and illegal content in a private Thread is still illegal content.
+     * No member-facing route sets this.
+     */
+    private Instant removedAt;
+
     private Instant createdAt;
 
     protected Message() {
@@ -58,5 +66,26 @@ class Message {
 
     Instant createdAt() {
         return createdAt;
+    }
+
+    boolean removed() {
+        return removedAt != null;
+    }
+
+    /** §10.3 rung 1: idempotent — the first removal is the one that stands. */
+    void remove(Instant now) {
+        if (removedAt == null) {
+            removedAt = now;
+        }
+    }
+
+    /**
+     * §10.5: the dated fact lifted, the item back exactly as it was. Idempotent —
+     * a Message that is not removed is left alone.
+     */
+    void restore() {
+        if (removedAt != null) {
+            removedAt = null;
+        }
     }
 }

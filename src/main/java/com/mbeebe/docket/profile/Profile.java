@@ -7,6 +7,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.time.Instant;
+
 /**
  * The page a Member publishes about themselves (CONTEXT.md) — exactly one per Member,
  * existing from the moment they join. Stores facts only; whether it is complete, who
@@ -44,6 +46,15 @@ public class Profile {
     @Enumerated(EnumType.STRING)
     @Column(name = "open_to_work")
     private OpenToWork openToWork;
+
+    /**
+     * §10.3 rung 1, in {@code reply.removed_at}'s shape. A removed Profile stops
+     * rendering on every surface, including §6.3's consented application view; the
+     * row stays, because removal is never a delete and the Member is untouched —
+     * ending a Member is the ladder's fourth rung, not this one.
+     */
+    @Column(name = "removed_at")
+    private Instant removedAt;
 
     protected Profile() {
     }
@@ -101,5 +112,26 @@ public class Profile {
 
     void setOpenToWork(OpenToWork openToWork) {
         this.openToWork = openToWork;
+    }
+
+    boolean removed() {
+        return removedAt != null;
+    }
+
+    /** §10.3 rung 1: idempotent — the first removal is the one that stands. */
+    void remove(Instant now) {
+        if (removedAt == null) {
+            removedAt = now;
+        }
+    }
+
+    /**
+     * §10.5: the dated fact lifted, the Profile back exactly as it was. Idempotent
+     * — a Profile that is not removed is left alone.
+     */
+    void restore() {
+        if (removedAt != null) {
+            removedAt = null;
+        }
     }
 }

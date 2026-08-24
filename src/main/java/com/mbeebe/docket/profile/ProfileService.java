@@ -66,6 +66,16 @@ public class ProfileService {
             return Optional.empty();
         }
         Profile profile = profiles.findById(memberId).orElseGet(() -> Profile.blankFor(memberId));
+        // §10.3 rung 1, and unlike the Block check this one has no self-exception:
+        // a removed Profile does not exist for anybody, its owner included. The
+        // Member is untouched — signing in and the edit page both still work, which
+        // is what keeps §10.3's "the member is told which state they are in" and
+        // §10.5's reversibility possible. Every surface that asks this question —
+        // people search, the Company page's people list, a Post's visibility —
+        // inherits the answer without restating it.
+        if (profile.removed()) {
+            return Optional.empty();
+        }
         List<PositionView> positionViews = positionViews(memberId);
         List<EducationView> educationViews = educationViews(memberId);
         Completeness completeness =
@@ -93,7 +103,11 @@ public class ProfileService {
      * the member's authored feed content (the §9.4 caps bind Posts and Replies,
      * which are not the Profile and are not here), the open-to-work flag (it
      * rides its own audience, and an application already says more), and any
-     * graph affordance. Empty only when the Member does not exist.
+     * graph affordance. Empty when the Member does not exist — or when the Profile
+     * has been removed (§10.3 rung 1), which needs saying separately here precisely
+     * because this method bypasses the Dial and the floors: a bypass that did not
+     * also ask about removal would be the one surface a removed Profile still
+     * rendered on.
      */
     @Transactional(readOnly = true)
     public Optional<ProfilePage> pageForApplication(long memberId) {
@@ -101,6 +115,9 @@ public class ProfileService {
             return Optional.empty();
         }
         Profile profile = profiles.findById(memberId).orElseGet(() -> Profile.blankFor(memberId));
+        if (profile.removed()) {
+            return Optional.empty();
+        }
         List<PositionView> positionViews = positionViews(memberId);
         List<EducationView> educationViews = educationViews(memberId);
         Completeness completeness =
@@ -202,8 +219,7 @@ public class ProfileService {
                 .map(position -> {
                     position.endAt(end);
                     return new PositionView(position.id(), position.title(),
-                            position.company() == null ? "" : position.company().name(),
-                            position.company() == null ? null : position.company().id(),
+                            nameOf(position.company()), idOf(position.company()),
                             span(position.start(), end), position.description(), false);
                 });
     }
@@ -270,11 +286,24 @@ public class ProfileService {
         return positions.findByMemberIdOrderByStartMonthDesc(memberId).stream()
                 .sorted(Comparator.comparing(Position::current).reversed())
                 .map(position -> new PositionView(position.id(), position.title(),
-                        position.company() == null ? "" : position.company().name(),
-                        position.company() == null ? null : position.company().id(),
+                        nameOf(position.company()), idOf(position.company()),
                         span(position.start(), position.end()), position.description(),
                         position.current()))
                 .toList();
+    }
+
+    /**
+     * §10.3 rung 1 reaching the Position's employer line: a removed Company is not
+     * named and not linked, so the entry renders as the role alone — the same shape
+     * a Position that never named an employer already has. The Position itself is
+     * the Member's own claim and stays; only the Company stops rendering.
+     */
+    private static String nameOf(Company company) {
+        return company == null || company.removed() ? "" : company.name();
+    }
+
+    private static Long idOf(Company company) {
+        return company == null || company.removed() ? null : company.id();
     }
 
     private static String span(YearMonth start, YearMonth end) {

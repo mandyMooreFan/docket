@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Queue — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">Queue</h1>
+    <p class="meta">
+        <a href="/moderation/intimate-images">Intimate image reports</a> ·
+        <a href="/moderation/complaints">Data protection complaints</a> ·
+        <a href="/transparency">Transparency log</a>
+    </p>
+
+    <p class="meta" th:if="${queue.isEmpty()}">No open reports. Nothing is waiting.</p>
+
+    <article class="entry" th:each="entry : ${queue}">
+        <h3>
+            <a th:href="'/moderation/reports/' + ${entry.reportId()}"
+               th:text="${entry.category().label()}">Category</a>
+        </h3>
+        <p class="org">
+            <span th:text="${entry.targetKind()}">POST</span>
+            <a th:if="${entry.item().isPresent()}" th:href="${entry.item().get().href()}"
+               th:text="${entry.item().get().href()}">where</a>
+            <span th:if="${entry.itemGone()}">— the item is no longer there</span>
+        </p>
+        <div class="prose" th:text="${entry.account()}">what the reporter said</div>
+    </article>
+
+    <div class="block">
+        <h2>Appeals</h2>
+        <p class="meta" th:if="${appeals.isEmpty()}">No open appeals.</p>
+        <article class="entry" th:each="appeal : ${appeals}">
+            <div class="prose" th:text="${appeal.account()}">what they said</div>
+            <form method="post" th:action="'/moderation/appeals/' + ${appeal.id()}" class="form">
+                <label class="field">
+                    <span class="label">Reason</span>
+                    <input class="input" type="text" name="reason">
+                </label>
+                <div>
+                    <button class="btn primary" type="submit" name="outcome" value="UPHELD">Uphold</button>
+                    <button class="btn" type="submit" name="outcome" value="REFUSED">Refuse</button>
+                </div>
+            </form>
+        </article>
+    </div>
+</main>
+</body>
+</html>

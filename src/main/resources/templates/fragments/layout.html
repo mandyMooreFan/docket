@@ -32,6 +32,11 @@
         <div class="right">
             <!-- AGPL §13: durable Source link, reachable from every page, logged in or out -->
             <a class="source-link" href="https://github.com/mandyMooreFan/docket">Source</a>
+            <!--/* §15.3, Children's code Standard 15: reporting and rights tools carry a
+                   persistent, identifiable affordance. Placement, not new capability —
+                   so it sits beside Source rather than becoming a fifth nav item, which
+                   would put safety in competition with the four destinations. */-->
+            <a class="source-link" href="/safety">Safety</a>
             <th:block th:if="${currentMember != null}">
                 <a class="av av-32" href="/profile" th:text="${currentMember.initial}"
                    th:title="${currentMember.email}">D</a>

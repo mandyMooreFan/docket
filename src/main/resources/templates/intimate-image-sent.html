@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Report received — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">We have it</h1>
+    <div class="prose">
+        <p th:if="${held}"><strong>The content is hidden now.</strong> That happened when
+            this form arrived, not after a review — nothing was waiting on someone being
+            awake. A person will look and either confirm the removal or put it back, and
+            you will hear which.</p>
+        <p th:if="${!held}">We could not work out from what you told us which item you
+            meant, so nothing is hidden yet — we are not going to guess and take down
+            somebody else's post. This is at the front of the queue and a person will
+            read it. If you find a link in the meantime, send the form again with it.</p>
+        <p>There is a copy in your inbox.</p>
+        <p><a href="/safety">Back to safety</a></p>
+    </div>
+</main>
+</body>
+</html>

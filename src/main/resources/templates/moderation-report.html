@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Report — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif" style="font-size: var(--t-30);"
+        th:text="${entry.category().label()}">Category</h1>
+
+    <article class="entry">
+        <p class="org">
+            <span th:text="${entry.targetKind()}">POST</span>
+            <a th:if="${entry.item().isPresent()}" th:href="${entry.item().get().href()}"
+               th:text="${entry.item().get().href()}">where</a>
+        </p>
+        <div class="prose" th:if="${entry.item().isPresent()}"
+             th:text="${entry.item().get().summary()}">the item</div>
+        <p class="meta" th:if="${entry.itemGone()}">The item is no longer there. The
+            report still needs deciding.</p>
+    </article>
+
+    <div class="block">
+        <h2>What the reporter said</h2>
+        <div class="prose" th:text="${entry.account()}">account</div>
+    </div>
+
+    <!--/* §10.3's ladder, in order. Every rung takes a reason and every rung sends the
+           statement of reasons; there is deliberately no rung between "remove" and
+           "withdraw" that would quietly reduce reach. */-->
+    <div class="block">
+        <h2>Nothing was wrong</h2>
+        <form method="post" th:action="'/moderation/reports/' + ${entry.reportId()} + '/dismiss'" class="form">
+            <label class="field">
+                <span class="label">Reason</span>
+                <input class="input" type="text" name="reason">
+            </label>
+            <div><button class="btn" type="submit">Dismiss</button></div>
+        </form>
+    </div>
+
+    <div class="block">
+        <h2>1 — Remove the item</h2>
+        <form method="post" th:action="'/moderation/reports/' + ${entry.reportId()} + '/remove'" class="form">
+            <label class="field">
+                <span class="label">Reason</span>
+                <input class="input" type="text" name="reason">
+            </label>
+            <div><button class="btn" type="submit">Remove</button></div>
+        </form>
+    </div>
+
+    <div class="block">
+        <h2>2 — Withdraw what was abused</h2>
+        <form method="post" th:action="'/moderation/reports/' + ${entry.reportId()} + '/withdraw'" class="form">
+            <label class="field">
+                <span class="label">Capability</span>
+                <select class="input" name="capability">
+                    <option th:each="c : ${capabilities}" th:value="${c}" th:text="${c}">POST</option>
+                </select>
+            </label>
+            <label class="field">
+                <span class="label">Days — leave blank for indefinitely</span>
+                <input class="input" type="number" name="days" min="1">
+            </label>
+            <label class="field">
+                <span class="label">Reason</span>
+                <input class="input" type="text" name="reason">
+            </label>
+            <div><button class="btn" type="submit">Withdraw</button></div>
+        </form>
+    </div>
+
+    <div class="block">
+        <h2>3 — Read-only</h2>
+        <form method="post" th:action="'/moderation/reports/' + ${entry.reportId()} + '/suspend'" class="form">
+            <label class="field">
+                <span class="label">Days — leave blank for indefinitely</span>
+                <input class="input" type="number" name="days" min="1">
+            </label>
+            <label class="field">
+                <span class="label">Reason</span>
+                <input class="input" type="text" name="reason">
+            </label>
+            <div><button class="btn" type="submit">Suspend</button></div>
+        </form>
+    </div>
+
+    <div class="block">
+        <h2>4 — End the account</h2>
+        <form method="post" th:action="'/moderation/reports/' + ${entry.reportId()} + '/terminate'" class="form">
+            <label class="field">
+                <span class="label">Reason</span>
+                <input class="input" type="text" name="reason">
+            </label>
+            <div><button class="btn" type="submit">Terminate</button></div>
+        </form>
+    </div>
+</main>
+</body>
+</html>

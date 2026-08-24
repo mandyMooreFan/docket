@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Member conduct policy — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">Member conduct policy</h1>
+
+    <!--/* §10.6: the members' list, short and enumerated. The Contributor Covenant
+           governs contributors to the repository, not members; this is the other one.
+           §15.3 requires it be pitched so a 16-year-old can read it. */-->
+    <div class="prose">
+        <p>This is the whole list. <strong>Everything not on it is not an
+            offence.</strong> If something you did is not described below, no rule
+            covers it, and nobody here gets to invent one afterwards.</p>
+    </div>
+
+    <div class="block">
+        <h2>A member may not</h2>
+        <div class="prose">
+            <ol>
+                <li><strong>Post or send illegal content.</strong></li>
+                <li><strong>Impersonate a specific real person.</strong> This is the only
+                    rule about names. You can use whatever name you like, including one
+                    that is not on your passport — what you cannot do is claim to be a
+                    particular someone else.</li>
+                <li><strong>Harass a specific member.</strong></li>
+                <li><strong>Send bulk or commercial spam.</strong></li>
+                <li><strong>Post or send pornographic content.</strong> This applies to
+                    everyone here, not only to members under 18.</li>
+                <li><strong>Post or send content encouraging, promoting or giving
+                    instructions for suicide, self-harm, or eating disorders.</strong>
+                    This applies to everyone here too.</li>
+            </ol>
+            <p>The last two are prohibited for every member deliberately. Some services
+                allow this material for adults and then try to keep under-18s away from it
+                with age checks. Docket does not allow it at all, which means there is
+                nothing to build an age check around.</p>
+        </div>
+    </div>
+
+    <div class="block">
+        <h2>How these are enforced</h2>
+        <div class="prose">
+            <p>Reactively, and on report. Nothing on this page is enforced by scanning
+                what you write. One person reads reports and decides, and the response is
+                meant to fit what happened: first the item is removed; then, if that is
+                not enough, the specific thing that was misused is taken away — posting
+                jobs, or replying, or messaging — for a stated period or indefinitely.
+                Someone who misused job postings does not thereby lose their
+                correspondence.</p>
+            <p>Beyond that there are two rungs left: an account can be made read-only,
+                where you can still sign in and read everything; and an account can be
+                ended.</p>
+            <p>You are told which rung, and why, and you can <a href="/appeals">appeal</a>
+                once. If a capability was taken from you, the product says so in those
+                words — it does not tell you to go and finish your profile as though you
+                had never earned it.</p>
+        </div>
+    </div>
+
+    <div class="block">
+        <h2>Reporting</h2>
+        <div class="prose">
+            <p>The <a href="/safety">safety page</a> covers how to report something, what
+                happens next, and the separate routes for intimate images and for data
+                protection complaints.</p>
+            <p th:if="${publishedAddress}">Without an account, write to
+                <a th:href="'mailto:' + ${publishedAddress}" th:text="${publishedAddress}">address</a>.</p>
+        </div>
+    </div>
+</main>
+</body>
+</html>

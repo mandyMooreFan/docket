@@ -103,6 +103,7 @@ class CompanyEditController {
             return "redirect:/login";
         }
         Company company = companies.findResolved(id)
+                .filter(found -> !found.removed())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("companyName", company.name());
         model.addAttribute("companyId", company.id());
@@ -116,7 +117,10 @@ class CompanyEditController {
         if (member.isEmpty()) {
             throw new RedirectToLogin();
         }
+        // §10.3: a removed Company is a 404 on every one of its doors, edit
+        // included — there is no page left to vandalise or to defend.
         Company company = companies.findResolved(id)
+                .filter(found -> !found.removed())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         if (!trustGate.passes(member.get().id(), company.id())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);

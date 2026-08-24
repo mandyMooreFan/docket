@@ -216,7 +216,8 @@ class MessagingService {
     InboxPage inboxFor(Member viewer) {
         List<InboxPage.Row> rows = threads.findByMemberAOrMemberB(viewer.id(), viewer.id())
                 .stream()
-                .flatMap(thread -> messages.findFirstByThreadIdOrderByIdDesc(thread.id())
+                .flatMap(thread -> messages
+                        .findFirstByThreadIdAndRemovedAtIsNullOrderByIdDesc(thread.id())
                         .map(latest -> new Latest(thread, latest)).stream())
                 .sorted(Comparator.comparingLong((Latest latest) -> latest.message().id()).reversed())
                 .map(latest -> new InboxPage.Row(latest.thread().other(viewer.id()),
@@ -248,10 +249,12 @@ class MessagingService {
     /**
      * Renders the correspondence and advances the reader's own mark to the last
      * Message the rendering actually showed them. Deliberately one-sided: no
-     * row the other person can see changes, now or ever (§7.2).
+     * row the other person can see changes, now or ever (§7.2). A removed
+     * Message (§10.3 rung 1) is absent for both correspondents — the predicate
+     * is the query's, so the mark can only ever reach a Message that rendered.
      */
     private List<MessageView> render(MessageThread thread, long viewerId) {
-        List<Message> found = messages.findByThreadIdOrderByIdAsc(thread.id());
+        List<Message> found = messages.findByThreadIdAndRemovedAtIsNullOrderByIdAsc(thread.id());
         if (!found.isEmpty()) {
             markRead(thread.id(), viewerId, found.get(found.size() - 1).id());
         }
