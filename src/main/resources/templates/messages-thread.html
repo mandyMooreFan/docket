@@ -54,9 +54,11 @@
         </form>
     </section>
 
-    <!-- §7.3: closed to new Messages, both sides keep the history. The wording is
-         identical whether the Connection ended or a Block stands — §4.2's
-         silent-decline discipline, applied to endings. -->
+    <!--/* §7.3: closed to new Messages, both sides keep the history. The wording is
+           identical whether the Connection ended or a Block stands — §4.2's
+           silent-decline discipline, applied to endings. A parser-level comment
+           on purpose: the reasoning belongs in the source, not in the bytes the
+           closed-out reader receives. */-->
     <p class="meta" th:unless="${page.mayWrite}" th:text="${page.note}"
        style="margin-top: var(--s-8);">Closed.</p>
 </main>
