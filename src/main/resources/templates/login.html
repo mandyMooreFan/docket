@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Sign in — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">Sign in</h1>
+    <div class="prose">
+        <p>Docket emails you a link — no password to remember, none to leak.</p>
+    </div>
+    <p class="label" th:if="${error}" th:text="${error}" style="color: var(--ac); text-transform: none; letter-spacing: 0; max-width: 30rem;">error</p>
+    <form method="post" action="/login/link" style="display: flex; gap: var(--s-2); margin-top: var(--s-6);">
+        <label for="email" class="label" style="position: absolute; left: -9999px;">Email</label>
+        <input id="email" name="email" class="search" style="width: 20rem;" type="email"
+               placeholder="you@example.org" required autofocus>
+        <button class="btn primary" type="submit">Send my link</button>
+    </form>
+    <p style="margin-top: var(--s-8); font-size: var(--t-14);">New here? <a href="/join">Join Docket</a>.</p>
+</main>
+</body>
+</html>

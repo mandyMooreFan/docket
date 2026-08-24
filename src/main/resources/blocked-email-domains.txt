@@ -1,0 +1,23 @@
+# Public-inbox throwaway providers (SPEC.md §3.3): anyone can read mail sent to
+# these domains, so an account behind one is an account anyone can open.
+# This list is a floor, extended as providers turn up. Private aliasing services
+# (Hide My Email, SimpleLogin, Fastmail aliases, DuckDuckGo) are allowed and do
+# not belong here.
+mailinator.com
+yopmail.com
+guerrillamail.com
+sharklasers.com
+grr.la
+maildrop.cc
+dispostable.com
+getnada.com
+tempmail.dev
+temp-mail.org
+10minutemail.com
+mailnesia.com
+trashmail.com
+fakeinbox.com
+mytemp.email
+inboxkitten.com
+harakirimail.com
+mail-tester.top

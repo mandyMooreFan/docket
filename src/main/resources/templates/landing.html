@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">A professional network without the gimmicks.</h1>
+    <div class="prose">
+        <p>A public resume page at an address you control, the people you actually know, and a
+            jobs board where every posting shows the salary and every application gets an answer.
+            Free — no ads, no premium tier, no paid anything — and
+            <a href="https://github.com/mandyMooreFan/docket">open source</a>.</p>
+        <p>Docket is under construction. The parts that exist say so plainly.</p>
+    </div>
+    <p style="display: flex; gap: var(--s-2); margin-top: var(--s-8);">
+        <a class="btn primary" href="/join">Join</a>
+        <a class="btn" href="/login">Sign in</a>
+    </p>
+</main>
+</body>
+</html>
