@@ -69,7 +69,7 @@ class DialAndFloorTests extends DocketTestBase {
 
     @Test
     void anUnder18sProfileIsMembersOnlyRegardlessOfTheDial() throws Exception {
-        Cookie minor = signUpMinorAndIn("younger@example.org");
+        Cookie minor = signUpMinorAndIn("minor-dial@example.org");
         complete(minor, "Young Person");
         String url = ownProfileUrl(minor);
 

@@ -110,9 +110,13 @@ public abstract class DocketTestBase {
         return sessionCookieFor(requestAdultJoinLink(email));
     }
 
-    /** Signs up a 17-year-old: the §9 floors need a minor to exercise them. */
+    /**
+     * Signs up a 16½-year-old: the §9 floors need a minor to exercise them. Deliberately
+     * younger than AgeRolloverTests' 17-year-old — the container is shared, and a minor
+     * born in that same month would be swept into its rollover window.
+     */
     protected Cookie signUpMinorAndIn(String email) throws Exception {
-        YearMonth birth = YearMonth.now(clock).minusYears(17);
+        YearMonth birth = YearMonth.now(clock).minusYears(17).plusMonths(6);
         mvc.perform(post("/join/link")
                         .param("email", email)
                         .param("ageKind", "MINOR")

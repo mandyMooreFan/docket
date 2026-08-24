@@ -44,6 +44,13 @@ class ProfilePageTests extends DocketTestBase {
     }
 
     @Test
+    void theAppBarAvatarLeadsToYourProfile() throws Exception {
+        Cookie session = signUpAndIn("avatar@example.org");
+        mvc.perform(get("/").cookie(session))
+                .andExpect(content().string(containsString("class=\"av av-32\" href=\"/profile\"")));
+    }
+
+    @Test
     void signedOutVisitorsAreSentToSignInFromTheMeAddress() throws Exception {
         mvc.perform(get("/profile"))
                 .andExpect(status().is3xxRedirection())
