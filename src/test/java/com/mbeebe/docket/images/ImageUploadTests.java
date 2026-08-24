@@ -54,10 +54,29 @@ class ImageUploadTests extends DocketTestBase {
     @Autowired
     com.mbeebe.docket.company.Companies companies;
 
+    /**
+     * This class runs in its own Spring context (the fake above), whose clock starts
+     * at real time while the shared database's rate-limit ledger already carries
+     * rows stamped by the base context's far-advanced clock. Signing up from a
+     * distinct IP keeps the two contexts' per-IP windows out of each other's way —
+     * in both directions.
+     */
+    Cookie signUpAndInFromOwnIp(String email) throws Exception {
+        mvc.perform(post("/join/link")
+                        .param("email", email)
+                        .param("ageKind", "ADULT")
+                        .with(request -> {
+                            request.setRemoteAddr("10.99.34.1");
+                            return request;
+                        }))
+                .andExpect(status().isOk());
+        return sessionCookieFor(latestMailedToken());
+    }
+
     /** A member past the trust gate at a fresh company — the only one who may upload. */
     Cookie gatedEditorAt(String email, String name, String company, String domain)
             throws Exception {
-        Cookie session = signUpAndIn(email);
+        Cookie session = signUpAndInFromOwnIp(email);
         mvc.perform(post("/profile/basics").cookie(session)
                         .param("name", name).param("headline", "A headline")
                         .param("location", "").param("summary", ""))
@@ -163,7 +182,7 @@ class ImageUploadTests extends DocketTestBase {
         mvc.perform(multipart("/companies/" + company + "/logo")
                         .file(new MockMultipartFile("logo", "logo.png", "image/png",
                                 new byte[16]))
-                        .cookie(signUpAndIn("co-img-stranger@example.org")))
+                        .cookie(signUpAndInFromOwnIp("co-img-stranger@example.org")))
                 .andExpect(status().isForbidden());
     }
 
