@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Docket</title>
+</head>
+<body>
+<main class="page">
+    <article>
+        <header style="display: flex; align-items: center; gap: var(--s-3); margin-bottom: var(--s-6);">
+            <a class="av av-40" th:href="'/p/' + ${post.author.memberId}"
+               th:text="${post.author.initials}">·</a>
+            <div>
+                <p style="margin: 0; font-family: var(--serif); font-size: var(--t-18); font-weight: 600;">
+                    <a th:href="'/p/' + ${post.author.memberId}" style="color: var(--i900);"
+                       th:text="${post.author.displayName()}">Name</a>
+                </p>
+                <p class="meta" style="margin: 0;" th:text="${post.when}">1 Aug 2026</p>
+            </div>
+        </header>
+        <div class="prose" th:utext="${post.bodyHtml}"></div>
+        <div class="post-images" th:if="${!post.imageIds.isEmpty()}">
+            <img th:each="imageId : ${post.imageIds}" th:src="'/images/' + ${imageId}" alt="">
+        </div>
+        <p class="link-preview" th:each="link : ${post.links}">
+            <a th:href="${link.url}" rel="nofollow noopener" th:text="${link.domain}">domain</a>
+        </p>
+    </article>
+</main>
+</body>
+</html>

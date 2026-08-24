@@ -242,3 +242,20 @@ textarea.input { font-family: var(--serif); font-size: var(--t-18); line-height:
   .search { width: 10rem; }
   .title-serif { font-size: var(--t-36); }
 }
+
+/* ---------- the feed (#33, §5) ---------- */
+
+/* §5.1: the hard boundary where the feed ends — app-said, so sans and quiet */
+.caught-up {
+  text-align: center; font-size: var(--t-13); font-weight: 600; color: var(--i400);
+  letter-spacing: .04em; margin: var(--s-16) 0 0;
+}
+
+/* still images on a Post (§5.2.1): the panel radius, stacked with entry spacing */
+.post-images { display: flex; flex-direction: column; gap: var(--s-3); margin-top: var(--s-4); }
+.post-images img { border-radius: 12px; display: block; }
+
+/* §5.2.1: a link preview is a domain line, never a card */
+.link-preview { font-size: var(--t-13); font-weight: 500; margin: var(--s-2) 0 0; }
+
+.entry.post .prose { margin-top: var(--s-2); }

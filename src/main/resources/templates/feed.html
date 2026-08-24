@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Docket</title>
+</head>
+<body>
+<main class="with-rail">
+    <div>
+        <!-- §14.2: the server-rendered composer, at the top of the feed. -->
+        <section class="panel" th:if="${feed.mayPost}">
+            <h3>Write a post</h3>
+            <p class="label" th:if="${error}" th:text="${error}"
+               style="color: var(--ac); text-transform: none; letter-spacing: 0;">error</p>
+            <form method="post" action="/posts" enctype="multipart/form-data" class="form">
+                <textarea class="input" name="body" rows="4"
+                          placeholder="Write at length — this is a page, not a box."></textarea>
+                <input type="file" name="images" accept="image/png,image/jpeg" multiple
+                       style="font-size: var(--t-13); color: var(--i500);">
+                <div><button class="btn primary" type="submit">Post</button></div>
+            </form>
+        </section>
+        <p class="meta" th:unless="${feed.mayPost}">
+            Posting opens when your profile is complete.
+        </p>
+
+        <!-- §5.5: replies to you — a quiet section, never a badge, dot or count (§5.6). -->
+        <section class="block" th:if="${!feed.repliesToYou.isEmpty()}"
+                 style="margin-top: var(--s-8);">
+            <h2>Replies to you</h2>
+            <article class="entry" th:each="notice : ${feed.repliesToYou}">
+                <p class="org">
+                    <a th:href="'/p/' + ${notice.author.memberId}"
+                       th:text="${notice.author.displayName()}">Name</a> replied ·
+                    <span class="when" th:text="${notice.when}">1 Aug 2026</span>
+                </p>
+                <p><a th:href="'/posts/' + ${notice.postId}"
+                      th:text="${notice.excerpt}">Their words</a></p>
+            </article>
+        </section>
+
+        <!-- §13.4: the empty graph — the copy is spec surface, honest by design. -->
+        <div class="prose" th:if="${!feed.hasConnections}" style="margin-top: var(--s-8);">
+            <p>Your feed shows what your connections write — you don't have any
+                connections yet. It stays empty until you do; nothing gets put here
+                for you. Find someone you know, or invite them.</p>
+        </div>
+
+        <th:block th:if="${feed.hasConnections}">
+            <article class="entry post" th:each="post : ${feed.entries}"
+                     style="margin-top: var(--s-8);">
+                <p class="org">
+                    <a th:href="'/p/' + ${post.author.memberId}"
+                       th:text="${post.author.displayName()}">Name</a> ·
+                    <a class="when" th:href="'/posts/' + ${post.id}"
+                       th:text="${post.when}">1 Aug 2026</a>
+                </p>
+                <div class="prose" th:utext="${post.bodyHtml}"></div>
+                <div class="post-images" th:if="${!post.imageIds.isEmpty()}">
+                    <img th:each="imageId : ${post.imageIds}" th:src="'/images/' + ${imageId}"
+                         alt="">
+                </div>
+                <p class="link-preview" th:each="link : ${post.links}">
+                    <a th:href="${link.url}" rel="nofollow noopener"
+                       th:text="${link.domain}">domain</a>
+                </p>
+                <!-- §5.3: the reply count — the only visible number in the feed. -->
+                <p class="meta">
+                    <a th:href="'/posts/' + ${post.id}"
+                       th:text="${post.replyCount == 0} ? 'Reply' : ${post.replyCountLabel()}">Reply</a>
+                </p>
+            </article>
+            <!-- §5.1: the feed ends. Nothing is re-surfaced, promoted or shown twice. -->
+            <p class="caught-up">You're caught up.</p>
+        </th:block>
+    </div>
+
+    <!-- §2.3: the rail. At phone width its contents are promoted to /jobs and
+         /network (§14.1) — the CSS hides it, never stacks it. -->
+    <aside class="rail">
+        <section class="panel">
+            <h3>Jobs from your network</h3>
+            <!-- §13.4: honest until the jobs board exists (#35). -->
+            <p class="meta" style="margin: 0;">No jobs from your network yet.</p>
+        </section>
+        <section class="panel">
+            <h3>Pending requests</h3>
+            <p class="meta" style="margin: 0;" th:if="${feed.pendingRequests.isEmpty()}">
+                No pending requests.</p>
+            <article th:each="person : ${feed.pendingRequests}"
+                     style="margin-bottom: var(--s-3);">
+                <a th:href="'/p/' + ${person.memberId}"
+                   th:text="${person.displayName()}">Name</a>
+            </article>
+            <p class="meta" style="margin: var(--s-3) 0 0;"
+               th:if="${!feed.pendingRequests.isEmpty()}">
+                <a href="/network">Respond on your network page</a>
+            </p>
+        </section>
+    </aside>
+</main>
+</body>
+</html>
