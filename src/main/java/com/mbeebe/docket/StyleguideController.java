@@ -1,4 +1,4 @@
-package com.mbeebe.docket.skeleton;
+package com.mbeebe.docket;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

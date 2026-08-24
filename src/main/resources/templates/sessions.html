@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Sessions — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">Sessions</h1>
+    <div class="prose">
+        <p>Everywhere you're signed in. A session lasts 90 days from its last use.</p>
+    </div>
+    <section class="block">
+        <h2>Signed in</h2>
+        <div class="entry" th:each="s : ${sessions}">
+            <h3 th:text="${s.current} ? 'This device' : 'Another device'">This device</h3>
+            <p class="org" th:text="${s.client}">client</p>
+            <p><span th:text="'Started ' + ${s.started}">started</span> ·
+                <span th:text="'Last used ' + ${s.lastUsed}">last used</span></p>
+        </div>
+    </section>
+    <section class="block">
+        <h2>Leave</h2>
+        <div style="display: flex; gap: var(--s-2);">
+            <form method="post" action="/settings/sessions/sign-out">
+                <button class="btn" type="submit">Sign out</button>
+            </form>
+            <form method="post" action="/settings/sessions/sign-out-everywhere">
+                <button class="btn" type="submit">Sign out everywhere</button>
+            </form>
+        </div>
+    </section>
+</main>
+</body>
+</html>
