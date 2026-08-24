@@ -12,4 +12,10 @@ interface RecommendationRepository extends Repository<Recommendation, Long> {
     Optional<Recommendation> findByAuthorIdAndSubjectId(Long authorId, Long subjectId);
 
     List<Recommendation> findBySubjectIdOrderByWrittenAt(Long subjectId);
+
+    /**
+     * The ones this Member wrote. §11.1 exports them (they provided them, so they
+     * are portable); §11.2 leaves every one of them exactly where it is.
+     */
+    List<Recommendation> findByAuthorIdOrderByWrittenAt(Long authorId);
 }

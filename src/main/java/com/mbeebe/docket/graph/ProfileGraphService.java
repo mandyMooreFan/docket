@@ -114,6 +114,6 @@ class ProfileGraphService implements ProfileGraphLookup {
     private ProfileGraph.RecommendationCard card(Recommendation recommendation) {
         PersonCard author = profiles.cardFor(recommendation.authorId());
         return new ProfileGraph.RecommendationCard(recommendation.authorId(),
-                author.displayName(), recommendation.text());
+                author.displayName(), recommendation.text(), author.former());
     }
 }

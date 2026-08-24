@@ -35,4 +35,8 @@ class SavedPost {
     long postId() {
         return postId;
     }
+
+    Instant savedAt() {
+        return savedAt;
+    }
 }

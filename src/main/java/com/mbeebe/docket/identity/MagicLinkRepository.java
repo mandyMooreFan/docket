@@ -9,4 +9,7 @@ interface MagicLinkRepository extends Repository<MagicLink, Long> {
     MagicLink save(MagicLink link);
 
     Optional<MagicLink> findByTokenHash(String tokenHash);
+
+    /** §11.2: an unconsumed link is a live credential, and it leaves with the Member. */
+    void deleteByEmail(String email);
 }

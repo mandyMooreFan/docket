@@ -11,4 +11,7 @@ interface CompanyEditRepository extends Repository<CompanyEdit, Long> {
     List<CompanyEdit> findByCompanyIdOrderByIdAsc(long companyId);
 
     List<CompanyEdit> findByCompanyIdOrderByIdDesc(long companyId);
+
+    /** §11.1: the edits one Member made, wherever they made them. */
+    List<CompanyEdit> findByMemberIdOrderByIdAsc(long memberId);
 }

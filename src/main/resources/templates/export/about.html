@@ -1,0 +1,19 @@
+<!doctype html>
+<!--/*
+    The Article 15 supplementary information (SPEC.md §11.1; docs/data-rights.md §4):
+    purposes, recipients, retention, source, and the rights that exist. The words
+    are in leaving.SupplementaryInformation, not here, because the JSON has to say
+    exactly the same thing and a compliance statement kept in two places is a
+    compliance statement that will one day disagree with itself.
+*/-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{export/document :: document(${title}, ~{::main})}">
+<body>
+<main>
+    <section th:each="item : ${supplementary}" th:id="${item.key}">
+        <h2 th:text="${item.heading}">Heading</h2>
+        <p th:text="${item.text}">Text</p>
+    </section>
+</main>
+</body>
+</html>

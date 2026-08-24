@@ -40,6 +40,10 @@ class Connection {
         this.connectedAt = connectedAt;
     }
 
+    Instant connectedAt() {
+        return connectedAt;
+    }
+
     /** The far end of the Connection, seen from one of its members. */
     long other(long memberId) {
         return memberA == memberId ? memberB : memberA;

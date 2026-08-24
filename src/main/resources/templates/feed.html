@@ -30,7 +30,8 @@
             <h2>Replies to you</h2>
             <article class="entry" th:each="notice : ${feed.repliesToYou}">
                 <p class="org">
-                    <a th:href="'/p/' + ${notice.author.memberId}"
+                    <!--/* §11.2: named, not linked — a former member's Profile 404s. */-->
+                    <a th:href="${notice.author.former} ? null : '/p/' + ${notice.author.memberId}"
                        th:text="${notice.author.displayName()}">Name</a> replied ·
                     <span class="when" th:text="${notice.when}">1 Aug 2026</span>
                 </p>
