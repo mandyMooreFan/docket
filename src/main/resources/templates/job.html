@@ -86,6 +86,19 @@
             Your posting — <a th:href="'/jobs/' + ${posting.id} + '/applications'">work its queue</a>.
         </p>
     </section>
+
+    <!-- §5.2.2: the only path from board to feed — a member writes a Post and
+         attaches this posting. Nothing auto-syndicates. -->
+    <section class="block" th:if="${posting.mayShare}">
+        <h2>Share it</h2>
+        <p class="label" th:if="${shareError}" th:text="${shareError}"
+           style="color: var(--ac); text-transform: none; letter-spacing: 0;">error</p>
+        <form method="post" class="form" th:action="'/jobs/' + ${posting.id} + '/share'">
+            <textarea class="input" name="body" rows="3" style="font-family: var(--serif);"
+                      placeholder="Say why it's worth someone's time — your words are the post; the posting rides along as a card."></textarea>
+            <div><button class="btn" type="submit">Post it to your feed</button></div>
+        </form>
+    </section>
 </main>
 </body>
 </html>

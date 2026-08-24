@@ -11,7 +11,8 @@ import java.util.List;
  */
 public record PostView(long id, PersonCard author, String when, String bodyHtml,
                        List<Long> imageIds, List<LinkPreview> links, int replyCount,
-                       boolean saved, boolean mine) {
+                       boolean saved, boolean mine,
+                       JobBoardLookup.AttachedPosting attached) {
 
     public String replyCountLabel() {
         return replyCount == 1 ? "1 reply" : replyCount + " replies";

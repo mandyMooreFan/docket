@@ -227,7 +227,7 @@ class JobService {
         return knownCompanies == null || knownCompanies.contains(posting.companyId());
     }
 
-    private Set<Long> companiesWhereIKnowSomeone(long memberId) {
+    Set<Long> companiesWhereIKnowSomeone(long memberId) {
         return graph.connectedTo(memberId).stream()
                 .flatMap(connectionId -> positions.companiesHeldBy(connectionId).stream())
                 .flatMap(companyId -> companies.findResolved(companyId).stream())

@@ -1,7 +1,11 @@
 package com.mbeebe.docket.jobs;
 
+import com.mbeebe.docket.feed.JobAttachedPosts;
 import com.mbeebe.docket.identity.CurrentMember;
 import com.mbeebe.docket.identity.Member;
+import com.mbeebe.docket.profile.Capability;
+import com.mbeebe.docket.profile.CapabilityAnswer;
+import com.mbeebe.docket.profile.CapabilityService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
@@ -24,9 +28,14 @@ import java.util.Optional;
 class JobsController {
 
     private final JobService jobs;
+    private final JobAttachedPosts attachedPosts;
+    private final CapabilityService capabilities;
 
-    JobsController(JobService jobs) {
+    JobsController(JobService jobs, JobAttachedPosts attachedPosts,
+                   CapabilityService capabilities) {
         this.jobs = jobs;
+        this.attachedPosts = attachedPosts;
+        this.capabilities = capabilities;
     }
 
     @GetMapping("/jobs")
@@ -113,6 +122,32 @@ class JobsController {
             model.addAttribute("posting", jobs.postingPage(id, member)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
             model.addAttribute("error", refused.getMessage());
+            return "job";
+        }
+    }
+
+    /**
+     * §5.2.2: a member writes a Post and attaches this posting — the ONLY path
+     * from board to feed. A job-attached Post is still a Post (§3.2's POST).
+     */
+    @PostMapping("/jobs/{id}/share")
+    String share(@PathVariable long id, @RequestParam(defaultValue = "") String body,
+                 HttpServletRequest request, HttpServletResponse response, Model model) {
+        Optional<Member> member = CurrentMember.get(request);
+        if (member.isEmpty()) {
+            return "redirect:/login";
+        }
+        if (capabilities.may(member.get().id(), Capability.POST) != CapabilityAnswer.YES) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Posting opens when your profile is complete.");
+        }
+        try {
+            return "redirect:/posts/" + attachedPosts.compose(member.get(), id, body);
+        } catch (JobAttachedPosts.Refused refused) {
+            response.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value());
+            model.addAttribute("posting", jobs.postingPage(id, member)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
+            model.addAttribute("shareError", refused.getMessage());
             return "job";
         }
     }

@@ -47,11 +47,12 @@ class PostService {
     private final Images images;
     private final ProfileService profiles;
     private final ConnectionLookup graph;
+    private final JobBoardLookup board;
     private final Clock clock;
 
     PostService(PostRepository posts, PostImageRepository postImages, ReplyRepository replies,
                 SavedPostRepository saves, Images images, ProfileService profiles,
-                ConnectionLookup graph, Clock clock) {
+                ConnectionLookup graph, JobBoardLookup board, Clock clock) {
         this.posts = posts;
         this.postImages = postImages;
         this.replies = replies;
@@ -59,6 +60,7 @@ class PostService {
         this.images = images;
         this.profiles = profiles;
         this.graph = graph;
+        this.board = board;
         this.clock = clock;
     }
 
@@ -197,6 +199,10 @@ class PostService {
 
     /** The Post as one viewer sees it, reply count included — theirs, nobody's else. */
     PostView view(Post post, Optional<Member> viewer) {
+        // §5.2.2: the attached posting renders as a compact card; a reference
+        // the board can no longer answer simply renders no card.
+        JobBoardLookup.AttachedPosting attached = post.jobPostingId() == null ? null
+                : board.attached(post.jobPostingId()).orElse(null);
         return new PostView(post.id(), profiles.cardFor(post.authorId()),
                 when(post.createdAt()), PostBodies.toHtml(post.body()),
                 postImages.findByPostIdOrderByPosition(post.id()).stream()
@@ -205,7 +211,7 @@ class PostService {
                 visibleReplies(post, viewer).size(),
                 viewer.map(member ->
                         saves.existsByMemberIdAndPostId(member.id(), post.id())).orElse(false),
-                owns(viewer, post));
+                owns(viewer, post), attached);
     }
 
     /** §5.3: the private Save. Idempotent; only a Post you can see can be kept. */

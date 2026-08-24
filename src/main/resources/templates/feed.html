@@ -56,6 +56,16 @@
                        th:text="${post.when}">1 Aug 2026</a>
                 </p>
                 <div class="prose" th:utext="${post.bodyHtml}"></div>
+                <!-- §5.2.2: the attached posting — a compact card, app-said, sans. -->
+                <a class="posting-card" th:if="${post.attached != null}"
+                   th:href="'/jobs/' + ${post.attached.id}">
+                    <span th:text="${post.attached.title}">Title</span>
+                    <span class="meta" style="margin-top: var(--s-1);">
+                        <span th:text="${post.attached.company}">Company</span>
+                        <span class="salary" th:text="${post.attached.salaryLine}">£45,000</span>
+                        <span th:unless="${post.attached.open}">Closed</span>
+                    </span>
+                </a>
                 <div class="post-images" th:if="${!post.imageIds.isEmpty()}">
                     <img th:each="imageId : ${post.imageIds}" th:src="'/images/' + ${imageId}"
                          alt="">
@@ -80,8 +90,17 @@
     <aside class="rail">
         <section class="panel">
             <h3>Jobs from your network</h3>
-            <!-- §13.4: honest until the jobs board exists (#35). -->
-            <p class="meta" style="margin: 0;">No jobs from your network yet.</p>
+            <!-- §2.3: open postings at companies where a Connection works —
+                 derived, unranked (§6.5). Empty says what it is (§13.4). -->
+            <p class="meta" style="margin: 0;" th:if="${feed.networkJobs.isEmpty()}">
+                No jobs from your network yet.</p>
+            <article th:each="job : ${feed.networkJobs}" style="margin-bottom: var(--s-3);">
+                <a th:href="'/jobs/' + ${job.id}" th:text="${job.title}">Title</a>
+                <p class="meta" style="margin: 0;">
+                    <span th:text="${job.company}">Company</span>
+                    <span class="salary" th:text="${job.salaryLine}">£45,000–£60,000</span>
+                </p>
+            </article>
         </section>
         <section class="panel">
             <h3>Pending requests</h3>

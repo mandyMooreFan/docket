@@ -19,6 +19,16 @@
             </div>
         </header>
         <div class="prose" th:utext="${page.post.bodyHtml}"></div>
+        <!-- §5.2.2: the attached posting — a compact card, app-said, sans. -->
+        <a class="posting-card" th:if="${page.post.attached != null}"
+           th:href="'/jobs/' + ${page.post.attached.id}">
+            <span th:text="${page.post.attached.title}">Title</span>
+            <span class="meta" style="margin-top: var(--s-1);">
+                <span th:text="${page.post.attached.company}">Company</span>
+                <span class="salary" th:text="${page.post.attached.salaryLine}">£45,000</span>
+                <span th:unless="${page.post.attached.open}">Closed</span>
+            </span>
+        </a>
         <div class="post-images" th:if="${!page.post.imageIds.isEmpty()}">
             <img th:each="imageId : ${page.post.imageIds}" th:src="'/images/' + ${imageId}" alt="">
         </div>

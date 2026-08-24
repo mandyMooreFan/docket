@@ -21,7 +21,7 @@ import java.time.Instant;
 @Table(name = "post")
 class Post {
 
-    enum Kind { WRITTEN, WORK_CHANGE }
+    enum Kind { WRITTEN, WORK_CHANGE, JOB_ATTACHED }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,6 +41,9 @@ class Post {
 
     private Instant createdAt;
 
+    /** §5.2.2: set only on a JOB_ATTACHED Post — the board reference it carries. */
+    private Long jobPostingId;
+
     protected Post() {
     }
 
@@ -50,6 +53,14 @@ class Post {
         this.body = body;
         this.authoredAsMinor = authoredAsMinor;
         this.createdAt = createdAt;
+    }
+
+    /** §5.2.2: a member's words with one of the board's postings attached. */
+    static Post jobAttached(long authorId, String body, long jobPostingId,
+                            boolean authoredAsMinor, Instant createdAt) {
+        Post post = new Post(authorId, Kind.JOB_ATTACHED, body, authoredAsMinor, createdAt);
+        post.jobPostingId = jobPostingId;
+        return post;
     }
 
     Long id() {
@@ -85,5 +96,9 @@ class Post {
 
     Instant createdAt() {
         return createdAt;
+    }
+
+    Long jobPostingId() {
+        return jobPostingId;
     }
 }
