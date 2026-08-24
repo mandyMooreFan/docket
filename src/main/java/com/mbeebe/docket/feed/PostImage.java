@@ -35,6 +35,10 @@ class PostImage {
         this.position = position;
     }
 
+    long postId() {
+        return postId;
+    }
+
     long imageId() {
         return imageId;
     }

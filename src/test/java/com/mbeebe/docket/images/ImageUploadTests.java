@@ -123,9 +123,16 @@ class ImageUploadTests extends DocketTestBase {
         Matcher matcher = IMAGE_URL.matcher(page);
         assertThat(matcher.find()).as("the page shows the logo").isTrue();
 
+        // §8.4: a Company page is open-web, logo included — this fetch carries no
+        // session on purpose. A Company has no Dial, so the bytes are public
+        // permanently, which is what earns them a shared, immutable cache (#51).
         mvc.perform(get(matcher.group(0)))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", "image/png"))
+                .andExpect(header().string("Cache-Control",
+                        containsString("public")))
+                .andExpect(header().string("Cache-Control",
+                        containsString("immutable")))
                 .andExpect(content().bytes(png));
 
         // The change is history like any other (§6.1).

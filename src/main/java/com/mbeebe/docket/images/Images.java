@@ -1,5 +1,6 @@
 package com.mbeebe.docket.images;
 
+import com.mbeebe.docket.identity.Member;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,17 +26,23 @@ public class Images {
     public record Stored(Outcome outcome, Long imageId) {
     }
 
-    /** What a controller needs to serve one image. */
-    public record StoredImage(String contentType, byte[] data) {
+    /**
+     * What a controller needs to serve one image to one viewer. {@code openWeb} is
+     * not decoration: it decides the cache headers, and getting it wrong would put a
+     * members-only image into a shared proxy cache.
+     */
+    public record ServedImage(String contentType, byte[] data, boolean openWeb) {
     }
 
     private final ImageRepository repository;
     private final ImageChecks checks;
+    private final ImageAudiences audiences;
     private final Clock clock;
 
-    Images(ImageRepository repository, ImageChecks checks, Clock clock) {
+    Images(ImageRepository repository, ImageChecks checks, ImageAudiences audiences, Clock clock) {
         this.repository = repository;
         this.checks = checks;
+        this.audiences = audiences;
         this.clock = clock;
     }
 
@@ -55,9 +62,22 @@ public class Images {
         return new Stored(Outcome.STORED, image.id());
     }
 
+    /**
+     * The bytes, if this viewer may have them (§8.5: the Dial is honoured on every
+     * surface, and derived data never exceeds it). The audience is asked before the
+     * row is read, so an image out of a viewer's reach is indistinguishable from one
+     * that never existed — the Profile page's no-placeholder 404, applied to bytes.
+     * There is deliberately no viewer-less {@code load}: no route can get at an
+     * image without answering for who is asking.
+     */
     @Transactional(readOnly = true)
-    public Optional<StoredImage> load(long id) {
+    public Optional<ServedImage> serve(long id, Optional<Member> viewer) {
+        ImageAudience.Verdict verdict = audiences.verdictFor(id, viewer);
+        if (verdict == ImageAudience.Verdict.HIDDEN) {
+            return Optional.empty();
+        }
         return repository.findById(id)
-                .map(image -> new StoredImage(image.contentType(), image.data()));
+                .map(image -> new ServedImage(image.contentType(), image.data(),
+                        verdict == ImageAudience.Verdict.OPEN_WEB));
     }
 }
