@@ -34,12 +34,14 @@ class AgeRolloverTests extends IdentityTestBase {
         YearMonth birth = YearMonth.now(clock).minusYears(17);
         minorBorn(birth, "almost@example.org");
 
-        // Still inside the birth month they turn 18: nothing happens.
-        assertThat(rollover.rolloverDueMinors(birth.plusYears(18))).isZero();
+        // Still inside the birth month they turn 18: nothing happens to THIS member.
+        // (Assertions are member-scoped, not counts: the container is shared, and
+        // other suites' minors may be due in windows this test doesn't control.)
+        rollover.rolloverDueMinors(birth.plusYears(18));
         assertThat(members.findByEmail("almost@example.org").orElseThrow().isMinor()).isTrue();
 
         // The month after: the fact collapses and the birth data is gone.
-        assertThat(rollover.rolloverDueMinors(birth.plusYears(18).plusMonths(1))).isEqualTo(1);
+        rollover.rolloverDueMinors(birth.plusYears(18).plusMonths(1));
         Member rolled = members.findByEmail("almost@example.org").orElseThrow();
         assertThat(rolled.isMinor()).isFalse();
         assertThat(rolled.ageKind()).isEqualTo(Member.AgeKind.ADULT);
