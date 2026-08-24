@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{export/document :: document(${title}, ~{::main})}">
+<body>
+<main>
+    <div class="note">
+        <p><strong>This is your copy of what Docket stores about you.</strong></p>
+        <p>Your profile, the things you wrote, who you are connected to, the jobs you
+            applied for and what happened to them, and the recommendations people wrote
+            about you. Your conversations are in a separate file, because they contain
+            somebody else's words as well as yours.</p>
+        <p>What is <em>not</em> in here, and why, is set out in
+            <a th:href="${aboutFile}" href="about-this-copy.html">About this copy</a> —
+            along with what we use your data for, who else sees it, and how long we keep
+            it. It is worth the two minutes.</p>
+    </div>
+    <th:block th:replace="~{export/parts :: sections(${sections})}"></th:block>
+</main>
+</body>
+</html>

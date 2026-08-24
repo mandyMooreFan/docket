@@ -65,6 +65,10 @@ class MessageThread {
         return memberB;
     }
 
+    Instant createdAt() {
+        return createdAt;
+    }
+
     long other(long memberId) {
         return memberId == memberA ? memberB : memberA;
     }

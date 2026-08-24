@@ -35,4 +35,12 @@ class MemberBlock {
         this.blockedId = blockedId;
         this.createdAt = createdAt;
     }
+
+    long blockedId() {
+        return blockedId;
+    }
+
+    Instant createdAt() {
+        return createdAt;
+    }
 }

@@ -21,8 +21,17 @@ public record ProfileGraph(int connectionCount, List<PersonCard> mutuals,
      */
     public enum Affordance { NONE, CONNECT, REQUEST_SENT, RESPOND, CONNECTED }
 
-    /** One recommendation as the page shows it: the author, and their serif words. */
-    public record RecommendationCard(long authorId, String authorName, String text) {
+    /**
+     * One recommendation as the page shows it: the author, and their serif words.
+     *
+     * <p>{@code authorFormer} carries §11.2 to this surface — <em>Recommendations
+     * you wrote stay published</em>, and they stay published attributed to a former
+     * member with no link behind the name. The words are the subject's personal
+     * data as much as the author's ({@code docs/data-rights.md} §3), which is why
+     * the leaver takes their name off it rather than taking it down.
+     */
+    public record RecommendationCard(long authorId, String authorName, String text,
+                                     boolean authorFormer) {
     }
 
     public boolean canConnect() {

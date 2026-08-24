@@ -324,3 +324,15 @@ a.av { text-decoration: none; }
 .entry.person { display: flex; align-items: flex-start; gap: var(--s-3); }
 .entry.person > .said { flex: 1; min-width: 0; }
 .entry.person > .said > :first-child { margin-top: 0; }
+
+/* ---------- leaving (#39, §11): the one thing on a form that must be read ---------- */
+
+/* The unticked-box refusal on /settings/data. Ink, not colour: §2.2 spends its
+   one accent on the primary action, and a red would be the product's first
+   alarm — for a form the member has not finished, not for anything wrong. */
+.warn {
+  font-size: var(--t-14);
+  font-weight: 600;
+  color: var(--i900);
+  margin: 0 0 var(--s-3);
+}

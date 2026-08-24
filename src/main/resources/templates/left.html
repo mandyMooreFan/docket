@@ -1,0 +1,36 @@
+<!doctype html>
+<!--/*
+    After Termination (SPEC.md §11.2–§11.3). Reached signed out, by someone whose
+    account no longer exists, so it says the two things they may still need: that
+    the deletion happened, and where their data now is — §11.3's backups position,
+    said again here because the page it was first said on is no longer reachable
+    by this reader.
+*/-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Your account is gone — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">Your account is gone</h1>
+    <div class="prose">
+        <p>Your profile, your posts and everything you published on your own have been
+            deleted. You are signed out everywhere.</p>
+        <p>Your side of each conversation is still there for the person you were
+            writing to, marked as written by a former member — along with any
+            recommendations you wrote and any replies you left under other people's
+            posts. Those are somebody else's record, and they were never yours to
+            erase.</p>
+        <p>Your data is out of Docket now. It is in our backups until they roll over on
+            their normal schedule, put beyond use in the meantime: nobody reads it,
+            nobody restores it, and it is not used for anything.</p>
+        <p>If you want to complain about how we handled your data, you can — we
+            acknowledge complaints within 30 days and tell you what we decided — and
+            you can complain to the Information Commissioner's Office whether or not
+            you come to us first.</p>
+        <p>You are welcome back any time. It would be a new account, from nothing.</p>
+    </div>
+</main>
+</body>
+</html>

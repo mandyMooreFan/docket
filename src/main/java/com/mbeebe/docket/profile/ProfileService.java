@@ -52,11 +52,19 @@ public class ProfileService {
     /**
      * The Profile page as the viewer is allowed to see it; empty when they are not —
      * a Profile out of its audience does not exist, with no placeholder (§9.4's shape).
+     *
+     * <p>§11.2's "your Profile goes" is enforced here rather than left to the rows:
+     * a terminated Member has no page, to anybody, including themselves. It has to
+     * be said on the Member and not inferred from the missing Profile row, because
+     * {@code Profile.blankFor} would otherwise fill the hole and render an empty
+     * page. Everything that rides this derivation — a Post's audience (§5.4), a
+     * face at /images/{id} (§8.5), a search result (§8.5) — inherits the answer
+     * without being told, which is the reason it is one question and not five.
      */
     @Transactional(readOnly = true)
     public Optional<ProfilePage> pageFor(long memberId, Optional<Member> viewer) {
         Optional<Member> owner = members.find(memberId);
-        if (owner.isEmpty()) {
+        if (owner.isEmpty() || owner.get().terminated()) {
             return Optional.empty();
         }
         // §7.3: a Block is total — for each of the pair, the other's Profile does
@@ -112,7 +120,9 @@ public class ProfileService {
      */
     @Transactional(readOnly = true)
     public Optional<ProfilePage> pageForApplication(long memberId) {
-        if (members.find(memberId).isEmpty()) {
+        // §11.2 is the one thing this exception does not bend around: an
+        // Application from a Member who has since left has nothing behind it.
+        if (members.find(memberId).filter(owner -> !owner.terminated()).isEmpty()) {
             return Optional.empty();
         }
         Profile profile = profiles.findById(memberId).orElseGet(() -> Profile.blankFor(memberId));
@@ -169,10 +179,14 @@ public class ProfileService {
      */
     @Transactional(readOnly = true)
     public PersonCard cardFor(long memberId) {
+        // §11.2: the attribution that outlives the Member. Asked here, once, so
+        // every surface that draws a person — a Reply, a Recommendation, a Thread
+        // — says "A former member" without any of them knowing the rule.
+        boolean former = members.find(memberId).map(Member::terminated).orElse(true);
         Optional<Profile> profile = profiles.findById(memberId);
         String name = profile.map(Profile::name).orElse("");
         return new PersonCard(memberId, name, initials(name),
-                profile.map(Profile::photoImageId).orElse(null));
+                profile.map(Profile::photoImageId).orElse(null), former);
     }
 
     /** The §3.2 bar, computed fresh from the stored facts — never cached, never stored. */

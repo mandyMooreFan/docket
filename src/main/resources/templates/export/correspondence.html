@@ -1,0 +1,29 @@
+<!doctype html>
+<!--/*
+    Your conversations, whole, both halves (SPEC.md §11.1).
+
+    Why both halves: WP242 rev.01 — endorsed by the EDPB and still operative on
+    portability — says interpersonal messaging records go to the subscriber
+    *because* they also concern them. Half a conversation is not a record of a
+    conversation. The condition the guidance attaches is about purpose, not about
+    withholding, and that condition is the note below: it is the first thing on the
+    page, above any of the other person's words, and it is repeated in README.txt
+    so it is unmissable even by somebody who never opens an HTML file.
+*/-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{export/document :: document(${title}, ~{::main})}">
+<body>
+<main>
+    <div class="note">
+        <p><strong th:text="${note}">Other people's words are in here.</strong></p>
+        <p>Your conversations are here whole — what you wrote and what the other person
+            wrote — because that is the only form in which a conversation makes sense,
+            and because half of one would not be a record of anything.</p>
+        <p>They are your copy to keep. They are not material to publish, to feed into
+            anything, or to build a picture of someone who did not ask you to. The
+            other person wrote to you, not to everyone.</p>
+    </div>
+    <th:block th:replace="~{export/parts :: sections(${sections})}"></th:block>
+</main>
+</body>
+</html>

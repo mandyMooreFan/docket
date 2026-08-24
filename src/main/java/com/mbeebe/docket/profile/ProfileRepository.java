@@ -13,6 +13,9 @@ interface ProfileRepository extends Repository<Profile, Long> {
 
     Optional<Profile> findById(Long memberId);
 
+    /** §11.2: your Profile goes — the row, not a blanking of its columns. */
+    void delete(Profile profile);
+
     /**
      * Whose photo this image is, if it is anyone's current one — the lookup
      * {@link ProfilePhotoAudience} does on every /images/{id} request, which is why

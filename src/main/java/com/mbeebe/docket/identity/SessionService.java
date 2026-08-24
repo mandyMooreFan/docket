@@ -46,7 +46,11 @@ public class SessionService {
                 .map(session -> {
                     session.touch(clock.instant());
                     return session.member();
-                });
+                })
+                // §11.2: Termination destroys every session, so this should never
+                // fire. It is here because "should never" is not a guarantee, and
+                // the one thing a tombstone must never do is sign somebody in.
+                .filter(member -> !member.terminated());
     }
 
     @Transactional

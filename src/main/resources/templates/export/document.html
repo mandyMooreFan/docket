@@ -1,0 +1,97 @@
+<!doctype html>
+<!--/*
+    The shell every readable page in the archive wears (SPEC.md §11.1: "the
+    Member's profile and writing as documents, not a developer artefact").
+
+    Self-contained on purpose, and that is the one way it departs from the rest of
+    the product's templates: these files are opened from a folder on somebody's
+    laptop, years later, with no Docket to serve /css/docket.css and no network to
+    fetch it over. So the styles are inline and the type stack is what the machine
+    already has. The design language is still honoured where it can be — §2's rule
+    that serif is for anything a person wrote and sans for anything the app said
+    holds here too, and it does more work in an archive than anywhere else: it is
+    what tells your words apart from our headings at a glance.
+*/-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="document (title, body)">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' — your Docket data'">Your Docket data</title>
+    <style>
+        :root {
+            --ink: #101418; --ink-soft: #5D6775; --line: #EAEEF2; --ground: #FFFFFF;
+            --accent: #1F5C99;
+            --serif: Georgia, "Source Serif 4", serif;
+            --sans: system-ui, "Helvetica Neue", Arial, sans-serif;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ink: #F1F4F8; --ink-soft: #949EAB; --line: #1E252E; --ground: #0D1117;
+                --accent: #7CB2E8;
+            }
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0 auto; padding: 32px 20px 96px; max-width: 44rem;
+            background: var(--ground); color: var(--ink);
+            font-family: var(--sans); font-size: 1rem; line-height: 1.55;
+        }
+        a { color: var(--accent); }
+        .mark {
+            margin: 0; font-size: .75rem; letter-spacing: .08em; text-transform: uppercase;
+            color: var(--ink-soft);
+        }
+        h1 { font-family: var(--sans); font-size: 1.875rem; margin: .25rem 0 .25rem; }
+        h2 {
+            font-size: 1.25rem; margin: 3rem 0 .5rem;
+            padding-bottom: .35rem; border-bottom: 1px solid var(--line);
+        }
+        h3 { font-size: 1rem; margin: 1.5rem 0 .25rem; }
+        .taken, .empty, .count { color: var(--ink-soft); font-size: .875rem; }
+        nav { margin: 1.5rem 0 0; font-size: .875rem; }
+        nav a { margin-right: 1rem; }
+        .note {
+            margin: 1.5rem 0; padding: 1rem 1.25rem;
+            border-left: 3px solid var(--accent); background: rgba(31, 92, 153, .06);
+        }
+        .note p { margin: 0 0 .5rem; }
+        .note p:last-child { margin-bottom: 0; }
+        .note strong { font-size: 1.0625rem; }
+        dl { margin: .5rem 0 0; }
+        dt {
+            font-size: .75rem; letter-spacing: .05em; text-transform: uppercase;
+            color: var(--ink-soft); margin-top: .75rem;
+        }
+        /* §2: serif for anything a person wrote. In an archive this is the line
+           between your words and our labels. */
+        dd { margin: .125rem 0 0; font-family: var(--serif); white-space: pre-wrap; }
+        .entry { margin: 1.25rem 0; padding-bottom: 1.25rem; border-bottom: 1px solid var(--line); }
+        .nested { margin-left: 1.25rem; padding-left: 1rem; border-left: 2px solid var(--line); }
+        .nested .entry { border-bottom: none; padding-bottom: 0; margin: 1rem 0; }
+        figure { margin: .75rem 0 0; }
+        figure img { max-width: 100%; height: auto; border: 1px solid var(--line); }
+        figcaption { font-size: .75rem; color: var(--ink-soft); }
+        footer { margin-top: 4rem; font-size: .875rem; color: var(--ink-soft); }
+    </style>
+</head>
+<body>
+<header>
+    <p class="mark">Docket</p>
+    <h1 th:text="${title}">Your Docket</h1>
+    <p class="taken" th:text="'Taken on ' + ${generatedAt} + '. Member ' + ${memberId} + '.'">
+        Taken on a date.</p>
+    <nav>
+        <a th:href="${ownFile}" href="your-docket.html">Your profile and writing</a>
+        <a th:href="${correspondenceFile}" href="your-messages.html">Your messages</a>
+        <a th:href="${aboutFile}" href="about-this-copy.html">About this copy</a>
+    </nav>
+</header>
+<main th:replace="${body}"></main>
+<footer>
+    <p>Every fact in these pages is also in
+        <span th:text="${jsonFile}">docket-export.json</span>, for a machine to read.</p>
+    <p>Docket is free software: <a href="https://github.com/mandyMooreFan/docket"
+       >github.com/mandyMooreFan/docket</a></p>
+</footer>
+</body>
+</html>

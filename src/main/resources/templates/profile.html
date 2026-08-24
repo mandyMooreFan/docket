@@ -150,7 +150,11 @@
              th:if="${!graph.recommendations.isEmpty() or !graph.awaitingApproval.isEmpty() or graph.mayRecommend}">
         <h2>Recommendations</h2>
         <article class="entry" th:each="rec : ${graph.awaitingApproval}">
-            <h3><a th:href="'/p/' + ${rec.authorId}" th:text="${rec.authorName}">Author</a></h3>
+            <!--/* §11.2: a Recommendation stays published when its author leaves, but the
+                     name stops being a link — their Profile 404s, and a name pointing at a
+                     404 is worse than a name that is simply not a link. */-->
+            <h3><a th:href="${rec.authorFormer} ? null : '/p/' + ${rec.authorId}"
+                   th:text="${rec.authorName}">Author</a></h3>
             <p class="org">Awaiting your approval — nobody else can see it</p>
             <p th:text="${rec.text}">Their words</p>
             <div style="display: flex; gap: var(--s-2); margin-top: var(--s-2);">
@@ -163,7 +167,11 @@
             </div>
         </article>
         <article class="entry" th:each="rec : ${graph.recommendations}">
-            <h3><a th:href="'/p/' + ${rec.authorId}" th:text="${rec.authorName}">Author</a></h3>
+            <!--/* §11.2: a Recommendation stays published when its author leaves, but the
+                     name stops being a link — their Profile 404s, and a name pointing at a
+                     404 is worse than a name that is simply not a link. */-->
+            <h3><a th:href="${rec.authorFormer} ? null : '/p/' + ${rec.authorId}"
+                   th:text="${rec.authorName}">Author</a></h3>
             <p th:text="${rec.text}">Their words</p>
             <form th:if="${profile.owner}" method="post" style="margin-top: var(--s-2);"
                   th:action="'/recommendations/' + ${rec.authorId} + '/hide'">

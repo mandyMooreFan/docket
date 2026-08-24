@@ -42,6 +42,11 @@ public class Member {
 
     private Integer birthYear;
 
+    /** §11.2: the dated fact that this Member ended. Null for every live account. */
+    private Instant terminatedAt;
+
+    private String terminationReason;
+
     protected Member() {
     }
 
@@ -90,12 +95,47 @@ public class Member {
     }
 
     boolean dueForRollover(YearMonth now) {
-        return isMinor() && AgeRules.reached(18, birth(), now);
+        return isMinor() && !terminated() && AgeRules.reached(18, birth(), now);
     }
 
     /** The 18 rollover: collapse to the adult fact and delete the birth data (§9.3). */
     void rolloverToAdult() {
         this.ageKind = AgeKind.ADULT;
+        this.birthMonth = null;
+        this.birthYear = null;
+    }
+
+    /**
+     * §11.2: whether this Member ended. Everything a live Member has — a Profile,
+     * a place in search, a face at /images/{id}, a session — is withheld on this
+     * one fact, derived at the point of asking rather than mirrored into a flag on
+     * every table (ADR-0002).
+     */
+    public boolean terminated() {
+        return terminatedAt != null;
+    }
+
+    /**
+     * The end of a Member (CONTEXT.md, §11.2), as far as identity is concerned:
+     * dated, reasoned, and stripped.
+     *
+     * <p>The row itself stays, and has to — V8's thread and message references
+     * deliberately do not cascade, so deleting it would be refused, and making
+     * them cascade would let one person delete another's correspondence. What
+     * leaves is everything that identified the person: the email is replaced with
+     * a value that identifies nobody and unblocks the unique index (they must be
+     * able to join again from scratch), and a minor's birth month/year go the way
+     * the 18 rollover sends them (§9.3) — held for exactly one purpose, and that
+     * purpose has ended. {@code ageKind} is deliberately NOT flipped to ADULT: the
+     * rollover may say that truthfully, this may not.
+     */
+    void terminate(String reason, Instant now) {
+        if (terminatedAt != null) {
+            return;
+        }
+        this.terminatedAt = now;
+        this.terminationReason = reason;
+        this.email = "former-member-" + id + "@docket.invalid";
         this.birthMonth = null;
         this.birthYear = null;
     }

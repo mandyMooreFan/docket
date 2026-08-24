@@ -20,6 +20,9 @@ interface JobApplicationRepository extends Repository<JobApplication, Long> {
 
     List<JobApplication> findByApplicantIdOrderByAppliedAtDescIdDesc(long applicantId);
 
+    /** §11.2: an Application offering a Profile that no longer exists. */
+    void delete(JobApplication application);
+
     /**
      * §6.4's block, derived at the point of asking (ADR-0002): the Applications
      * on this poster's postings that closed without response and still hold no

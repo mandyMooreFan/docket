@@ -17,4 +17,12 @@ interface ConnectionRequestRepository extends Repository<ConnectionRequest, Long
 
     List<ConnectionRequest> findByRecipientIdAndStateOrderBySentAt(
             Long recipientId, ConnectionRequest.State state);
+
+    /** Every request this Member sent, whatever became of it (§11.1's export). */
+    List<ConnectionRequest> findByRequesterId(long requesterId);
+
+    /** Every request this Member received (§11.1's export; §11.2 deletes both). */
+    List<ConnectionRequest> findByRecipientId(long recipientId);
+
+    void delete(ConnectionRequest request);
 }
