@@ -132,15 +132,21 @@ public class ProfileService {
                 start, clock.instant()));
     }
 
-    /** True when the position was the member's own to end; false is the caller's 404. */
+    /**
+     * The ended position's view when it was the member's own to end — the
+     * caller needs its title and company for §5.2.3's opt-in share; empty is
+     * the caller's 404.
+     */
     @Transactional
-    public boolean endPosition(long memberId, long positionId, YearMonth end) {
+    public Optional<PositionView> endPosition(long memberId, long positionId, YearMonth end) {
         return positions.findByIdAndMemberId(positionId, memberId)
                 .map(position -> {
                     position.endAt(end);
-                    return true;
-                })
-                .orElse(false);
+                    return new PositionView(position.id(), position.title(),
+                            position.company() == null ? "" : position.company().name(),
+                            position.company() == null ? null : position.company().id(),
+                            span(position.start(), end), position.description(), false);
+                });
     }
 
     @Transactional

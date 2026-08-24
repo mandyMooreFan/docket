@@ -106,6 +106,10 @@
                            type="number" name="endMonth" min="1" max="12" placeholder="MM" required>
                     <input class="input" style="width: 6rem; padding: var(--s-1) var(--s-2);"
                            type="number" name="endYear" min="1900" max="2100" placeholder="YYYY" required>
+                    <!-- §5.2.3: opt-in, at this moment only — never automatic. -->
+                    <label style="display: flex; align-items: center; gap: var(--s-1); font-size: var(--t-13); color: var(--i500);">
+                        <input type="checkbox" name="share"> Share this on your feed
+                    </label>
                     <button class="btn sm" type="submit">Mark as ended</button>
                 </form>
                 <form method="post" th:action="'/profile/positions/' + ${position.id} + '/delete'">
@@ -142,6 +146,10 @@
             <label class="field">
                 <span class="label">What you did</span>
                 <textarea class="input" name="description" rows="3"></textarea>
+            </label>
+            <!-- §5.2.3: opt-in, at this moment only — never automatic. -->
+            <label style="display: flex; align-items: center; gap: var(--s-2); font-size: var(--t-14); color: var(--i500);">
+                <input type="checkbox" name="share"> Share this on your feed
             </label>
             <div><button class="btn" type="submit">Add position</button></div>
         </form>
