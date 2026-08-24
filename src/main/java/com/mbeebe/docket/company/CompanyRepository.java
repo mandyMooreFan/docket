@@ -13,6 +13,9 @@ interface CompanyRepository extends Repository<Company, Long> {
 
     Optional<Company> findById(Long id);
 
+    /** Whether any Company currently wears this logo — the images module's claim (§8.4). */
+    boolean existsByLogoImageId(long imageId);
+
     @Query("select c from Company c where lower(c.name) = lower(:name)")
     Optional<Company> findByNameIgnoringCase(@Param("name") String name);
 
