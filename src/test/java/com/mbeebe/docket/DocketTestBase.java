@@ -2,7 +2,7 @@ package com.mbeebe.docket;
 
 import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.GreenMailUtil;
-import com.icegreen.greenmail.util.ServerSetupTest;
+import com.icegreen.greenmail.util.ServerSetup;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -52,14 +52,32 @@ public abstract class DocketTestBase {
         postgres.start();
     }
 
+    // A free port, chosen once per JVM. ServerSetupTest.SMTP is the fixed 3025, which
+    // is machine-wide: two test runs in two worktrees cannot both hold it, and the
+    // loser fails every class with "Could not start mail server" — indistinguishable
+    // from a broken branch unless you go looking at ss(8). The port is resolved here,
+    // in a static initialiser, rather than read back off the extension: JUnit starts
+    // SpringExtension before a @RegisterExtension field, so a supplier asking GreenMail
+    // for its port could be evaluated before GreenMail has one.
+    private static final int SMTP_PORT = freePort();
+
+    private static int freePort() {
+        try (java.net.ServerSocket probe = new java.net.ServerSocket(0)) {
+            return probe.getLocalPort();
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException("No free port for the SMTP fake", e);
+        }
+    }
+
     @RegisterExtension
-    protected static GreenMailExtension greenMail =
-            new GreenMailExtension(ServerSetupTest.SMTP).withPerMethodLifecycle(false);
+    protected static GreenMailExtension greenMail = new GreenMailExtension(
+            new ServerSetup(SMTP_PORT, "127.0.0.1", ServerSetup.PROTOCOL_SMTP))
+            .withPerMethodLifecycle(false);
 
     @DynamicPropertySource
     static void mailProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.mail.host", () -> "127.0.0.1");
-        registry.add("spring.mail.port", () -> ServerSetupTest.SMTP.getPort());
+        registry.add("spring.mail.port", () -> SMTP_PORT);
     }
 
     private static final Pattern LINK = Pattern.compile("/auth/([A-Za-z0-9_-]+)");
