@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${page.other.displayName()} + ' — Messages — Docket'">Docket</title>
+</head>
+<body>
+<main class="page">
+    <header>
+        <p class="meta"><a href="/messages">Messages</a></p>
+        <h1 class="title-serif" style="font-size: var(--t-30);">
+            <a th:href="'/p/' + ${page.otherId}"
+               th:text="${page.other.displayName()}">Name</a>
+        </h1>
+    </header>
+
+    <!-- §7.2's polite near-realtime: the open Thread re-fetches its own message
+         list on one htmx trigger, roughly every ten seconds. No socket, no SSE,
+         no realtime infrastructure (§14.2) — and nothing that reports on you:
+         no typing indicator, no read receipt, no last-seen, no presence. -->
+    <div class="thread" th:attr="hx-get='/messages/' + ${page.otherId} + '/list'"
+         hx-trigger="every 10s">
+        <div th:fragment="list">
+            <article class="message" th:each="message : ${page.messages}"
+                     th:id="'message-' + ${message.id}"
+                     th:classappend="${message.mine} ? 'mine' : ''">
+                <p class="org">
+                    <span th:text="${message.author.displayName()}">Name</span> ·
+                    <span class="when" th:text="${message.when}">1 Aug 2026, 09:12</span>
+                </p>
+                <!-- Serif: a person wrote these words (§2). -->
+                <div class="prose" th:utext="${message.bodyHtml}"></div>
+                <!-- §7.2: still images. The one guarded /images route serves them,
+                     and MessageImageAudience answers for who may have the bytes —
+                     the two people in this Thread, and nobody else (§10.2). -->
+                <div class="post-images" th:if="${!message.imageIds.isEmpty()}">
+                    <img th:each="imageId : ${message.imageIds}"
+                         th:src="'/images/' + ${imageId}" alt="">
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <section class="panel" th:if="${page.mayWrite}" style="margin-top: var(--s-8);">
+        <h3>Write a message</h3>
+        <p class="label" th:if="${error}" th:text="${error}"
+           style="color: var(--ac); text-transform: none; letter-spacing: 0;">error</p>
+        <form method="post" th:action="'/messages/' + ${page.otherId}"
+              enctype="multipart/form-data" class="form">
+            <textarea class="input" name="body" rows="4"
+                      placeholder="A reply that takes a day is a normal reply."></textarea>
+            <input type="file" name="images" accept="image/png,image/jpeg" multiple
+                   style="font-size: var(--t-13); color: var(--i500);">
+            <div><button class="btn primary" type="submit">Send</button></div>
+        </form>
+    </section>
+
+    <!--/* §7.3: closed to new Messages, both sides keep the history. The wording is
+           identical whether the Connection ended or a Block stands — §4.2's
+           silent-decline discipline, applied to endings. A parser-level comment
+           on purpose: the reasoning belongs in the source, not in the bytes the
+           closed-out reader receives. */-->
+    <p class="meta" th:unless="${page.mayWrite}" th:text="${page.note}"
+       style="margin-top: var(--s-8);">Closed.</p>
+</main>
+</body>
+</html>

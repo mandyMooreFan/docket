@@ -14,7 +14,12 @@
         <nav>
             <a href="/">Feed</a>
             <a href="/jobs">Jobs</a>
-            <a href="/messages">Messages</a>
+            <!--/* §7.4: the Unread count — the only badge in the product (§5.6's one
+                   named exception), and nothing at all at zero. Parser-level, so the
+                   word itself never reaches the page: §5.6's rule is tested on the
+                   rendered bytes (feed.NotificationTests), and rightly so. */-->
+            <a href="/messages">Messages<span class="badge" th:if="${unread != null}"
+                                              th:text="${unread}">1</span></a>
             <a href="/network">Network</a>
         </nav>
         <div class="right">

@@ -65,12 +65,14 @@ class JobService {
     private final Members members;
     private final JobMails mails;
     private final JobSearchService searches;
+    private final ChannelForMessaging channel;
     private final Clock clock;
 
     JobService(JobPostingRepository postings, JobApplicationRepository applications,
                Companies companies, TrustGate trustGate, CurrentPositions positions,
                CapabilityService capabilities, ProfileService profiles, Connections graph,
-               Members members, JobMails mails, JobSearchService searches, Clock clock) {
+               Members members, JobMails mails, JobSearchService searches,
+               ChannelForMessaging channel, Clock clock) {
         this.postings = postings;
         this.applications = applications;
         this.companies = companies;
@@ -82,6 +84,7 @@ class JobService {
         this.members = members;
         this.mails = mails;
         this.searches = searches;
+        this.channel = channel;
         this.clock = clock;
     }
 
@@ -360,9 +363,13 @@ class JobService {
         var mutuals = graph.mutuals(posting.posterId(), application.applicantId()).stream()
                 .map(profiles::cardFor)
                 .toList();
+        // §7.1: the poster's reply affordance, and the only one on this page —
+        // shown exactly while the Application-scoped channel is open, so the
+        // queue never offers a door that turns out to be shut.
+        boolean mayMessage = channel.openBetween(posting.posterId(), application.applicantId());
         return new QueuePage.Row(application.id(), profiles.cardFor(application.applicantId()),
                 application.note(), day(application.appliedAt()),
-                stateLabel(application.state()), application.unresolved(), mutuals);
+                stateLabel(application.state()), application.unresolved(), mutuals, mayMessage);
     }
 
     /**

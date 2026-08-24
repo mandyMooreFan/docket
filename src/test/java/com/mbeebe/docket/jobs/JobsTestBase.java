@@ -32,6 +32,18 @@ public abstract class JobsTestBase extends GraphTestBase {
     @Autowired
     protected Companies companies;
 
+    @Autowired
+    private PostingCloser postingCloser;
+
+    /**
+     * §6.4's hourly sweep, run on demand. Exposed here because PostingCloser is
+     * package-private and suites outside com.mbeebe.docket.jobs — messaging's
+     * application channel, for one — still need the closure guarantee executed.
+     */
+    protected void sweepClosedPostings() {
+        postingCloser.closeDue(clock.instant());
+    }
+
     /** A complete member whose Profile claims a current Position at the Company. */
     protected Cookie employeeAt(String email, String name, String companyName) throws Exception {
         Cookie session = signUpAndIn(email);
