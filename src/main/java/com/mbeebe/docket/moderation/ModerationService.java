@@ -274,6 +274,7 @@ class ModerationService {
     private String withdrawalSentence(Capability capability, Optional<Instant> until) {
         String what = switch (capability) {
             case CONNECT -> "send connection requests";
+            case INVITE -> "send invites";
             case MESSAGE -> "send messages";
             case POST -> "write posts";
             case POST_JOB -> "post jobs";

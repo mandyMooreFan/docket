@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Invite — Docket</title>
+</head>
+<body>
+<main class="page">
+    <header>
+        <h1 class="title-serif" style="font-size: var(--t-30);">Invite someone</h1>
+        <!-- §13.2: the seeding mechanism, said plainly. The first connection is
+             otherwise unsolved by design (§8.3), and this page is where that is
+             admitted rather than dressed up as a growth feature. -->
+        <p class="meta" style="margin-top: var(--s-2);">
+            An email to somebody who isn't a member yet, with a note if you want one.
+        </p>
+    </header>
+
+    <div class="prose" style="margin-top: var(--s-6);">
+        <p th:if="${invite.justSent}">Invite sent.</p>
+        <p>Inviting gates nothing. They can join without it, and joining with it is an
+            ordinary signup — the only difference is that your connection request is
+            already waiting when they arrive.</p>
+        <p>There's no limit on how many people you invite. Sending is rate-limited the
+            same way link requests are, which bounds a burst and not a total.</p>
+    </div>
+
+    <section class="panel" th:if="${invite.mayInvite}" style="margin-top: var(--s-8);">
+        <h3>Send an invite</h3>
+        <p class="label" th:if="${invite.error}" th:text="${invite.error}"
+           style="color: var(--ac); text-transform: none; letter-spacing: 0;">error</p>
+        <form method="post" action="/invite" class="form">
+            <label class="field">
+                <span class="label">Email address</span>
+                <input class="input" type="email" name="email" required>
+            </label>
+            <label class="field">
+                <span class="label">Note (optional)</span>
+                <textarea class="input" name="note" rows="3"
+                          placeholder="How they know you."></textarea>
+            </label>
+            <div><button class="btn primary" type="submit">Send the invite</button></div>
+        </form>
+    </section>
+
+    <!-- §3.2: the same bar the Connect button sits behind. An Invite is a
+         Connection request posted ahead of time, so it cannot be the way round it. -->
+    <p class="meta" th:unless="${invite.mayInvite}" style="margin-top: var(--s-8);">
+        Inviting opens when your profile is complete.
+    </p>
+
+    <section class="block" th:if="${!invite.sent.isEmpty()}">
+        <h2>Invites you've sent</h2>
+        <!-- Where it went and when, and nothing about what became of it: "joined"
+             would be §8.3's membership oracle told slowly. If they join and accept,
+             they appear in Connections like anyone else. -->
+        <p class="meta">Where each one went, and when. Nothing here says whether anyone
+            joined — that news arrives on your network page or not at all.</p>
+        <article class="entry" th:each="row : ${invite.sent}">
+            <h3 th:text="${row.email}">someone@example.org</h3>
+            <p class="org"><span class="when" th:text="${row.when}">1 Aug 2026</span></p>
+        </article>
+    </section>
+</main>
+</body>
+</html>

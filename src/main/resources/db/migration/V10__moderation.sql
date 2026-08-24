@@ -53,7 +53,7 @@ create table moderation_action (
                     ('PROFILE', 'POST', 'REPLY', 'MESSAGE', 'JOB_POSTING', 'COMPANY')),
     target_id   bigint,
     capability  text check (capability in
-                    ('CONNECT', 'MESSAGE', 'POST', 'POST_JOB', 'REPLY')),
+                    ('CONNECT', 'INVITE', 'MESSAGE', 'POST', 'POST_JOB', 'REPLY')),
     until       timestamptz,
     reason      text not null check (char_length(reason) <= 4000),
     actor_id    bigint not null references member (id),

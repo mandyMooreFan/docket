@@ -13,5 +13,12 @@ interface MemberRepository extends Repository<Member, Long> {
 
     Optional<Member> findByEmail(String email);
 
+    /**
+     * For {@link Addresses} only, and deliberately laxer than the login lookup: an
+     * Invite must not mail an existing Member merely because the sender typed their
+     * address in a different case (§13.3, §8.3).
+     */
+    Optional<Member> findByEmailIgnoreCase(String email);
+
     List<Member> findByAgeKind(Member.AgeKind ageKind);
 }

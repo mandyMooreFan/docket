@@ -38,8 +38,9 @@
                    would put safety in competition with the four destinations. */-->
             <a class="source-link" href="/safety">Safety</a>
             <th:block th:if="${currentMember != null}">
-                <a class="av av-32" href="/profile" th:text="${currentMember.initial}"
-                   th:title="${currentMember.email}">D</a>
+                <a class="av av-32" href="/profile" th:title="${currentMember.email}"
+                   th:insert="~{fragments/avatar :: face(${currentMember.initial},
+                                ${viewerPhotoImageId})}">D</a>
             </th:block>
             <th:block th:if="${currentMember == null}">
                 <a class="btn sm" href="/login">Sign in</a>

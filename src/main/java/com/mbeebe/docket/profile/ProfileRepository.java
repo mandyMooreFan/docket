@@ -14,6 +14,14 @@ interface ProfileRepository extends Repository<Profile, Long> {
     Optional<Profile> findById(Long memberId);
 
     /**
+     * Whose photo this image is, if it is anyone's current one — the lookup
+     * {@link ProfilePhotoAudience} does on every /images/{id} request, which is why
+     * V12 indexes the column. A photo since replaced stops being claimed and stops
+     * being served, the same rule a replaced Company logo lives under.
+     */
+    Optional<Profile> findByPhotoImageId(Long imageId);
+
+    /**
      * §8.1's whole matching rule: the name column against the name index, and
      * there is nothing else in the query to match on. §8.2's order —
      * ts_rank first, then the member id, so it is total, stable, and about the

@@ -12,6 +12,20 @@ public enum Capability {
     /** Sending a Connection request (§4.2). */
     CONNECT(true),
 
+    /**
+     * Sending an Invite (§13.3). Not named in §3.2's list because §13.3 wrote the
+     * Invite later, but it belongs there on §3.2's own reasoning: an Invite is a
+     * Connection request posted ahead of time to a stranger's inbox, and gating
+     * the request while leaving the Invite open would be a hole straight through
+     * the bar. The bar is "a real per-account cost for a bulk registrar", and
+     * mailing strangers is precisely what a bulk registrar registers for.
+     *
+     * <p>This gates the SENDER only. §13.3's "optional, never a gate" is about the
+     * invitee, whose signup stays completely open (§3.1) whether or not anyone
+     * ever invited them.
+     */
+    INVITE(true),
+
     /** Writing a Message (§7). */
     MESSAGE(true),
 

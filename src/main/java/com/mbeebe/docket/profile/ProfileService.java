@@ -90,7 +90,8 @@ public class ProfileService {
                 profile.location(), profile.summary(), initials(profile.name()),
                 openToWorkShown(profile, memberId, viewer, isOwner), positionViews,
                 educationViews, skillViews(memberId), completeness,
-                profile.dial(), profile.openToWork(), visibility.indexable()));
+                profile.dial(), profile.openToWork(), visibility.indexable(),
+                profile.photoImageId()));
     }
 
     /**
@@ -125,7 +126,7 @@ public class ProfileService {
         return Optional.of(new ProfilePage(memberId, false, profile.name(), profile.headline(),
                 profile.location(), profile.summary(), initials(profile.name()), false,
                 positionViews, educationViews, skillViews(memberId), completeness,
-                profile.dial(), profile.openToWork(), false));
+                profile.dial(), profile.openToWork(), false, profile.photoImageId()));
     }
 
     /**
@@ -159,11 +160,19 @@ public class ProfileService {
                 && completenessOf(memberId).complete();
     }
 
-    /** How lists elsewhere point at a Member (#32's /network, Mutuals): a card, never the entity. */
+    /**
+     * How lists elsewhere point at a Member (#32's /network, Mutuals): a card, never
+     * the entity. The card carries the photo's ADDRESS, not the bytes and not a
+     * decision — /images/{id} re-derives, per viewer and per request, whether that
+     * address answers (§8.5). A card whose photo is out of the reader's reach draws
+     * the initials it always carries.
+     */
     @Transactional(readOnly = true)
     public PersonCard cardFor(long memberId) {
-        String name = profiles.findById(memberId).map(Profile::name).orElse("");
-        return new PersonCard(memberId, name, initials(name));
+        Optional<Profile> profile = profiles.findById(memberId);
+        String name = profile.map(Profile::name).orElse("");
+        return new PersonCard(memberId, name, initials(name),
+                profile.map(Profile::photoImageId).orElse(null));
     }
 
     /** The §3.2 bar, computed fresh from the stored facts — never cached, never stored. */
@@ -180,7 +189,28 @@ public class ProfileService {
         Profile profile = ownProfile(memberId);
         return new ProfileEdit(profile.name(), profile.headline(), profile.location(),
                 profile.summary(), profile.dial(), profile.openToWork(), positionViews(memberId),
-                educationViews(memberId), skillViews(memberId));
+                educationViews(memberId), skillViews(memberId), initials(profile.name()),
+                profile.photoImageId());
+    }
+
+    /**
+     * The §4.1 photo, set or cleared. Passing null is removal, and that symmetry is
+     * the point: taking your face off Docket is exactly as many clicks as putting it
+     * on. The bytes reached the one image store (§10.4) before this is called — this
+     * only records which stored image a Profile currently wears.
+     *
+     * <p>Nothing else changes. A photo is not on the §3.2 bar, so setting one earns
+     * no Capability and removing one costs none.
+     */
+    @Transactional
+    public void setPhoto(long memberId, Long imageId) {
+        ownProfile(memberId).setPhoto(imageId);
+    }
+
+    /** The signed-in member's own photo, for the app-bar avatar (§2's layout). */
+    @Transactional(readOnly = true)
+    public Optional<Long> photoOf(long memberId) {
+        return profiles.findById(memberId).map(Profile::photoImageId);
     }
 
     @Transactional

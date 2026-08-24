@@ -1,5 +1,6 @@
 package com.mbeebe.docket.identity;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +12,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 /**
  * Magic links are the whole auth system (§3.3): login and verification are the same
@@ -25,27 +25,27 @@ public class MagicLinkService {
     static final int MAX_PER_IP_PER_HOUR = 10;
     static final Duration LINK_LIFETIME = Duration.ofMinutes(30);
 
-    private static final Pattern PLAUSIBLE_EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
-
     public enum Outcome { SENT, INVALID_EMAIL, BLOCKED_DOMAIN, RATE_LIMITED }
 
     private final MagicLinkRepository magicLinks;
     private final LinkRequestRepository linkRequests;
     private final MemberRepository members;
-    private final BlockedEmailDomains blockedDomains;
+    private final Addresses addresses;
     private final Mailer mailer;
+    private final ObjectProvider<JoinListener> joinListeners;
     private final Clock clock;
     private final String baseUrl;
 
     MagicLinkService(MagicLinkRepository magicLinks, LinkRequestRepository linkRequests,
-                     MemberRepository members, BlockedEmailDomains blockedDomains,
-                     Mailer mailer, Clock clock,
+                     MemberRepository members, Addresses addresses,
+                     Mailer mailer, ObjectProvider<JoinListener> joinListeners, Clock clock,
                      @Value("${docket.base-url:http://localhost:8080}") String baseUrl) {
         this.magicLinks = magicLinks;
         this.linkRequests = linkRequests;
         this.members = members;
-        this.blockedDomains = blockedDomains;
+        this.addresses = addresses;
         this.mailer = mailer;
+        this.joinListeners = joinListeners;
         this.clock = clock;
         this.baseUrl = baseUrl;
     }
@@ -87,11 +87,18 @@ public class MagicLinkService {
 
     private Outcome request(String email, String requestIp,
                             java.util.function.Function<String, MagicLink> linkFor) {
-        if (!PLAUSIBLE_EMAIL.matcher(email).matches()) {
-            return Outcome.INVALID_EMAIL;
-        }
-        if (blockedDomains.blocks(email)) {
-            return Outcome.BLOCKED_DOMAIN;
+        // The address rules live in one place (§3.3), shared with the Invite. The
+        // membership verdict is deliberately not consulted here: what this method
+        // does about a known address is decided by the caller's own lookup, and
+        // never by the shape of this refusal (§8.3).
+        switch (addresses.check(email)) {
+            case NOT_AN_ADDRESS -> {
+                return Outcome.INVALID_EMAIL;
+            }
+            case BLOCKED_DOMAIN -> {
+                return Outcome.BLOCKED_DOMAIN;
+            }
+            default -> { }
         }
         Instant hourAgo = clock.instant().minus(Duration.ofHours(1));
         if (linkRequests.countByEmailAndCreatedAtAfter(email, hourAgo) >= MAX_PER_ADDRESS_PER_HOUR
@@ -131,10 +138,13 @@ public class MagicLinkService {
                     link.markUsed(now);
                     return members.findByEmail(link.email()).orElseGet(() -> {
                         LocalDate today = LocalDate.ofInstant(now, ZoneId.systemDefault());
-                        return members.save(link.purpose() == MagicLink.Purpose.JOIN
+                        Member joined = members.save(link.purpose() == MagicLink.Purpose.JOIN
                                 && link.ageKind() == Member.AgeKind.MINOR
                                 ? Member.minor(link.email(), link.birth(), today, now)
                                 : Member.adult(link.email(), today, now));
+                        // The one announcement identity makes (§13.3's landing).
+                        joinListeners.forEach(listener -> listener.joined(joined));
+                        return joined;
                     });
                 });
     }

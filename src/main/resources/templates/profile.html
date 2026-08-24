@@ -7,7 +7,8 @@
 <body>
 <main class="page">
     <header>
-        <div class="av av-96" th:text="${profile.initials}">·</div>
+        <div class="av av-96"
+             th:insert="~{fragments/avatar :: face(${profile.initials}, ${profile.photoImageId})}">·</div>
         <h1 class="title-serif" th:if="${profile.named()}" th:text="${profile.name}">Name</h1>
         <h1 class="title-serif unnamed" th:unless="${profile.named()}">A member</h1>
         <p class="headline" th:if="${!profile.headline.isBlank()}" th:text="${profile.headline}">Headline</p>
@@ -114,9 +115,13 @@
     <!-- §4.2: Mutuals — the only relationship Docket names between two members. -->
     <section class="block" th:if="${!graph.mutuals.isEmpty()}">
         <h2>Mutuals</h2>
-        <article class="entry" th:each="person : ${graph.mutuals}">
-            <h3><a th:href="'/p/' + ${person.memberId}"
-                   th:text="${person.displayName()}">Name</a></h3>
+        <article class="entry person" th:each="person : ${graph.mutuals}">
+            <span class="av av-40"
+                  th:insert="~{fragments/avatar :: face(${person.initials}, ${person.photoImageId})}">·</span>
+            <div class="said">
+                <h3><a th:href="'/p/' + ${person.memberId}"
+                       th:text="${person.displayName()}">Name</a></h3>
+            </div>
         </article>
     </section>
 
@@ -124,9 +129,13 @@
     <section class="block" th:if="${graph.listVisible()}">
         <h2>Connections</h2>
         <p class="meta" th:if="${graph.connections.isEmpty()}">No connections yet.</p>
-        <article class="entry" th:each="person : ${graph.connections}">
-            <h3><a th:href="'/p/' + ${person.memberId}"
-                   th:text="${person.displayName()}">Name</a></h3>
+        <article class="entry person" th:each="person : ${graph.connections}">
+            <span class="av av-40"
+                  th:insert="~{fragments/avatar :: face(${person.initials}, ${person.photoImageId})}">·</span>
+            <div class="said">
+                <h3><a th:href="'/p/' + ${person.memberId}"
+                       th:text="${person.displayName()}">Name</a></h3>
+            </div>
         </article>
     </section>
 
