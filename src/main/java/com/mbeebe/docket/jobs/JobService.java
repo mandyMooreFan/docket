@@ -12,6 +12,7 @@ import com.mbeebe.docket.profile.CapabilityAnswer;
 import com.mbeebe.docket.profile.CapabilityService;
 import com.mbeebe.docket.profile.ProfilePage;
 import com.mbeebe.docket.profile.ProfileService;
+import com.mbeebe.docket.search.SearchTerms;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -192,23 +193,54 @@ class JobService {
         Set<Long> knownCompanies = filters.known() && viewer.isPresent()
                 ? companiesWhereIKnowSomeone(viewer.get().id())
                 : null;
-        List<PostingRow> rows = postings.openAt(clock.instant()).stream()
-                .filter(posting -> matches(posting, filters, knownCompanies))
+        List<PostingRow> rows = selected(filters, knownCompanies).stream()
                 .map(this::row)
                 .toList();
         return new BoardPage(rows, filters, viewer.isPresent(),
                 viewer.map(member -> searches.listFor(member.id())).orElse(List.of()));
     }
 
-    boolean matches(JobPosting posting, JobFilters filters, Set<Long> knownCompanies) {
+    /**
+     * The open postings one filter set selects, newest first — the single place
+     * §6.5's filters are applied. The board and the saved-search digest both
+     * come through here, so a digest can never disagree with the board the
+     * search was saved from.
+     */
+    @Transactional(readOnly = true)
+    List<JobPosting> selected(JobFilters filters, Set<Long> knownCompanies) {
+        return openMatching(filters).stream()
+                .filter(posting -> matches(posting, filters, knownCompanies))
+                .toList();
+    }
+
+    /**
+     * §6.5's keyword, as full-text rather than substring matching (#37). The
+     * keyword became a database predicate rather than a scan, and it now
+     * stems — "shelving" finds "Shelving" and "engineers" finds "Engineer" —
+     * but the shape of the board did not change: still one list, still newest
+     * first, still no ranking, because §6.5 is a list and not a relevance sort.
+     *
+     * <p>The keyword no longer reaches the COMPANY NAME. That was substring
+     * matching's incidental reach, and the board already carries the honest
+     * axis for it: the company filter, its own param, still exact and still
+     * case-insensitive. A keyword that quietly also meant "or an employer whose
+     * name contains this" made two filters out of one box.
+     *
+     * <p>A keyword with nothing to ask (punctuation alone) narrows to nothing
+     * rather than to everything — the same floor search itself keeps (§8.5).
+     */
+    private List<JobPosting> openMatching(JobFilters filters) {
+        if (filters.q().isBlank()) {
+            return postings.openAt(clock.instant());
+        }
+        return SearchTerms.prefixQuery(filters.q())
+                .map(tsquery -> postings.openMatching(tsquery, clock.instant()))
+                .orElse(List.of());
+    }
+
+    private boolean matches(JobPosting posting, JobFilters filters, Set<Long> knownCompanies) {
         String companyName = companies.findResolved(posting.companyId())
                 .map(Company::name).orElse("");
-        if (!filters.q().isBlank()
-                && !containsIgnoringCase(posting.title(), filters.q())
-                && !containsIgnoringCase(posting.description(), filters.q())
-                && !containsIgnoringCase(companyName, filters.q())) {
-            return false;
-        }
         if (!filters.location().isBlank()
                 && !containsIgnoringCase(posting.location(), filters.location())) {
             return false;

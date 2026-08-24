@@ -111,6 +111,37 @@ public class ProfileService {
                 profile.dial(), profile.openToWork(), false));
     }
 
+    /**
+     * §8.5, in one place: which of these Members people search may return, in
+     * the order they were handed in (§8.2 — nothing here reorders anything).
+     *
+     * <p>Three gates, and the first is simply {@link #pageFor}: a result may
+     * never exceed the Dial, so the question "may search show this person" is
+     * answered by asking for their page as this viewer and seeing whether one
+     * comes back. Blocks, the Dial and both floors come along for free, derived
+     * fresh, so a Dial turned down takes effect on the next query.
+     *
+     * <p>On top of that, the two floors' own subjects are absent whatever the
+     * Dial says and whoever is asking: an under-18's Profile is never returned
+     * by people search (§8.1, §9.2), and an incomplete Profile stays un-indexed
+     * (§3.2, §8.5). Both are service-imposed and Dial-proof — a minor who sets
+     * their Dial to public is still not findable by name, and neither is a
+     * member who has typed nothing but their name.
+     */
+    @Transactional(readOnly = true)
+    public List<PersonCard> searchableAmong(List<Long> candidates, Optional<Member> viewer) {
+        return candidates.stream()
+                .filter(this::adultAndComplete)
+                .filter(memberId -> pageFor(memberId, viewer).isPresent())
+                .map(this::cardFor)
+                .toList();
+    }
+
+    private boolean adultAndComplete(long memberId) {
+        return members.find(memberId).map(owner -> !owner.isMinor()).orElse(false)
+                && completenessOf(memberId).complete();
+    }
+
     /** How lists elsewhere point at a Member (#32's /network, Mutuals): a card, never the entity. */
     @Transactional(readOnly = true)
     public PersonCard cardFor(long memberId) {

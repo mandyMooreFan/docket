@@ -28,18 +28,15 @@ class JobSearchMailer {
     private static final Logger log = LoggerFactory.getLogger(JobSearchMailer.class);
 
     private final JobSearchRepository searches;
-    private final JobPostingRepository postings;
     private final JobService jobs;
     private final Companies companies;
     private final Members members;
     private final JobMails mails;
     private final Clock clock;
 
-    JobSearchMailer(JobSearchRepository searches, JobPostingRepository postings,
-                    JobService jobs, Companies companies, Members members, JobMails mails,
-                    Clock clock) {
+    JobSearchMailer(JobSearchRepository searches, JobService jobs, Companies companies,
+                    Members members, JobMails mails, Clock clock) {
         this.searches = searches;
-        this.postings = postings;
         this.jobs = jobs;
         this.companies = companies;
         this.members = members;
@@ -58,7 +55,6 @@ class JobSearchMailer {
     @Transactional
     int runDue(Instant now) {
         int sent = 0;
-        List<JobPosting> open = postings.openAt(now);
         for (JobSearch search : searches.findByStoppedAtIsNull()) {
             if (!search.due(now)) {
                 continue;
@@ -66,9 +62,10 @@ class JobSearchMailer {
             Set<Long> known = search.knownOnly()
                     ? jobs.companiesWhereIKnowSomeone(search.memberId())
                     : null;
-            List<JobPosting> matching = open.stream()
+            // The board's own selection (#37 made the keyword a database
+            // predicate), narrowed to what is new since the last send.
+            List<JobPosting> matching = jobs.selected(search.filters(), known).stream()
                     .filter(posting -> posting.postedAt().isAfter(search.sentUpTo()))
-                    .filter(posting -> jobs.matches(posting, search.filters(), known))
                     .toList();
             if (matching.isEmpty()) {
                 continue;

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Search — Docket</title>
+</head>
+<body>
+<main class="page">
+    <header>
+        <h1 class="title-serif" style="font-size: var(--t-30);">Search</h1>
+        <p class="meta" style="margin-top: var(--s-2);">
+            One box: people, companies, posts and jobs. The same query returns the same
+            results in the same order for everyone.
+        </p>
+    </header>
+
+    <!-- §8.1: one field. There is deliberately nothing to filter people by —
+         no skill, no location, no employer, no availability. §8.2's one tick
+         narrows by a fact about the graph the seeker chose; it never reorders. -->
+    <section class="panel" style="margin-top: var(--s-8);">
+        <form method="get" action="/search" class="form" style="gap: var(--s-3);">
+            <div style="display: flex; gap: var(--s-3); flex-wrap: wrap; align-items: flex-end;">
+                <label class="field" style="flex: 1; min-width: 12rem;">
+                    <span class="label">Search</span>
+                    <input class="input" type="search" name="q" th:value="${results.query}"
+                           placeholder="A name, a company, a job, a post">
+                </label>
+                <div style="padding-bottom: 0;">
+                    <button class="btn sm" type="submit">Search</button>
+                </div>
+            </div>
+            <label th:if="${results.signedIn}" class="field"
+                   style="flex-direction: row; align-items: center; gap: var(--s-2);">
+                <input type="checkbox" name="connected" value="on"
+                       th:checked="${results.connectedOnly}">
+                <span style="font-size: var(--t-13); color: var(--i500);">
+                    Only people I share a connection with</span>
+            </label>
+        </form>
+    </section>
+
+    <p class="meta" th:unless="${results.asked}" style="margin-top: var(--s-8);">
+        Type something to search. There is no list to browse: people are found by name,
+        one search at a time.
+    </p>
+
+    <th:block th:if="${results.asked}">
+
+        <!-- §8.1: people, by name, and that is the whole of it. -->
+        <section class="block">
+            <h2>People</h2>
+
+            <!-- §8.4, said plainly rather than dressed up as an empty result:
+                 people search requires an account, so bulk enumeration of the
+                 membership stops being free. -->
+            <p class="meta" th:if="${results.peopleGated}">
+                People search requires an account. Jobs, companies and posts answer
+                without one — this door doesn't, because it is the one that would hand
+                a scraper the whole membership.
+                <a href="/login">Sign in</a> or <a href="/join">join</a>.
+            </p>
+
+            <!-- §13.4 again: an empty part says WHICH empty it is. People
+                 matched, and the seeker's own ticked filter is what emptied
+                 the group — saying "nobody by that name" here would be a lie
+                 told on behalf of a box they can untick. -->
+            <p class="meta" th:if="${results.hiddenByGraphFilter}">
+                Nobody by that name among the people you share a connection with.
+                Untick the filter to see everyone that name reaches.
+            </p>
+
+            <!-- §13.4's copy, verbatim: spec surface, honest by design. -->
+            <p class="meta" th:if="${results.noPeople()}">
+                Nobody by that name yet. People search matches names only — that's deliberate.
+            </p>
+
+            <article class="entry" th:each="row : ${results.people}">
+                <h3><a th:href="'/p/' + ${row.person.memberId}"
+                       th:text="${row.person.displayName()}">Name</a></h3>
+                <!-- §8.2: Mutuals are displayed and never reorder. Plain names,
+                     not links: the People group is search's one people surface. -->
+                <p class="mutuals" th:if="${!row.mutuals.isEmpty()}"
+                   th:text="${row.mutualsLine()}">You both know someone</p>
+            </article>
+        </section>
+
+        <section class="block">
+            <h2>Companies</h2>
+            <p class="meta" th:if="${results.companies.isEmpty()}">No company by that name.</p>
+            <article class="entry" th:each="company : ${results.companies}">
+                <h3><a th:href="'/companies/' + ${company.id}" th:text="${company.name}">Name</a></h3>
+                <p th:if="${!company.description.isBlank()}"
+                   th:text="${company.description}">What they do</p>
+            </article>
+        </section>
+
+        <section class="block">
+            <h2>Posts</h2>
+            <p class="meta" th:if="${results.posts.isEmpty()}">Nothing written about that yet.</p>
+            <!-- The author is named, not linked: a post row is about the post. -->
+            <article class="entry" th:each="post : ${results.posts}">
+                <h3><a th:href="'/posts/' + ${post.id}" th:text="${post.excerpt}">The post</a></h3>
+                <p class="org">
+                    <span th:text="${post.author}">Author</span> ·
+                    <span class="when" th:text="${post.when}">1 Aug 2026</span>
+                </p>
+            </article>
+        </section>
+
+        <section class="block">
+            <h2>Jobs</h2>
+            <p class="meta" th:if="${results.jobs.isEmpty()}">No open posting matches that.</p>
+            <article class="entry" th:each="job : ${results.jobs}">
+                <h3><a th:href="'/jobs/' + ${job.id}" th:text="${job.title}">Title</a></h3>
+                <p class="org">
+                    <a th:href="'/companies/' + ${job.companyId}" th:text="${job.company}">Company</a> ·
+                    <span class="salary" th:text="${job.salaryLine}">£45,000–£60,000</span> ·
+                    <span class="when" th:text="${job.placeLine}">Hybrid — Leeds</span>
+                </p>
+            </article>
+        </section>
+
+    </th:block>
+</main>
+</body>
+</html>

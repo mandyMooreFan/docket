@@ -289,3 +289,14 @@ textarea.input { font-family: var(--serif); font-size: var(--t-18); line-height:
 .message .org { font-size: var(--t-13); font-weight: 600; color: var(--i500); margin: 0 0 var(--s-2); }
 .message .org .when { font-weight: 400; color: var(--i400); }
 .message.mine .org { color: var(--i400); }
+
+/* ---------- search (#37, §8): one box, four groups, one impersonal order ---------- */
+
+/* the app-bar box: a flex item between the nav and the right-hand cluster, so
+   it keeps the bar's 60px rhythm and the .search field's own surface language */
+.appbar-search { display: flex; align-items: center; }
+
+/* §8.2: Mutuals ride the row and never reorder it — the palest ink, sans,
+   because a shared Connection is something the app worked out, not something
+   a person wrote */
+.mutuals { font-size: var(--t-13); color: var(--i400); margin: var(--s-1) 0 0; }

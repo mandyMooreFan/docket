@@ -91,6 +91,32 @@ class BoardFilterTests extends JobsTestBase {
         assertThat(board("?q=Zorilla&company=elsewhere")).doesNotContain("Zorilla Analyst");
     }
 
+    /**
+     * #37 replaced the keyword's substring matching with the same Postgres
+     * full-text search /search uses. The board's shape is unchanged — one list,
+     * newest first, no ranking — but the keyword now stems, and it narrows to
+     * nothing rather than to everything when there is nothing in it to ask.
+     */
+    @Test
+    void theKeywordStemsAndStillDoesNotReorderTheList() throws Exception {
+        Cookie poster = posterAt("jobs-stem-poster@example.org", "Stem Poster",
+                "Stemworks Ltd", "stemworks-fl.example");
+        long company = companies.named("Stemworks Ltd").id();
+        postJob(poster, company, "Blimbering Engineer");
+        clock.advance(java.time.Duration.ofMinutes(1));
+        postJob(poster, company, "Blimbering Archivist");
+
+        // "engineers" reaches "Engineer"; substring matching never could.
+        assertThat(board("?q=engineers")).contains("Blimbering Engineer")
+                .doesNotContain("Blimbering Archivist");
+        // Newest first, exactly as before — the tsvector narrows, never ranks.
+        String both = board("?q=blimbering");
+        assertThat(both.indexOf("Blimbering Archivist"))
+                .isLessThan(both.indexOf("Blimbering Engineer"));
+        // Punctuation alone carries nothing to ask, so it selects nothing.
+        assertThat(board("?q=%25%25")).doesNotContain("Blimbering");
+    }
+
     @Test
     void rolesWhereIKnowSomeoneIsAFactAboutTheGraph() throws Exception {
         Cookie poster = posterAt("jobs-known-poster@example.org", "Kay Poster",

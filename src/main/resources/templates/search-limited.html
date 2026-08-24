@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Too many searches — Docket</title>
+</head>
+<body>
+<main class="page">
+    <header>
+        <h1 class="title-serif" style="font-size: var(--t-30);">That's a lot of searching.</h1>
+    </header>
+    <!-- §10.3: a system control applied to everyone, not moderation. It says
+         what it is, states the numbers, and makes no claim about the person
+         reading it — nothing has been recorded against anyone's account, there
+         is nothing to appeal, and the next window opens on the clock. -->
+    <div class="prose" style="margin-top: var(--s-6);">
+        <p>Search is capped for everyone: 60 searches every ten minutes signed in, 30 from
+            one address signed out. It's there because bulk querying is how a directory
+            gets scraped, and a cap is the honest way to stop it.</p>
+        <p>Nothing has happened to your account. Wait a few minutes and search again —
+            the limit clears on its own.</p>
+        <p><a href="/jobs">The jobs board</a> is still there in the meantime.</p>
+    </div>
+</main>
+</body>
+</html>

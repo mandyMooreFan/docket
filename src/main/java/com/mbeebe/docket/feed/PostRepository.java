@@ -1,6 +1,8 @@
 package com.mbeebe.docket.feed;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -17,4 +19,19 @@ interface PostRepository extends JpaRepository<Post, Long> {
      */
     List<Post> findByAuthorIdInAndCreatedAtAfterOrderByCreatedAtDescIdDesc(
             Collection<Long> authorIds, Instant after);
+
+    /**
+     * §8's post group: body matches, ranked by the text and tied on the id
+     * (§8.2). Candidates only — who may read each one is
+     * {@link PostService#visibleTo}'s answer, derived after the match, so the
+     * author's Dial and §9.4's permanent cap are never baked into the index.
+     */
+    @Query(value = """
+            select p.* from post p
+            where p.body_tsv @@ to_tsquery('english'::regconfig, cast(:tsquery as text))
+            order by ts_rank(p.body_tsv, to_tsquery('english'::regconfig, cast(:tsquery as text))) desc,
+                     p.id asc
+            limit :limit
+            """, nativeQuery = true)
+    List<Post> bodyCandidates(@Param("tsquery") String tsquery, @Param("limit") int limit);
 }

@@ -22,6 +22,13 @@
                                               th:text="${unread}">1</span></a>
             <a href="/network">Network</a>
         </nav>
+        <!-- §8: one box in the app bar, returning people, companies, posts and
+             jobs. A GET, so a search is a link; the page itself carries the one
+             tickable filter (§8.2) rather than crowding the bar with it. -->
+        <form class="appbar-search" method="get" action="/search" role="search">
+            <input class="search" type="search" name="q" placeholder="Search"
+                   aria-label="Search Docket">
+        </form>
         <div class="right">
             <!-- AGPL §13: durable Source link, reachable from every page, logged in or out -->
             <a class="source-link" href="https://github.com/mandyMooreFan/docket">Source</a>
