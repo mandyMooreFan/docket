@@ -35,28 +35,39 @@ class StatutorySurfaceTests extends ModerationTestBase {
 
     @Test
     void theSafetyPageStatesTheRealResponseExpectationRatherThanImplyingADesk() throws Exception {
-        String safety = mvc.perform(get("/safety"))
+        String safety = flat(mvc.perform(get("/safety"))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse().getContentAsString());
 
         // §10.1 requires this said in plain words, and requires it not be dressed up.
         assertThat(safety).contains("One person reviews reports");
         assertThat(safety).contains("one timezone");
+        // The page may say what it is NOT ("not a service level"); what it may not do is
+        // imply a staffed desk that does not exist.
+        assertThat(safety).contains("not a service level");
         assertThat(safety).doesNotContainIgnoringCase("our team");
         assertThat(safety).doesNotContainIgnoringCase("24/7");
-        assertThat(safety).doesNotContainIgnoringCase("service level");
+        assertThat(safety).doesNotContainIgnoringCase("within 24 hours");
     }
 
     @Test
     void theConductPolicyEnumeratesSixThingsAndSaysEverythingElseIsNotAnOffence() throws Exception {
-        String conduct = mvc.perform(get("/conduct"))
+        String conduct = flat(mvc.perform(get("/conduct"))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse().getContentAsString());
 
         assertThat(conduct).contains("Everything not on it is not an offence");
-        for (ReportCategory category : ReportCategory.values()) {
-            assertThat(conduct).contains(category.label());
-        }
+        // The six of §10.6, in the policy's own words. Deliberately not asserted against
+        // ReportCategory's labels: those are the reporter's phrasing on a form ("Harassing
+        // someone"), and the policy states the rule ("Harass a specific member"). Binding
+        // the page to the enum's wording would be testing that two different voices are
+        // the same voice.
+        assertThat(conduct).containsIgnoringCase("Post or send illegal content");
+        assertThat(conduct).containsIgnoringCase("Impersonate a specific real person");
+        assertThat(conduct).containsIgnoringCase("Harass a specific member");
+        assertThat(conduct).containsIgnoringCase("bulk or commercial spam");
+        assertThat(conduct).containsIgnoringCase("pornographic content");
+        assertThat(conduct).containsIgnoringCase("suicide, self-harm, or eating disorders");
         // §9.5: "for all users" is load-bearing — it is what disapplies s.12(5)'s
         // mandatory age assurance, and narrowing it to minors would reopen §9 silently.
         assertThat(conduct).contains("applies to everyone here, not only to members under 18");
@@ -70,13 +81,13 @@ class StatutorySurfaceTests extends ModerationTestBase {
         long postId = compose(author, "A post that ends up in the counts.");
         report(reporter, "POST", postId, "SPAM", "This is an advert.");
         Cookie ownerSession = owner();
-        act(ownerSession, oldestOpenReportId(ownerSession), "dismiss",
+        act(ownerSession, reportIdForPost(ownerSession, postId), "dismiss",
                 "reason", "It is not an advert.");
 
         // Public: a log only the moderated can read is not transparency.
-        String log = mvc.perform(get("/transparency"))
+        String log = flat(mvc.perform(get("/transparency"))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse().getContentAsString());
 
         assertThat(log).contains("Bulk or commercial spam");
         // No names, either side of the report.
@@ -90,9 +101,9 @@ class StatutorySurfaceTests extends ModerationTestBase {
 
     @Test
     void theTransparencyLogHasNoRowForReachReductionBecauseThereIsNone() throws Exception {
-        String log = mvc.perform(get("/transparency"))
+        String log = flat(mvc.perform(get("/transparency"))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse().getContentAsString());
 
         // §10.3 refuses visibility limiting and shadowbanning outright. The log saying
         // so is the cheapest place to notice if that ever stopped being true.
@@ -103,9 +114,9 @@ class StatutorySurfaceTests extends ModerationTestBase {
 
     @Test
     void theDataProtectionRouteIsItsOwnFormAndAcknowledgesOnReceipt() throws Exception {
-        String form = mvc.perform(get("/data-protection"))
+        String form = flat(mvc.perform(get("/data-protection"))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse().getContentAsString());
         // §11.3 and §15.3: distinct from the moderation report flow and from §10.5's.
         assertThat(form).contains("not the route for reporting a post");
         assertThat(form).contains("You do not need an account");
@@ -134,12 +145,12 @@ class StatutorySurfaceTests extends ModerationTestBase {
         report(reporter, "POST", postId, "ILLEGAL_CONTENT", "This looks unlawful to me.");
         Cookie ownerSession = owner();
 
-        act(ownerSession, oldestOpenReportId(ownerSession), "remove",
+        act(ownerSession, reportIdForPost(ownerSession, postId), "remove",
                 "reason", "Unlawful under the Act.");
 
         List<String> toAuthor = mailBodiesFor("mod-stat-sor-a@example.org");
         assertThat(toAuthor).isNotEmpty();
-        String statement = toAuthor.getLast();
+        String statement = flat(toAuthor.getLast());
         // DSA Art. 17's five contents, as far as they apply here (§15.4: v1 does not
         // target the EU, so they are carried rather than owed).
         assertThat(statement).contains("removed");                       // what was done

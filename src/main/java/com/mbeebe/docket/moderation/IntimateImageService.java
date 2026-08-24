@@ -192,8 +192,11 @@ class IntimateImageService {
     }
 
     @Transactional(readOnly = true)
-    List<IntimateImageReport> queue() {
-        return reports.findByDecidedAtIsNullOrderByCreatedAtAscIdAsc();
+    List<IntimateImageView> queue() {
+        return reports.findByDecidedAtIsNullOrderByCreatedAtAscIdAsc().stream()
+                .map(report -> new IntimateImageView(report.id(), report.locator(),
+                        !holds.findByReportIdOrderByIdAsc(report.id()).isEmpty()))
+                .toList();
     }
 
     /**

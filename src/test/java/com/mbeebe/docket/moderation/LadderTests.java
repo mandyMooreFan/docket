@@ -27,10 +27,10 @@ class LadderTests extends ModerationTestBase {
     void aWithdrawalTakesTheOneThingMisusedAndLeavesTheRest() throws Exception {
         Cookie author = completeMember("mod-lad-prop-a@example.org", "Proportional Author");
         Cookie reporter = completeMember("mod-lad-prop-b@example.org", "Proportional Reporter");
-        reportedPostBy(author, reporter, "A post that led to a withdrawal.");
+        long postId = reportedPostBy(author, reporter, "A post that led to a withdrawal.");
         Cookie ownerSession = owner();
 
-        act(ownerSession, oldestOpenReportId(ownerSession), "withdraw",
+        act(ownerSession, reportIdForPost(ownerSession, postId), "withdraw",
                 "capability", "POST", "reason", "Repeatedly aimed at one person.");
 
         // The rung that was applied bites...
@@ -45,15 +45,15 @@ class LadderTests extends ModerationTestBase {
     void aWithdrawnCapabilityIsNotDescribedAsOneNeverEarned() throws Exception {
         Cookie author = completeMember("mod-lad-told-a@example.org", "Told Author");
         Cookie reporter = completeMember("mod-lad-told-b@example.org", "Told Reporter");
-        reportedPostBy(author, reporter, "A post that gets its capability withdrawn.");
+        long postId = reportedPostBy(author, reporter, "A post that gets its capability withdrawn.");
         Cookie ownerSession = owner();
 
-        act(ownerSession, oldestOpenReportId(ownerSession), "withdraw",
+        act(ownerSession, reportIdForPost(ownerSession, postId), "withdraw",
                 "capability", "POST", "reason", "Aimed at one person, repeatedly.");
 
         // §10.3: "the member is told which they are in". The Profile here is complete,
         // so "finish your profile" would be both wrong and impossible to act on.
-        String standing = standingSeenBy(author);
+        String standing = flat(standingSeenBy(author));
         assertThat(standing).contains("A capability was withdrawn");
         assertThat(standing).contains("Aimed at one person, repeatedly.");
         assertThat(standing).doesNotContainIgnoringCase("not yet earned");
@@ -65,7 +65,7 @@ class LadderTests extends ModerationTestBase {
     void aMemberWithNothingAgainstThemIsToldThatPlainly() throws Exception {
         Cookie clean = completeMember("mod-lad-clean@example.org", "Clean Member");
 
-        String standing = standingSeenBy(clean);
+        String standing = flat(standingSeenBy(clean));
         assertThat(standing).contains("Nothing has been taken from your account");
         // The never-earned side, said out loud rather than by absence.
         assertThat(standing).contains("has not been earned yet");
@@ -75,10 +75,10 @@ class LadderTests extends ModerationTestBase {
     void suspensionIsReadOnlyAndTheMemberCanStillSignInAndAppeal() throws Exception {
         Cookie author = completeMember("mod-lad-susp-a@example.org", "Suspended Author");
         Cookie reporter = completeMember("mod-lad-susp-b@example.org", "Suspending Reporter");
-        reportedPostBy(author, reporter, "A post that leads to a suspension.");
+        long postId = reportedPostBy(author, reporter, "A post that leads to a suspension.");
         Cookie ownerSession = owner();
 
-        act(ownerSession, oldestOpenReportId(ownerSession), "suspend",
+        act(ownerSession, reportIdForPost(ownerSession, postId), "suspend",
                 "reason", "A pattern of it, not one post.");
 
         // Reading is untouched — the whole difference between rung 3 and rung 4.
@@ -94,10 +94,7 @@ class LadderTests extends ModerationTestBase {
 
         // §10.3 gives one Appeal, and a suspension that swallowed it would make the
         // remedy imaginary — so this POST is deliberately still allowed through.
-        long actionId = appealableActionId(author);
-        mvc.perform(post("/appeals/" + actionId).cookie(author)
-                        .param("account", "The pattern was three years ago."))
-                .andExpect(status().is3xxRedirection());
+        appeal(author, appealableActionId(author), "The pattern was three years ago.");
     }
 
     @Test
@@ -107,7 +104,7 @@ class LadderTests extends ModerationTestBase {
         long postId = reportedPostBy(author, reporter, "A post that will be removed outright.");
         Cookie ownerSession = owner();
 
-        act(ownerSession, oldestOpenReportId(ownerSession), "remove",
+        act(ownerSession, reportIdForPost(ownerSession, postId), "remove",
                 "reason", "Illegal content.");
 
         // §10.3 refuses shadowbanning: "covert reach reduction is a lie told to a member
@@ -123,10 +120,10 @@ class LadderTests extends ModerationTestBase {
     void terminationEndsTheSessionsAsWellAsTheMember() throws Exception {
         Cookie author = completeMember("mod-lad-term-a@example.org", "Ending Author");
         Cookie reporter = completeMember("mod-lad-term-b@example.org", "Ending Reporter");
-        reportedPostBy(author, reporter, "A post that ends an account.");
+        long postId = reportedPostBy(author, reporter, "A post that ends an account.");
         Cookie ownerSession = owner();
 
-        act(ownerSession, oldestOpenReportId(ownerSession), "terminate",
+        act(ownerSession, reportIdForPost(ownerSession, postId), "terminate",
                 "reason", "Illegal content, not a first time.");
 
         // The door is closable from the other side: the Member is elsewhere when this
@@ -139,9 +136,9 @@ class LadderTests extends ModerationTestBase {
     void aDecidedReportCannotBeDecidedTwice() throws Exception {
         Cookie author = completeMember("mod-lad-twice-a@example.org", "Twice Author");
         Cookie reporter = completeMember("mod-lad-twice-b@example.org", "Twice Reporter");
-        reportedPostBy(author, reporter, "A post decided once.");
+        long postId = reportedPostBy(author, reporter, "A post decided once.");
         Cookie ownerSession = owner();
-        long reportId = oldestOpenReportId(ownerSession);
+        long reportId = reportIdForPost(ownerSession, postId);
 
         act(ownerSession, reportId, "dismiss", "reason", "Nothing wrong with it.");
 

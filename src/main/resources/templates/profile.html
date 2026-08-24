@@ -18,6 +18,11 @@
         </p>
         <!-- §4.2: the connection count — the only number the graph shows. -->
         <p class="meta" style="margin-top: var(--s-2);" th:text="${graph.connectionsLabel()}">No connections yet.</p>
+        <!--/* §10.2: a Profile is reportable. Not shown on your own page — reporting
+               yourself is not a thing the product needs to offer. */-->
+        <p class="meta" th:if="${currentMember != null and !profile.owner}">
+            <a th:href="'/report/PROFILE/' + ${profile.memberId}">Report this profile</a>
+        </p>
         <div th:if="${profile.owner}" style="margin-top: var(--s-6);">
             <a class="btn" href="/profile/edit">Edit profile</a>
         </div>

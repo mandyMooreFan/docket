@@ -22,15 +22,18 @@
     </div>
 
     <article class="entry" th:each="notice : ${notices}">
-        <h3 th:switch="${notice.kind().name()}">
+        <h3 th:switch="${notice.kind()}">
             <span th:case="'WITHDRAWAL'">A capability was withdrawn</span>
             <span th:case="'SUSPENSION'">Your account is read-only</span>
             <span th:case="'TERMINATION'">Your account has been terminated</span>
             <span th:case="*">A decision was made about your account</span>
         </h3>
         <p class="org">
-            <span th:if="${notice.capability() != null}" th:text="${notice.capability()}">POST</span>
-            <span th:text="${notice.indefinite()} ? 'Indefinitely' : 'For a stated period'">Indefinitely</span>
+            <span th:if="${!notice.capability().isEmpty()}" th:text="${notice.capability()}">POST</span>
+            <!--/* Indefinite is a real answer and is said plainly, never disguised as a
+                   date far away. §10.3 requires the period be stated either way. */-->
+            <span th:if="${notice.indefinite()}">Indefinitely</span>
+            <span th:if="${!notice.indefinite()}" th:text="'Until ' + ${notice.until()}">Until then</span>
         </p>
         <div class="prose" th:text="${notice.reason()}">why</div>
         <p class="meta">

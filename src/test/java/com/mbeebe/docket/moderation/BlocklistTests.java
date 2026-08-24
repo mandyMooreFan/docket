@@ -52,15 +52,22 @@ class BlocklistTests extends ModerationTestBase {
         return out.toByteArray();
     }
 
+    /**
+     * A genuinely unrelated picture: four wide vertical bands.
+     *
+     * <p>The bands are 100px on a 400px canvas deliberately. A difference hash compares
+     * each pixel with its right-hand neighbour on a 9×8 thumbnail, so fine stripes wash
+     * out to flat grey under the downscale and land on the same near-zero hash as a
+     * smooth gradient — which is a property of the fixture, not of the hash, and it is
+     * worth not writing a test that mistakes one for the other.
+     */
     private static byte[] differentPicture() throws IOException {
-        BufferedImage image = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+        BufferedImage image = new BufferedImage(400, 400, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = image.createGraphics();
         try {
-            g.setColor(Color.WHITE);
-            g.fillRect(0, 0, 200, 200);
-            g.setColor(Color.BLACK);
-            for (int i = 0; i < 200; i += 20) {
-                g.fillRect(i, 0, 10, 200);
+            for (int band = 0; band < 4; band++) {
+                g.setColor(band % 2 == 0 ? Color.WHITE : Color.BLACK);
+                g.fillRect(band * 100, 0, 100, 400);
             }
         } finally {
             g.dispose();
@@ -86,7 +93,11 @@ class BlocklistTests extends ModerationTestBase {
         long other = PerceptualHash.of(differentPicture()).orElseThrow();
 
         // The error that matters in this direction: a false match is a refusal to store
-        // somebody's legitimate photograph.
+        // somebody's legitimate photograph. Asserting the distance rather than only the
+        // verdict, so a future failure says how close it came rather than just "true".
+        assertThat(PerceptualHash.distance(one, other))
+                .as("two unrelated pictures should be far apart, not marginal")
+                .isGreaterThan(PerceptualHash.SUBSTANTIALLY_THE_SAME);
         assertThat(PerceptualHash.substantiallyTheSame(one, other)).isFalse();
     }
 

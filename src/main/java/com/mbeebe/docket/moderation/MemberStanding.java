@@ -7,8 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
+import java.util.Locale;
 
 /**
  * Where a Member stands against §10.3's ladder, derived at the ask from the action
@@ -24,6 +25,9 @@ import java.util.Optional;
  */
 @Service
 class MemberStanding implements WithdrawnCapabilities {
+
+    private static final DateTimeFormatter DAY =
+            DateTimeFormatter.ofPattern("d MMM uuuu", Locale.UK);
 
     private final ModerationActionRepository actions;
     private final MemberTerminationRepository terminations;
@@ -76,30 +80,17 @@ class MemberStanding implements WithdrawnCapabilities {
                 .filter(action -> action.kind() != ModerationAction.Kind.REMOVAL)
                 .map(action -> new StandingNotice(
                         action.id(),
-                        action.kind(),
-                        action.capability(),
+                        action.kind().name(),
+                        action.capability() == null ? "" : action.capability().name(),
                         action.reason(),
-                        Optional.ofNullable(action.until()),
-                        action.actedAt()))
+                        action.until() == null ? "" : DAY.withZone(clock.getZone())
+                                .format(action.until()),
+                        action.until() == null))
                 .toList();
     }
 
     private java.util.stream.Stream<ModerationAction> live(long memberId, Instant now) {
         return actions.findByMemberIdAndReversedAtIsNull(memberId).stream()
                 .filter(action -> action.inForceAt(now));
-    }
-
-    /** One standing rung, in the words the Member reads. */
-    record StandingNotice(long actionId,
-                          ModerationAction.Kind kind,
-                          Capability capability,
-                          String reason,
-                          Optional<Instant> until,
-                          Instant actedAt) {
-
-        /** Indefinite is a real answer and is said plainly, never disguised as a long date. */
-        boolean indefinite() {
-            return until.isEmpty();
-        }
     }
 }

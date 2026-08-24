@@ -89,9 +89,9 @@ class IntimateImageRouteTests extends ModerationTestBase {
         mvc.perform(get("/posts/" + postId).cookie(reader)).andExpect(status().isNotFound());
 
         Cookie ownerSession = owner();
-        String queue = mvc.perform(get("/moderation/intimate-images").cookie(ownerSession))
+        String queue = flat(mvc.perform(get("/moderation/intimate-images").cookie(ownerSession))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse().getContentAsString());
         assertThat(queue).contains("/posts/" + postId);
         long reportId = Long.parseLong(queue.replaceAll(
                 "(?s).*?/moderation/intimate-images/(\\d+).*", "$1"));
@@ -127,13 +127,13 @@ class IntimateImageRouteTests extends ModerationTestBase {
         // §10.5 accepts an imprecise location, because a non-member cannot see a private
         // Thread. The product must not guess — taking down somebody else's post on a
         // guess would be a worse failure than saying it could not act yet.
-        String page = mvc.perform(post("/safety/intimate-image")
+        String page = flat(mvc.perform(post("/safety/intimate-image")
                         .param("locator", "a photo of me somewhere in his messages")
                         .param("subjectDeclared", "true")
                         .param("goodFaith", "true")
                         .param("contact", "mod-iir-vague@example.org"))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse().getContentAsString());
 
         assertThat(page).contains("could not work out");
         assertThat(page).contains("not going to guess");
@@ -141,9 +141,9 @@ class IntimateImageRouteTests extends ModerationTestBase {
 
     @Test
     void theRouteNeedsNoAccountAndIsReachableLoggedOut() throws Exception {
-        String form = mvc.perform(get("/safety/intimate-image"))
+        String form = flat(mvc.perform(get("/safety/intimate-image"))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse().getContentAsString());
 
         assertThat(form).contains("you do not need an account");
         // A distinct route, not the general report flow (§10.5).
@@ -155,13 +155,13 @@ class IntimateImageRouteTests extends ModerationTestBase {
         for (int i = 0; i < IntimateImageService.MAX_PER_ADDRESS_PER_HOUR; i++) {
             submit("nothing precise " + i, "mod-iir-flood@example.org");
         }
-        String page = mvc.perform(post("/safety/intimate-image")
+        String page = flat(mvc.perform(post("/safety/intimate-image")
                         .param("locator", "one more")
                         .param("subjectDeclared", "true")
                         .param("goodFaith", "true")
                         .param("contact", "mod-iir-flood@example.org"))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse().getContentAsString());
 
         assertThat(page).contains("Too many reports");
         // Rate-limited is not a dead end for someone in real trouble.

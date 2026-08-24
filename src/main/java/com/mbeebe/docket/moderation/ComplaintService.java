@@ -75,8 +75,11 @@ class ComplaintService {
     }
 
     @Transactional(readOnly = true)
-    List<DataProtectionComplaint> open() {
-        return complaints.findByRespondedAtIsNullOrderByCreatedAtAscIdAsc();
+    List<ComplaintView> open() {
+        return complaints.findByRespondedAtIsNullOrderByCreatedAtAscIdAsc().stream()
+                .map(complaint -> new ComplaintView(
+                        complaint.id(), complaint.contact(), complaint.account()))
+                .toList();
     }
 
     @Transactional

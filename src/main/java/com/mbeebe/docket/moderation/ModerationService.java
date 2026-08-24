@@ -87,28 +87,23 @@ class ModerationService {
     @Transactional(readOnly = true)
     List<QueueEntry> queue() {
         return reports.findByDecidedAtIsNullOrderByCreatedAtAscIdAsc().stream()
-                .map(report -> new QueueEntry(
-                        report.id(),
-                        report.targetKind(),
-                        report.targetId(),
-                        report.category(),
-                        report.account(),
-                        report.createdAt(),
-                        content.forModeration(report.targetKind(), report.targetId())))
+                .map(this::entryFor)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     Optional<QueueEntry> queueEntry(long reportId) {
-        return reports.findById(reportId)
-                .map(report -> new QueueEntry(
-                        report.id(),
-                        report.targetKind(),
-                        report.targetId(),
-                        report.category(),
-                        report.account(),
-                        report.createdAt(),
-                        content.forModeration(report.targetKind(), report.targetId())));
+        return reports.findById(reportId).map(this::entryFor);
+    }
+
+    private QueueEntry entryFor(Report report) {
+        return new QueueEntry(
+                report.id(),
+                report.targetKind(),
+                report.category(),
+                report.account(),
+                report.createdAt(),
+                content.forModeration(report.targetKind(), report.targetId()));
     }
 
     /**
@@ -214,8 +209,10 @@ class ModerationService {
     }
 
     @Transactional(readOnly = true)
-    List<Appeal> openAppeals() {
-        return appeals.findByDecidedAtIsNullOrderByMadeAtAscIdAsc();
+    List<AppealView> openAppeals() {
+        return appeals.findByDecidedAtIsNullOrderByMadeAtAscIdAsc().stream()
+                .map(appeal -> new AppealView(appeal.id(), appeal.account()))
+                .toList();
     }
 
     /**
@@ -294,18 +291,4 @@ class ModerationService {
                 .withZone(clock.getZone()).format(instant);
     }
 
-    /** One open Report as the queue shows it, with the item itself alongside. */
-    record QueueEntry(long reportId,
-                      TargetKind targetKind,
-                      long targetId,
-                      ReportCategory category,
-                      String account,
-                      Instant createdAt,
-                      Optional<ReportableContent.ReportedItem> item) {
-
-        /** An item that has since gone: the Report still needs deciding, honestly. */
-        boolean itemGone() {
-            return item.isEmpty();
-        }
-    }
 }

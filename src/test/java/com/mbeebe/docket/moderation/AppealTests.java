@@ -4,8 +4,6 @@ import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -19,14 +17,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 class AppealTests extends ModerationTestBase {
 
-    private static final Pattern APPEAL_FORM = Pattern.compile("/moderation/appeals/(\\d+)");
-
     private long withdrawPostingFrom(Cookie author, Cookie reporter) throws Exception {
         connect(author, reporter);
         long postId = compose(author, "A post that draws a withdrawal.");
         report(reporter, "POST", postId, "SPAM", "Adverts, over and over.");
         Cookie ownerSession = owner();
-        act(ownerSession, oldestOpenReportId(ownerSession), "withdraw",
+        act(ownerSession, reportIdForPost(ownerSession, postId), "withdraw",
                 "capability", "POST", "reason", "Repeated advertising.");
         return appealableActionId(author);
     }
@@ -37,17 +33,15 @@ class AppealTests extends ModerationTestBase {
         Cookie reporter = completeMember("mod-app-one-b@example.org", "Appealing Reporter");
         long actionId = withdrawPostingFrom(author, reporter);
 
-        mvc.perform(post("/appeals/" + actionId).cookie(author)
-                        .param("account", "The posts were about my own work."))
-                .andExpect(status().is3xxRedirection());
+        appeal(author, actionId, "The posts were about my own work.");
 
         String second = mvc.perform(post("/appeals/" + actionId).cookie(author)
                         .param("account", "Let me try that again."))
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn().getResponse().getContentAsString();
 
-        assertThat(second).contains("already appealed");
-        assertThat(second).contains("there is one appeal");
+        assertThat(flat(second)).contains("already appealed");
+        assertThat(flat(second)).containsIgnoringCase("there is one appeal");
     }
 
     @Test
@@ -56,9 +50,9 @@ class AppealTests extends ModerationTestBase {
         Cookie reporter = completeMember("mod-app-hon-b@example.org", "Honest Reporter");
         long actionId = withdrawPostingFrom(author, reporter);
 
-        String page = mvc.perform(get("/appeals/" + actionId).cookie(author))
+        String page = flat(mvc.perform(get("/appeals/" + actionId).cookie(author))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse().getContentAsString());
 
         // §10.3 requires the honesty, and the product must not imply a second opinion
         // it does not have.
@@ -76,14 +70,15 @@ class AppealTests extends ModerationTestBase {
         mvc.perform(post("/posts").cookie(author).param("body", "Blocked while withdrawn."))
                 .andExpect(status().isForbidden());
 
-        mvc.perform(post("/appeals/" + actionId).cookie(author)
-                        .param("account", "They were my own projects, not adverts."))
-                .andExpect(status().is3xxRedirection());
+        appeal(author, actionId, "They were my own projects, not adverts.");
 
+        // One sign-in, reused. Each owner() spends a magic-link request, and §3.3 allows
+        // three per address per hour — three calls in one test would sit exactly on the
+        // limit and the next edit to this test would push it over.
         Cookie ownerSession = owner();
-        Matcher matcher = APPEAL_FORM.matcher(queueSeenBy(ownerSession));
-        assertThat(matcher.find()).isTrue();
-        long appealId = Long.parseLong(matcher.group(1));
+        // Scoped to this appeal's own words, not the first in the queue: the container
+        // is shared, so the queue carries other suites' open appeals too.
+        long appealId = appealIdFor(ownerSession, "They were my own projects, not adverts.");
 
         mvc.perform(post("/moderation/appeals/" + appealId).cookie(ownerSession)
                         .param("outcome", "UPHELD")
@@ -97,7 +92,7 @@ class AppealTests extends ModerationTestBase {
         List<String> mail = mailBodiesFor("mod-app-up-a@example.org");
         assertThat(mail.getLast()).contains("Your appeal succeeded");
         // Nothing stands against them any more.
-        assertThat(standingSeenBy(author)).contains("Nothing has been taken from your account");
+        assertThat(flat(standingSeenBy(author))).contains("Nothing has been taken from your account");
     }
 
     @Test

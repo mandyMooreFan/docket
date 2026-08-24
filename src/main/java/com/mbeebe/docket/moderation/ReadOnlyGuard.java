@@ -57,7 +57,8 @@ class ReadOnlyGuard implements WebMvcConfigurer {
     private class Guard implements HandlerInterceptor {
 
         @Override
-        public boolean preHandle(HttpServletRequest request, HttpServletResponse response) {
+        public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
+                                 Object handler) {
             if (safe(request.getMethod()) || allowed(request.getRequestURI())) {
                 return true;
             }

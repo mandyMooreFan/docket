@@ -35,10 +35,29 @@ class CapabilityTests extends DocketTestBase {
     void aFreshMemberCanReadEverythingButDoNothingToAnyone() throws Exception {
         long member = memberId(signUpAndIn("lurker@example.org"));
         for (Capability capability : Capability.values()) {
+            if (!capability.earnedByCompleteness()) {
+                continue;
+            }
             assertThat(capabilities.may(member, capability))
                     .as("a fresh account holds no %s", capability)
                     .isEqualTo(CapabilityAnswer.NOT_YET_EARNED);
         }
+    }
+
+    /**
+     * §3.2's withheld list does not include replying, and #38 made that explicit rather
+     * than changing it: {@code PostService.reply} never asked for a Capability, because
+     * "the Connection itself was the earned thing". REPLY exists as a Capability only
+     * so §10.3 can withdraw it — it names Replies among the four things a Withdrawal
+     * can take — so it is the one Capability that is never NOT_YET_EARNED.
+     */
+    @Test
+    void replyingWasNeverWithheldByCompletenessAndStillIsNot() throws Exception {
+        long member = memberId(signUpAndIn("lurker-reply@example.org"));
+
+        assertThat(capabilities.may(member, Capability.REPLY))
+                .isEqualTo(CapabilityAnswer.YES);
+        assertThat(Capability.REPLY.earnedByCompleteness()).isFalse();
     }
 
     @Test
@@ -78,6 +97,14 @@ class CapabilityTests extends DocketTestBase {
                        or column_name in ('complete', 'completeness', 'capability',
                                           'indexable', 'visible', 'effective_visibility',
                                           'searchable'))
+                  -- moderation_action.capability is the one column allowed to carry the
+                  -- word, and it is the subject of a fact rather than a conclusion: it
+                  -- records WHICH Capability a §10.3 Withdrawal took, not whether some
+                  -- Member holds one. The conclusion is still derived at every ask, by
+                  -- CapabilityService reading these rows — which is exactly what the
+                  -- tests above prove. Deliberately narrow: any other table growing a
+                  -- 'capability' column still trips this.
+                  and table_name || '.' || column_name <> 'moderation_action.capability'
                 """, String.class);
         assertThat(suspicious).isEmpty();
     }

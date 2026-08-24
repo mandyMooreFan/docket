@@ -27,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
  * did before.
  */
 @Component
-@Primary
 class BlocklistImageChecks implements ImageChecks {
 
     private final BlockedImageHashRepository blocked;

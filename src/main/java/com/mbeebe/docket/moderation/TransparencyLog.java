@@ -3,7 +3,6 @@ package com.mbeebe.docket.moderation;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 
@@ -26,58 +25,30 @@ class TransparencyLog {
 
     private final ReportRepository reports;
     private final ModerationActionRepository actions;
-    private final IntimateImageReportRepository intimateImages;
-    private final Clock clock;
 
-    TransparencyLog(ReportRepository reports, ModerationActionRepository actions,
-                    IntimateImageReportRepository intimateImages, Clock clock) {
+    TransparencyLog(ReportRepository reports, ModerationActionRepository actions) {
         this.reports = reports;
         this.actions = actions;
-        this.intimateImages = intimateImages;
-        this.clock = clock;
     }
 
     @Transactional(readOnly = true)
-    Page since(Instant since) {
-        List<Row> rows = reports.countsByCategorySince(since).stream()
-                .map(count -> new Row(count.getCategory(), count.getReceived(),
+    TransparencyPage since(Instant since) {
+        List<TransparencyPage.Row> rows = reports.countsByCategorySince(since).stream()
+                .map(count -> new TransparencyPage.Row(count.getCategory(), count.getReceived(),
                         count.getUpheld(), count.getDismissed()))
                 .toList();
-        return new Page(
-                since,
+        return new TransparencyPage(
                 rows,
-                rows.stream().mapToLong(Row::received).sum(),
+                rows.stream().mapToLong(TransparencyPage.Row::received).sum(),
                 actions.countByActedAtAfterAndKind(since, ModerationAction.Kind.REMOVAL),
                 actions.countByActedAtAfterAndKind(since, ModerationAction.Kind.WITHDRAWAL),
                 actions.countByActedAtAfterAndKind(since, ModerationAction.Kind.SUSPENSION),
-                actions.countByActedAtAfterAndKind(since, ModerationAction.Kind.TERMINATION),
-                intimateImages.countByDecidedAtIsNull());
+                actions.countByActedAtAfterAndKind(since, ModerationAction.Kind.TERMINATION));
     }
 
+    /** §15.5: the log is forever, so the default view is everything there has ever been. */
     @Transactional(readOnly = true)
-    Page everything() {
+    TransparencyPage everything() {
         return since(Instant.EPOCH);
-    }
-
-    Clock clock() {
-        return clock;
-    }
-
-    /** One category's row. Counts only — the type cannot carry a name. */
-    record Row(ReportCategory category, long received, long upheld, long dismissed) {
-    }
-
-    record Page(Instant since,
-                List<Row> rows,
-                long received,
-                long removals,
-                long withdrawals,
-                long suspensions,
-                long terminations,
-                long intimateImageReportsOpen) {
-
-        boolean empty() {
-            return received == 0;
-        }
     }
 }

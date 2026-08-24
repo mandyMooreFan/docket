@@ -150,6 +150,9 @@ class MessagingEndingTests extends MessagingTestBase {
         return page.replace(otherName, "NAME")
                 .replace(ownEmail + "@example.org", "self@example.org")
                 .replaceAll("/(messages|p)/\\d+", "/x/N")
-                .replaceAll("message-\\d+", "message-N");
+                .replaceAll("message-\\d+", "message-N")
+                // §10.2 put a report link on every Message. Its row id says no more
+                // about how the Thread closed than the anchor id beside it does.
+                .replaceAll("/report/MESSAGE/\\d+", "/report/MESSAGE/N");
     }
 }

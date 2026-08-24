@@ -14,6 +14,9 @@
         <p class="meta" th:if="${company.signedIn}">
             <a th:href="'/companies/' + ${company.id} + '/history'">Page history</a>
             <a th:if="${company.mayEdit}" th:href="'/companies/' + ${company.id} + '/edit'">Edit this page</a>
+            <!--/* §10.2: Companies and their pages are reportable — §10.3's answer to a
+                   joke or spam entity is reactive cleanup, and this is how it is told. */-->
+            <a th:href="'/report/COMPANY/' + ${company.id}">Report</a>
         </p>
     </header>
 

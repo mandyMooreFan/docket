@@ -27,6 +27,10 @@
                 <p class="org">
                     <span th:text="${message.author.displayName()}">Name</span> ·
                     <span class="when" th:text="${message.when}">1 Aug 2026, 09:12</span>
+                    <!--/* §10.2: a Message in a Thread you are part of is reportable,
+                           and one in a Thread you are not part of is not — which is
+                           enforced at the service, not by the absence of this link. */-->
+                    · <a class="quiet" th:href="'/report/MESSAGE/' + ${message.id}">Report</a>
                 </p>
                 <!-- Serif: a person wrote these words (§2). -->
                 <div class="prose" th:utext="${message.bodyHtml}"></div>

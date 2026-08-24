@@ -52,9 +52,19 @@
                 <li><strong th:text="${log.suspensions()}">0</strong> accounts made read-only</li>
                 <li><strong th:text="${log.terminations()}">0</strong> accounts terminated</li>
             </ul>
-            <p>No entry for reach reduction or visibility limiting, because Docket does
-                not do either. There is no ranking to turn down, and a removal is total
-                and disclosed to the person it happened to.</p>
+        </div>
+    </div>
+
+    <!--/* Outside the empty-state guard on purpose. The refusal is true of a log with
+           nothing in it, and that is precisely when a reader has no counts to infer it
+           from — so §10.3's outright refusal of visibility limiting and shadowbanning
+           is stated here unconditionally. */-->
+    <div class="block">
+        <h2>What is not counted here</h2>
+        <div class="prose">
+            <p>No entry for reach reduction or visibility limiting, because Docket does not do either.
+                There is no ranking to turn down, and a removal is total and disclosed to the person
+                it happened to.</p>
         </div>
     </div>
 </main>
