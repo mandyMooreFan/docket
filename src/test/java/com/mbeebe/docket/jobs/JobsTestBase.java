@@ -95,13 +95,17 @@ public abstract class JobsTestBase extends GraphTestBase {
         return Long.parseLong(matcher.group(1));
     }
 
-    /** Every message GreenMail holds for one recipient — mailbox-scoped, never global. */
+    /**
+     * Every message GreenMail holds for one recipient — mailbox-scoped, never
+     * global. Decoded via getContent(), not getBody(): quoted-printable soft
+     * line breaks would otherwise split the very phrases under assertion.
+     */
     protected List<String> mailBodiesFor(String recipient) throws Exception {
         List<String> bodies = new ArrayList<>();
         for (MimeMessage message : greenMail.getReceivedMessages()) {
             for (var address : message.getAllRecipients()) {
                 if (address.toString().equals(recipient)) {
-                    bodies.add(GreenMailUtil.getBody(message));
+                    bodies.add(message.getContent().toString());
                 }
             }
         }

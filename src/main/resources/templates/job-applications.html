@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="'Applications — ' + ${queue.title} + ' — Docket'">Docket</title>
+</head>
+<body>
+<main class="page">
+    <header>
+        <h1 class="title-serif" style="font-size: var(--t-30);"
+            th:text="'Applications to ' + ${queue.title}">Applications</h1>
+        <p class="meta" style="margin-top: var(--s-2);">
+            <a th:href="'/jobs/' + ${queue.postingId}">The posting</a>
+            <span th:if="${queue.open}" th:text="'Open until ' + ${queue.closesOn}">Open</span>
+            <span th:unless="${queue.open}">Closed</span>
+        </p>
+        <!-- §6.4: the guarantee, from the poster's side — plain, not fine print. -->
+        <p class="meta" style="margin-top: var(--s-2);">
+            Mark each one advanced or not selected. Anything untouched at close is told
+            "closed without response", and an unresolved queue blocks your next posting.
+        </p>
+    </header>
+
+    <p class="meta" th:if="${queue.rows.isEmpty()}" style="margin-top: var(--s-8);">
+        No applications yet.
+    </p>
+
+    <section class="block" th:if="${!queue.rows.isEmpty()}">
+        <article class="entry" th:each="row : ${queue.rows}">
+            <!-- §6.3: the Application grants the full Profile for THIS application. -->
+            <h3><a th:href="'/jobs/' + ${queue.postingId} + '/applications/' + ${row.applicationId} + '/profile'"
+                   th:text="${row.applicant.displayName()}">Name</a></h3>
+            <p class="org">
+                <span class="when" th:text="'Applied ' + ${row.appliedOn}">Applied 1 Aug 2026</span> ·
+                <span th:text="${row.stateLabel}">Received</span>
+            </p>
+            <p th:if="${!row.note.isBlank()}" th:text="${row.note}">Their note</p>
+            <!-- §6.3: Mutuals — how a referral has always worked. -->
+            <p class="meta" th:if="${!row.mutuals.isEmpty()}" style="margin-top: var(--s-2);">
+                Mutuals:
+                <th:block th:each="person, stat : ${row.mutuals}">
+                    <a th:href="'/p/' + ${person.memberId}"
+                       th:text="${person.displayName()}">Name</a><th:block
+                        th:if="${!stat.last}">,</th:block>
+                </th:block>
+            </p>
+            <div th:if="${row.unresolved}"
+                 style="display: flex; gap: var(--s-2); margin-top: var(--s-3);">
+                <form method="post"
+                      th:action="'/jobs/' + ${queue.postingId} + '/applications/' + ${row.applicationId} + '/advance'">
+                    <button class="btn primary sm" type="submit">Advance</button>
+                </form>
+                <form method="post"
+                      th:action="'/jobs/' + ${queue.postingId} + '/applications/' + ${row.applicationId} + '/not-select'">
+                    <button class="btn sm" type="submit">Not selected</button>
+                </form>
+            </div>
+        </article>
+    </section>
+</main>
+</body>
+</html>

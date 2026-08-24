@@ -92,4 +92,39 @@ class JobsController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
         return "job";
     }
+
+    /** §6.3: one click plus an optional note — the Profile is the Application. */
+    @PostMapping("/jobs/{id}/apply")
+    String apply(@PathVariable long id, @RequestParam(defaultValue = "") String note,
+                 HttpServletRequest request, HttpServletResponse response, Model model) {
+        Optional<Member> member = CurrentMember.get(request);
+        if (member.isEmpty()) {
+            return "redirect:/login";
+        }
+        try {
+            jobs.apply(member.get(), id, note);
+            return "redirect:/jobs/" + id;
+        } catch (java.util.NoSuchElementException gone) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        } catch (JobService.NotAllowed refused) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, refused.getMessage());
+        } catch (JobService.Refused refused) {
+            response.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value());
+            model.addAttribute("posting", jobs.postingPage(id, member)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
+            model.addAttribute("error", refused.getMessage());
+            return "job";
+        }
+    }
+
+    /** §6.4: the applicant can always see their Applications' states. */
+    @GetMapping("/applications")
+    String mine(HttpServletRequest request, Model model) {
+        Optional<Member> member = CurrentMember.get(request);
+        if (member.isEmpty()) {
+            return "redirect:/login";
+        }
+        model.addAttribute("rows", jobs.applicationsOf(member.get().id()));
+        return "applications";
+    }
 }

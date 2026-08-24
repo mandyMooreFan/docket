@@ -4,10 +4,13 @@ import com.mbeebe.docket.company.Companies;
 import com.mbeebe.docket.company.Company;
 import com.mbeebe.docket.company.CurrentPositions;
 import com.mbeebe.docket.company.TrustGate;
+import com.mbeebe.docket.graph.Connections;
 import com.mbeebe.docket.identity.Member;
+import com.mbeebe.docket.identity.Members;
 import com.mbeebe.docket.profile.Capability;
 import com.mbeebe.docket.profile.CapabilityAnswer;
 import com.mbeebe.docket.profile.CapabilityService;
+import com.mbeebe.docket.profile.ProfilePage;
 import com.mbeebe.docket.profile.ProfileService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,11 +60,15 @@ class JobService {
     private final CurrentPositions positions;
     private final CapabilityService capabilities;
     private final ProfileService profiles;
+    private final Connections graph;
+    private final Members members;
+    private final JobMails mails;
     private final Clock clock;
 
     JobService(JobPostingRepository postings, JobApplicationRepository applications,
                Companies companies, TrustGate trustGate, CurrentPositions positions,
-               CapabilityService capabilities, ProfileService profiles, Clock clock) {
+               CapabilityService capabilities, ProfileService profiles, Connections graph,
+               Members members, JobMails mails, Clock clock) {
         this.postings = postings;
         this.applications = applications;
         this.companies = companies;
@@ -69,6 +76,9 @@ class JobService {
         this.positions = positions;
         this.capabilities = capabilities;
         this.profiles = profiles;
+        this.graph = graph;
+        this.members = members;
+        this.mails = mails;
         this.clock = clock;
     }
 
@@ -222,6 +232,133 @@ class JobService {
                     completeness.missing());
         }
         return box(PostingPage.ApplyBox.Kind.OPEN);
+    }
+
+    /**
+     * §6.3: the Profile is the Application — one click plus an optional note.
+     * Applying gates itself on the same Completeness check as everything else
+     * (§3.2), and consent to the full-Profile view is given by this act.
+     */
+    @Transactional
+    void apply(Member applicant, long postingId, String rawNote) {
+        JobPosting posting = postings.findById(postingId)
+                .orElseThrow(java.util.NoSuchElementException::new);
+        if (posting.posterId() == applicant.id()) {
+            throw new NotAllowed("This is your posting — its queue is yours to work, not join.");
+        }
+        // §7.3: a Block is total, both directions. No application opens a way past it.
+        if (graph.blocked(applicant.id(), posting.posterId())) {
+            throw new NotAllowed("You can't apply to this posting.");
+        }
+        if (!profiles.completenessOf(applicant.id()).complete()) {
+            throw new NotAllowed("Your profile is the application, and yours isn't complete yet.");
+        }
+        if (!posting.openAt(clock.instant())) {
+            throw new Refused("This posting has closed.");
+        }
+        if (applications.findByPostingIdAndApplicantId(postingId, applicant.id()).isPresent()) {
+            throw new Refused("You already applied — one application per posting.");
+        }
+        String note = rawNote == null ? "" : rawNote.strip();
+        if (note.length() > 1000) {
+            throw new Refused("A note can hold at most 1,000 characters.");
+        }
+        applications.save(new JobApplication(postingId, applicant.id(), note, clock.instant()));
+        String companyName = companies.findResolved(posting.companyId())
+                .map(Company::name).orElse("");
+        mails.received(applicant.email(), posting, companyName);
+    }
+
+    /** §6.4: the applicant can always see their Applications' states — all of them. */
+    @Transactional(readOnly = true)
+    List<MineRow> applicationsOf(long memberId) {
+        return applications.findByApplicantIdOrderByAppliedAtDescIdDesc(memberId).stream()
+                .map(application -> {
+                    JobPosting posting = postings.findById(application.postingId()).orElseThrow();
+                    String company = companies.findResolved(posting.companyId())
+                            .map(Company::name).orElse("");
+                    return new MineRow(posting.id(), posting.title(), company,
+                            day(application.appliedAt()), stateLabel(application.state()));
+                })
+                .toList();
+    }
+
+    record MineRow(long postingId, String title, String company, String appliedOn,
+                   String stateLabel) {
+    }
+
+    /** The poster's queue (§6.4); empty for anyone who is not the posting's author. */
+    @Transactional(readOnly = true)
+    Optional<QueuePage> queueFor(long postingId, Member member) {
+        return postings.findById(postingId)
+                .filter(posting -> posting.posterId() == member.id())
+                .map(posting -> new QueuePage(posting.id(), posting.title(),
+                        posting.openAt(clock.instant()), day(posting.closesAt()),
+                        applications.findByPostingIdOrderByAppliedAtAscIdAsc(postingId).stream()
+                                .map(application -> queueRow(posting, application))
+                                .toList()));
+    }
+
+    private QueuePage.Row queueRow(JobPosting posting, JobApplication application) {
+        // §6.3: the poster sees Mutuals — how a referral has always worked.
+        var mutuals = graph.mutuals(posting.posterId(), application.applicantId()).stream()
+                .map(profiles::cardFor)
+                .toList();
+        return new QueuePage.Row(application.id(), profiles.cardFor(application.applicantId()),
+                application.note(), day(application.appliedAt()),
+                stateLabel(application.state()), application.unresolved(), mutuals);
+    }
+
+    /**
+     * §6.4: the poster marks an Application advanced or not selected — a dated
+     * fact, set once. "Not selected" closes it and the applicant is told by
+     * mail (§6.5); "advanced" is not a closure, and the poster's own words
+     * travel by the Application-scoped Thread (#36), never from here.
+     */
+    @Transactional
+    boolean resolve(Member poster, long postingId, long applicationId,
+                    JobApplication.Outcome outcome) {
+        Optional<JobPosting> posting = postings.findById(postingId)
+                .filter(found -> found.posterId() == poster.id());
+        if (posting.isEmpty()) {
+            return false;
+        }
+        Optional<JobApplication> application = applications.findById(applicationId)
+                .filter(found -> found.postingId() == postingId);
+        if (application.isEmpty()) {
+            return false;
+        }
+        if (application.get().resolve(outcome, clock.instant())
+                && outcome == JobApplication.Outcome.NOT_SELECTED) {
+            members.find(application.get().applicantId()).ifPresent(applicant ->
+                    mails.notSelected(applicant.email(), posting.get(),
+                            companies.findResolved(posting.get().companyId())
+                                    .map(Company::name).orElse("")));
+        }
+        return true;
+    }
+
+    /**
+     * §6.3's full-Profile view, scoped to one Application: only the posting's
+     * author, only for an Application on that posting. The bypass itself lives
+     * in {@link ProfileService#pageForApplication}; this is the scope check.
+     */
+    @Transactional(readOnly = true)
+    Optional<ApplicationProfile> applicationProfile(long postingId, long applicationId,
+                                                    Member member) {
+        return postings.findById(postingId)
+                .filter(posting -> posting.posterId() == member.id())
+                .flatMap(posting -> applications.findById(applicationId)
+                        .filter(application -> application.postingId() == postingId)
+                        .flatMap(application ->
+                                profiles.pageForApplication(application.applicantId())
+                                        .map(page -> new ApplicationProfile(posting.id(),
+                                                posting.title(), application.note(),
+                                                day(application.appliedAt()), page))));
+    }
+
+    record ApplicationProfile(long postingId, String postingTitle, String note,
+                              String appliedOn, ProfilePage profile) {
     }
 
     private static PostingPage.ApplyBox box(PostingPage.ApplyBox.Kind kind) {

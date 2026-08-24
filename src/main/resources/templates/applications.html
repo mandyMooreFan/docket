@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Your applications — Docket</title>
+</head>
+<body>
+<main class="page">
+    <header>
+        <h1 class="title-serif" style="font-size: var(--t-30);">Your applications</h1>
+        <!-- §6.4: the closure guarantee, from the applicant's side. -->
+        <p class="meta" style="margin-top: var(--s-2);">
+            Every application gets an outcome — advanced, not selected, or closed
+            without response. This is where each one stands.
+        </p>
+    </header>
+
+    <p class="meta" th:if="${rows.isEmpty()}" style="margin-top: var(--s-8);">
+        Nothing yet. When you apply to a posting, it appears here with its state —
+        and it never just vanishes. <a href="/jobs">The board</a> is one list, newest first.
+    </p>
+
+    <section class="block" th:if="${!rows.isEmpty()}">
+        <article class="entry" th:each="row : ${rows}">
+            <h3><a th:href="'/jobs/' + ${row.postingId}" th:text="${row.title}">Title</a></h3>
+            <p class="org">
+                <span th:text="${row.company}">Company</span> ·
+                <span class="when" th:text="'Applied ' + ${row.appliedOn}">Applied 1 Aug 2026</span> ·
+                <span th:text="${row.stateLabel}">Received</span>
+            </p>
+        </article>
+    </section>
+</main>
+</body>
+</html>
