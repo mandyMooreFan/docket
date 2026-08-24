@@ -5,10 +5,13 @@ from it without reopening a decision. Where a decision looks arbitrary, the reas
 as history, but because the reasoning is usually the thing that stops an implementer from
 "improving" a rule into something that breaks a guarantee elsewhere.
 
-**Status: specified, not built.** Every decision here is settled; nothing is implemented. The
-[wayfinder map](https://github.com/mandyMooreFan/docket/issues/1) that produced it is indexed in
-§17, and each section names the tickets whose resolutions it folds in — the ticket holds the full
-argument, this document holds the design. The language used throughout is
+**Status: specified, and being built.** Every decision here is settled, and the v1 build is under
+way on its own map, [Map: the v1 build](https://github.com/mandyMooreFan/docket/issues/26) — that
+map's Decisions-so-far is the record of what has landed on `main`, and where the build settled a
+detail this document had left open, this document now says so in place. The
+[wayfinder map](https://github.com/mandyMooreFan/docket/issues/1) that produced this spec is
+indexed in §17, and each section names the tickets whose resolutions it folds in — the ticket holds
+the full argument, this document holds the design. The language used throughout is
 [`CONTEXT.md`](./CONTEXT.md)'s, and the two ADRs in [`docs/adr/`](./docs/adr/) are part of this
 spec.
 
@@ -97,9 +100,12 @@ the open-to-work pill, nothing else. **Dark theme ships in v1**: ink `#F1F4F8` �
   destinations, not stacked** (§14.1).
 - The tokens above are the spec; no CSS framework is chosen or implied.
 
-**Open detail (deliberately minor):** photo treatment — the prototype uses initials on a neutral
-fill; whether real photos render plain or greyscaled is an implementation-time taste call, the one
-visual question this spec leaves open.
+**Settled at build time (was this spec's one open visual question):** photo treatment — real
+photos render **plain**, never greyscaled. Company logos and Post images already shipped
+untouched, so a filter would have singled out faces alone, which is a house style imposed on how
+people choose to present themselves. Initials on a neutral fill remain the first-class fallback
+for a member with no photo. Decided in
+[Build the member photo](https://github.com/mandyMooreFan/docket/issues/52).
 
 ---
 
@@ -332,8 +338,12 @@ The heart of the board, possible only because the Application lives here:
   person, not the posting.
 - The applicant can always see their Application's state.
 
-*Implementation detail flagged, not decided:* "unresolved queue" needs a threshold — closing with
-two untouched applications is not the same as closing with two hundred.
+*Threshold settled at build time:* **one is enough.** A poster cannot open a new posting while any
+Application on any of their postings closed without response and still lacks an Outcome. The
+obligation is owed to each applicant singly, the remedy is two clicks each, and any threshold N
+licenses ignoring N−1 people per posting. While a posting is open its window is the deadline, so
+neglect only crystallises at close. Decided in
+[Build the jobs board](https://github.com/mandyMooreFan/docket/issues/35).
 
 ### 6.5 Browsing and email
 
@@ -604,6 +614,17 @@ None of these is a judgement about what members say.
   and contact details). Rate-limited per address and per IP. A **distinct route**, not the general
   report flow; the 48-hour clock is a **stated operational property**.
 
+⚠️ **A tension the build surfaced, unresolved here:** the two commitments above — that the hide is
+*structural*, and that the location may be *imprecise* — cannot both hold for a report whose
+locator the product cannot resolve, because there is then nothing to hide on receipt. The build
+implements the defensible reading (resolvable locators held in the receiving transaction;
+unresolvable ones accepted, prioritised, and the sender told plainly that nothing is hidden yet,
+because guessing would take down an uninvolved member's content on nobody's accusation), and
+Messages are the concrete gap, being exactly where imprecision is expected. Which way §10.5 should
+finally read is argued in
+[issue #59](https://github.com/mandyMooreFan/docket/issues/59) — **LAWYER** at the §15.6 gate
+either way.
+
 ### 10.6 The member conduct policy
 
 §15.3's terms duties require it stated per category; the Contributor Covenant governs contributors
@@ -700,9 +721,9 @@ Enacted, not just decided: `LICENSE` is on the repo.*
   canonical instance are not licensed with it — fork freely, call it something else. With
   magic-link auth this is member safety, not branding: a lookalike instance is a phishing surface.
 - **AGPL §13 is a UI requirement, not paperwork: every page must offer a durable, reachable
-  "Source" link** to the code archive. §2's layout has no footer, so the build must place it
-  deliberately — the app bar's overflow/settings surface and the logged-out page framing are the
-  candidates; wherever it lands, it is reachable from every page, logged in or out.
+  "Source" link** to the code archive. §2's layout has no footer, so the build had to place it
+  deliberately: it **sits in the app bar itself**, on every page, logged in or out — settled in
+  [Build the design language base](https://github.com/mandyMooreFan/docket/issues/28).
 - **Deferred to handoff with content already decided:** `CONTRIBUTING.md` follows linkpage's
   structure (status banner, who-this-is-for tie-breaker, rejection table — already written across
   the map's refusals, see §5.6 and §17.1 — and invariants); `CODE_OF_CONDUCT.md` is the
@@ -978,19 +999,24 @@ Product-level refusals live where they bind: §5.6 (feed), §8 (search), §10.3 
 
 Anything not listed here is settled.
 
-1. **Implementation-time details, flagged in place:** the unresolved-queue threshold (§6.4);
-   photo treatment (§2); the Source link's exact placement (§12); a version-numbered browser
-   support matrix if wanted (§14.1).
-2. **Pre-launch documents owed:** the DPIA (§15.2, before launch); the illegal-content and two
+1. **Implementation-time details, flagged in place:** a version-numbered browser support matrix if
+   wanted (§14.1). The other three are now settled where they were flagged, each decided inside the
+   build ticket that met it: the unresolved-queue threshold is **one** (§6.4), photo treatment is
+   **plain** (§2), and the Source link **sits in the app bar** (§12).
+2. **A tension the build surfaced** (§10.5): the intimate-image hide is structural only where the
+   reported location resolves. The build ships the defensible reading; which way the spec should
+   finally read is argued in
+   [issue #59](https://github.com/mandyMooreFan/docket/issues/59), and is **LAWYER**-gated.
+3. **Pre-launch documents owed:** the DPIA (§15.2, before launch); the illegal-content and two
    children's assessments (§15.1, three months from first operation); terms + conduct policy +
    transparency layer drafting (§15.3); `CONTRIBUTING.md` / `CODE_OF_CONDUCT.md` / `SECURITY.md`
    (§12, shapes decided).
-3. **The LAWYER gate** (§15.6) — the one review standing between this spec and launch.
-4. **Facts to verify at launch time:** `docket.social` registration (§1); Resend account and
+4. **The LAWYER gate** (§15.6) — the one review standing between this spec and launch.
+5. **Facts to verify at launch time:** `docket.social` registration (§1); Resend account and
    deliverability posture (§14.2); Ofcom source text where automated retrieval was blocked;
    whether the stack logs IP addresses (a Children's code Standard 10 input the research could
    not check from a spec).
-5. **The cohort choice** (§13.1) — an active decision that has to beat the developer default.
+6. **The cohort choice** (§13.1) — an active decision that has to beat the developer default.
 
 ### 17.3 The map index
 
