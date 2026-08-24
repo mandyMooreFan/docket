@@ -15,8 +15,44 @@
             <span th:if="${!profile.location.isBlank()}" th:text="${profile.location}">Location</span>
             <span class="flag" th:if="${profile.openToWork}">Open to work</span>
         </p>
+        <!-- §4.2: the connection count — the only number the graph shows. -->
+        <p class="meta" style="margin-top: var(--s-2);" th:text="${graph.connectionsLabel()}">No connections yet.</p>
         <div th:if="${profile.owner}" style="margin-top: var(--s-6);">
             <a class="btn" href="/profile/edit">Edit profile</a>
+        </div>
+        <div th:if="${!profile.owner}" style="margin-top: var(--s-6); display: flex; flex-direction: column; gap: var(--s-3);">
+            <!-- §4.2's one request affordance; absent for an adult viewing an under-18 (§9.2). -->
+            <form th:if="${graph.canConnect()}" method="post"
+                  th:action="'/p/' + ${profile.memberId} + '/connect'"
+                  style="display: flex; gap: var(--s-2);">
+                <input class="input" type="text" name="note" maxlength="280"
+                       style="font-family: var(--serif);" placeholder="Add a note (optional)">
+                <button class="btn primary" type="submit">Connect</button>
+            </form>
+            <p class="meta" th:if="${graph.requestSent()}">Connection request sent</p>
+            <div th:if="${graph.canRespond()}">
+                <p class="meta">Wants to connect with you</p>
+                <p class="prose" th:if="${!graph.incomingNote.isBlank()}"
+                   th:text="${graph.incomingNote}">Their note</p>
+                <div style="display: flex; gap: var(--s-2); margin-top: var(--s-2);">
+                    <form method="post" th:action="'/network/accept/' + ${profile.memberId}">
+                        <button class="btn primary sm" type="submit">Accept</button>
+                    </form>
+                    <form method="post" th:action="'/network/decline/' + ${profile.memberId}">
+                        <button class="btn quiet sm" type="submit">Decline</button>
+                    </form>
+                </div>
+            </div>
+            <div th:if="${graph.isConnected()}" style="display: flex; align-items: center; gap: var(--s-3);">
+                <span class="meta">Connected</span>
+                <form method="post" th:action="'/p/' + ${profile.memberId} + '/disconnect'">
+                    <button class="btn sm" type="submit">Disconnect</button>
+                </form>
+            </div>
+            <form th:if="${graph.mayBlock}" method="post"
+                  th:action="'/p/' + ${profile.memberId} + '/block'">
+                <button class="btn quiet sm" type="submit">Block</button>
+            </form>
         </div>
     </header>
 
@@ -63,6 +99,65 @@
         <div class="chips">
             <span th:each="skill : ${profile.skills}" th:text="${skill.name}">Skill</span>
         </div>
+    </section>
+
+    <!-- §4.2: Mutuals — the only relationship Docket names between two members. -->
+    <section class="block" th:if="${!graph.mutuals.isEmpty()}">
+        <h2>Mutuals</h2>
+        <article class="entry" th:each="person : ${graph.mutuals}">
+            <h3><a th:href="'/p/' + ${person.memberId}"
+                   th:text="${person.displayName()}">Name</a></h3>
+        </article>
+    </section>
+
+    <!-- §4.2: the full connection list, rendered only for the owner and their Connections. -->
+    <section class="block" th:if="${graph.listVisible()}">
+        <h2>Connections</h2>
+        <p class="meta" th:if="${graph.connections.isEmpty()}">No connections yet.</p>
+        <article class="entry" th:each="person : ${graph.connections}">
+            <h3><a th:href="'/p/' + ${person.memberId}"
+                   th:text="${person.displayName()}">Name</a></h3>
+        </article>
+    </section>
+
+    <!-- §4.3: approved Recommendations, the subject's approvals queue, and the
+         write affordance a Connection gets. No reciprocal prompts, no ask flow. -->
+    <section class="block"
+             th:if="${!graph.recommendations.isEmpty() or !graph.awaitingApproval.isEmpty() or graph.mayRecommend}">
+        <h2>Recommendations</h2>
+        <article class="entry" th:each="rec : ${graph.awaitingApproval}">
+            <h3><a th:href="'/p/' + ${rec.authorId}" th:text="${rec.authorName}">Author</a></h3>
+            <p class="org">Awaiting your approval — nobody else can see it</p>
+            <p th:text="${rec.text}">Their words</p>
+            <div style="display: flex; gap: var(--s-2); margin-top: var(--s-2);">
+                <form method="post" th:action="'/recommendations/' + ${rec.authorId} + '/approve'">
+                    <button class="btn primary sm" type="submit">Approve</button>
+                </form>
+                <form method="post" th:action="'/recommendations/' + ${rec.authorId} + '/hide'">
+                    <button class="btn quiet sm" type="submit">Hide</button>
+                </form>
+            </div>
+        </article>
+        <article class="entry" th:each="rec : ${graph.recommendations}">
+            <h3><a th:href="'/p/' + ${rec.authorId}" th:text="${rec.authorName}">Author</a></h3>
+            <p th:text="${rec.text}">Their words</p>
+            <form th:if="${profile.owner}" method="post" style="margin-top: var(--s-2);"
+                  th:action="'/recommendations/' + ${rec.authorId} + '/hide'">
+                <button class="btn quiet sm" type="submit">Hide</button>
+            </form>
+        </article>
+        <form th:if="${graph.mayRecommend}" method="post" class="form" style="margin-top: var(--s-8);"
+              th:action="'/p/' + ${profile.memberId} + '/recommend'">
+            <div class="field">
+                <span class="label">Write a recommendation</span>
+                <textarea class="input" name="text" rows="4"
+                          style="font-family: var(--serif);"
+                          placeholder="What was it like to work with them?"></textarea>
+            </div>
+            <div>
+                <button class="btn" type="submit">Send for approval</button>
+            </div>
+        </form>
     </section>
 </main>
 </body>

@@ -59,6 +59,12 @@ public class ProfileService {
         if (owner.isEmpty()) {
             return Optional.empty();
         }
+        // §7.3: a Block is total — for each of the pair, the other's Profile does
+        // not exist, with the same no-placeholder 404 as any missing page.
+        if (viewer.isPresent() && viewer.get().id() != memberId
+                && connections.blocked(memberId, viewer.get().id())) {
+            return Optional.empty();
+        }
         Profile profile = profiles.findById(memberId).orElseGet(() -> Profile.blankFor(memberId));
         List<PositionView> positionViews = positionViews(memberId);
         List<EducationView> educationViews = educationViews(memberId);
@@ -75,6 +81,13 @@ public class ProfileService {
                 openToWorkShown(profile, memberId, viewer, isOwner), positionViews,
                 educationViews, skillViews(memberId), completeness,
                 profile.dial(), profile.openToWork(), visibility.indexable()));
+    }
+
+    /** How lists elsewhere point at a Member (#32's /network, Mutuals): a card, never the entity. */
+    @Transactional(readOnly = true)
+    public PersonCard cardFor(long memberId) {
+        String name = profiles.findById(memberId).map(Profile::name).orElse("");
+        return new PersonCard(memberId, name, initials(name));
     }
 
     /** The §3.2 bar, computed fresh from the stored facts — never cached, never stored. */

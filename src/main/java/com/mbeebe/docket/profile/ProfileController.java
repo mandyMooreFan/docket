@@ -13,9 +13,11 @@ import org.springframework.web.server.ResponseStatusException;
 class ProfileController {
 
     private final ProfileService service;
+    private final ProfileGraphLookup graph;
 
-    ProfileController(ProfileService service) {
+    ProfileController(ProfileService service, ProfileGraphLookup graph) {
         this.service = service;
+        this.graph = graph;
     }
 
     /** The stable "me" address: your Profile lives at its public URL, owner or not. */
@@ -28,9 +30,11 @@ class ProfileController {
 
     @GetMapping("/p/{memberId}")
     String page(@PathVariable long memberId, HttpServletRequest request, Model model) {
-        ProfilePage page = service.pageFor(memberId, CurrentMember.get(request))
+        var viewer = CurrentMember.get(request);
+        ProfilePage page = service.pageFor(memberId, viewer)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("profile", page);
+        model.addAttribute("graph", graph.onProfile(memberId, viewer));
         return "profile";
     }
 }
