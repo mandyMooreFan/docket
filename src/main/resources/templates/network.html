@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Network — Docket</title>
+</head>
+<body>
+<main class="page">
+    <h1 class="title-serif">Network</h1>
+
+    <section class="block">
+        <h2>Pending requests</h2>
+        <!-- §13.4: the empty state says what it is, honestly. -->
+        <p class="meta" th:if="${network.pending.isEmpty()}">No pending requests.</p>
+        <article class="entry" th:each="req : ${network.pending}">
+            <h3><a th:href="'/p/' + ${req.from.memberId}"
+                   th:text="${req.from.displayName()}">Name</a></h3>
+            <p th:if="${!req.note.isBlank()}" th:text="${req.note}">Their note</p>
+            <div style="display: flex; gap: var(--s-2); margin-top: var(--s-2);">
+                <form method="post" th:action="'/network/accept/' + ${req.from.memberId}">
+                    <button class="btn primary sm" type="submit">Accept</button>
+                </form>
+                <form method="post" th:action="'/network/decline/' + ${req.from.memberId}">
+                    <button class="btn quiet sm" type="submit">Decline</button>
+                </form>
+            </div>
+        </article>
+    </section>
+
+    <section class="block">
+        <h2>Connections</h2>
+        <p class="meta" th:if="${network.connections.isEmpty()}">No connections yet.
+            A connection starts from a profile — find someone you know.</p>
+        <article class="entry" th:each="person : ${network.connections}">
+            <h3><a th:href="'/p/' + ${person.memberId}"
+                   th:text="${person.displayName()}">Name</a></h3>
+        </article>
+    </section>
+</main>
+</body>
+</html>
