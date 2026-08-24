@@ -76,12 +76,13 @@ class SearchService {
      */
     private List<SearchResults.PersonRow> peopleRows(String tsquery, boolean connectedOnly,
                                                      Optional<Member> viewer) {
-        List<PersonCard> matches = people.named(tsquery, viewer, GROUP_LIMIT);
         if (viewer.isEmpty()) {
+            // §8.4's account gate. The seam refuses too — this is the page
+            // declining to ask, so that the reason can be rendered instead.
             return List.of();
         }
         long viewerId = viewer.get().id();
-        return matches.stream()
+        return people.named(tsquery, viewer, GROUP_LIMIT).stream()
                 .filter(card -> !connectedOnly || graph.connected(viewerId, card.memberId()))
                 .map(card -> new SearchResults.PersonRow(card, mutualNames(viewerId, card)))
                 .toList();
