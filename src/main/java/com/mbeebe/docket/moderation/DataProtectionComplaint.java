@@ -13,7 +13,7 @@ import java.time.Instant;
  * statute makes it one. Distinct from a Report and from the intimate-image route, and
  * the product says so on all three forms so nobody has to guess which door they are at.
  *
- * <p>The word "complaint" is used here and nowhere else. CONTEXT.md puts it on the
+ * <p>The word "complaint" is used here and nowhere else. GLOSSARY.md puts it on the
  * <em>Avoid</em> list for a Report precisely so that it stays available for this, which
  * is the thing the law actually calls a complaint.
  *

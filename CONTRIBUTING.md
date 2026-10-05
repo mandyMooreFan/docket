@@ -64,7 +64,7 @@ to make a feature fit will be closed:
    fully-loaded view models (§14.2). A lazy load in a template is a build error in spirit.
 5. **No JavaScript build.** htmx is a single pinned vendored script; the CSS is hand-written
    from §2's tokens. There is no `package.json` and there won't be one (§14.2).
-6. **The vocabulary is [`CONTEXT.md`](./CONTEXT.md)'s** — code uses its words or amends it
+6. **The vocabulary is [`GLOSSARY.md`](./GLOSSARY.md)'s** — code uses its words or amends it
    deliberately in a PR that says so (§16). It has no word for reach, ranking, score or
    engagement; a glossary that cannot say a thing keeps it out.
 

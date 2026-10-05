@@ -133,7 +133,7 @@ class PostService {
      * §5.3: a Reply comes from one of the Post author's Connections — even on
      * a Post a stranger can read — into a thread that is still open. The
      * author may answer in their own thread. A Reply is not a Post
-     * (CONTEXT.md), so §3.2's POST capability is deliberately not asked for:
+     * (GLOSSARY.md), so §3.2's POST capability is deliberately not asked for:
      * the Connection itself was the earned thing.
      */
     @Transactional

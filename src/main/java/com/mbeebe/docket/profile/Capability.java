@@ -1,7 +1,7 @@
 package com.mbeebe.docket.profile;
 
 /**
- * Something a Member may do (CONTEXT.md) — the §3.2 list withheld until Completeness,
+ * Something a Member may do (GLOSSARY.md) — the §3.2 list withheld until Completeness,
  * plus the one thing §10.3 can take away that Completeness never gave. Never held or
  * granted: always a conclusion drawn at the point of asking (ADR-0002). Consumption —
  * browsing, reading the feed, the jobs board, editing your own Profile — is

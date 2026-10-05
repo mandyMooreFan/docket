@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 
 /**
- * The Member is the account, never public (CONTEXT.md). Carries the Age fact in its
+ * The Member is the account, never public (GLOSSARY.md). Carries the Age fact in its
  * minimal form (SPEC.md §9.3): an adult is only "adult, declared on a date" — birth
  * month/year exist solely on minors, solely to drive the automatic 18 rollover.
  */
@@ -116,7 +116,7 @@ public class Member {
     }
 
     /**
-     * The end of a Member (CONTEXT.md, §11.2), as far as identity is concerned:
+     * The end of a Member (GLOSSARY.md, §11.2), as far as identity is concerned:
      * dated, reasoned, and stripped.
      *
      * <p>The row itself stays, and has to — V8's thread and message references

@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 
 /**
- * A Block (CONTEXT.md, §7.3): a total, durable severance. Who blocked whom is the
+ * A Block (GLOSSARY.md, §7.3): a total, durable severance. Who blocked whom is the
  * stored fact; every conclusion drawn from it treats the pair symmetrically, and
  * v1 deliberately builds no way to lift one.
  */

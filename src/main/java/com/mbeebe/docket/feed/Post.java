@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 
 /**
- * A Post (SPEC.md §5.2, CONTEXT.md): something a Member wrote for the feed.
+ * A Post (SPEC.md §5.2, GLOSSARY.md): something a Member wrote for the feed.
  * Written and work-change kinds exist today; job-attached arrives with the jobs
  * board (#35). {@code authoredAsMinor} is the §9.4 fact — fixed at creation,
  * with no mutator anywhere, because the birth data it derives from is deleted

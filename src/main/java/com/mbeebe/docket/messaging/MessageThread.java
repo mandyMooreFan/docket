@@ -10,7 +10,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 
 /**
- * The Thread (SPEC.md §7.2, ADR-0001, CONTEXT.md): the single, permanent
+ * The Thread (SPEC.md §7.2, ADR-0001, GLOSSARY.md): the single, permanent
  * correspondence between a pair of Members — one row per pair, ever, created
  * lazily on the first authorised write. The pair is stored lowest id first so
  * the unique index is the one-per-pair guarantee itself, not a convention

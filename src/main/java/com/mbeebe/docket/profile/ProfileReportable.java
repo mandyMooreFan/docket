@@ -21,7 +21,7 @@ import java.util.Optional;
  * of its audience is not reportable for the same reason it is a 404.
  *
  * <p>Existence is the Member's, not the row's: there is exactly one Profile per
- * Member from the moment they join (CONTEXT.md), so a Member who has never
+ * Member from the moment they join (GLOSSARY.md), so a Member who has never
  * touched theirs still has a page to report and the row is written on the way to
  * removing it. The alternative — "no row, nothing to remove" — is the silent
  * success the registry's fail-closed default exists to prevent.

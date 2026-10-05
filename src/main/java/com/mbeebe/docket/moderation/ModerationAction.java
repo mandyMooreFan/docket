@@ -99,7 +99,7 @@ class ModerationAction {
                 capability, until, reason, actorId, now);
     }
 
-    /** Rung 3: read-only. The Member may still sign in (CONTEXT.md). */
+    /** Rung 3: read-only. The Member may still sign in (GLOSSARY.md). */
     static ModerationAction suspension(Long reportId, long memberId, Instant until,
                                        String reason, long actorId, Instant now) {
         return new ModerationAction(Kind.SUSPENSION, reportId, memberId, null, null,

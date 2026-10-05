@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 
 /**
- * A Connection request (CONTEXT.md): the offer of a Connection, its optional note,
+ * A Connection request (GLOSSARY.md): the offer of a Connection, its optional note,
  * and what became of it (SPEC.md §4.2). Rows are never deleted: a DECLINED row is
  * the fact that blocks repeat requests, while the sender's view keeps deriving
  * "sent" from it — decline stays silent because nothing the sender can observe

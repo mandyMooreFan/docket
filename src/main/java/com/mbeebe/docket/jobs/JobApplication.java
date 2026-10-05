@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 
 /**
- * An Application (SPEC.md §6.3, CONTEXT.md): a Member offering their Profile to
+ * An Application (SPEC.md §6.3, GLOSSARY.md): a Member offering their Profile to
  * a Job posting — one click plus an optional note; there is nothing else to
  * send. The Outcome (§6.4) is the poster's dated decision, stored apart from
  * {@code closedWithoutResponseAt} — the sweep's immutable record that the
@@ -25,7 +25,7 @@ import java.time.Instant;
 @Table(name = "application")
 class JobApplication {
 
-    /** The poster's Outcome (CONTEXT.md): advanced, or not selected. */
+    /** The poster's Outcome (GLOSSARY.md): advanced, or not selected. */
     enum Outcome { ADVANCED, NOT_SELECTED }
 
     /** The derived state the applicant always sees (§6.4). */

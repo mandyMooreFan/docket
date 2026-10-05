@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 
 /**
- * A Report (§10.2, CONTEXT.md): a Member's account of something they believe breaks a
+ * A Report (§10.2, GLOSSARY.md): a Member's account of something they believe breaks a
  * rule. Never a flag, a complaint or a ticket — it is an account, and the field is
  * named for what it is.
  *
