@@ -8,7 +8,7 @@ import jakarta.persistence.Table;
 
 import java.time.Instant;
 
-/** A self-declared word on a Profile (CONTEXT.md). Nobody may attest to it. */
+/** A self-declared word on a Profile (GLOSSARY.md). Nobody may attest to it. */
 @Entity
 @Table(name = "skill")
 public class Skill {

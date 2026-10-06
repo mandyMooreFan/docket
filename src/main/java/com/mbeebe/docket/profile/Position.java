@@ -16,7 +16,7 @@ import java.time.YearMonth;
 
 /**
  * A Member's self-declared claim to a role, current or past, optionally at a Company
- * (CONTEXT.md). Month resolution; a null end is what "current" means — currency is
+ * (GLOSSARY.md). Month resolution; a null end is what "current" means — currency is
  * derived on read, never flagged (ADR-0002), because #34 hangs capability off it.
  */
 @Entity

@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 
 /**
- * A Job posting (SPEC.md §6.3, CONTEXT.md): an opening authored by a Member —
+ * A Job posting (SPEC.md §6.3, GLOSSARY.md): an opening authored by a Member —
  * never a Company — attached to a Company, carrying a mandatory real salary
  * range and running a fixed window. {@code closesAt} is the window's edge,
  * fixed at posting; whether the posting is open is always derived from it

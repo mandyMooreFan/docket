@@ -10,7 +10,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 
 /**
- * The page a Member publishes about themselves (CONTEXT.md) — exactly one per Member,
+ * The page a Member publishes about themselves (GLOSSARY.md) — exactly one per Member,
  * existing from the moment they join. Stores facts only; whether it is complete, who
  * may see it and whether it is indexable are derived on every read (ADR-0002).
  */

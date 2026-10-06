@@ -67,7 +67,7 @@ public class Connections implements ConnectionLookup {
                 .toList();
     }
 
-    /** Mutuals (CONTEXT.md): the Connections two Members share — Docket names no other relationship. */
+    /** Mutuals (GLOSSARY.md): the Connections two Members share — Docket names no other relationship. */
     @Transactional(readOnly = true)
     public List<Long> mutuals(long memberA, long memberB) {
         Set<Long> theirs = new HashSet<>(connectedTo(memberB));

@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 
 /**
- * An Appeal (§10.3, CONTEXT.md): a Member's request that a moderation decision be
+ * An Appeal (§10.3, GLOSSARY.md): a Member's request that a moderation decision be
  * reconsidered, by the person who made it. Never a dispute, a review or an escalation —
  * and the product says so in those words, because §10.3 requires it be "described as
  * what it is: the same person reconsidering with new information".

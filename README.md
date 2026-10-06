@@ -3,7 +3,7 @@
 Open-source professional network — LinkedIn parity, NYT-simple design, no gimmicks, free.
 
 The complete v1 design is [`SPEC.md`](./SPEC.md); the domain vocabulary is
-[`CONTEXT.md`](./CONTEXT.md). Every decision is settled there — significant design changes are
+[`GLOSSARY.md`](./GLOSSARY.md). Every decision is settled there — significant design changes are
 argued in an issue first (SPEC.md §12).
 
 ## Run locally

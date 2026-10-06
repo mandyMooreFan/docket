@@ -27,7 +27,7 @@ interface MessageRepository extends Repository<Message, Long> {
     Optional<Message> findFirstByThreadIdAndRemovedAtIsNullOrderByIdDesc(long threadId);
 
     /**
-     * The Unread count (§7.4, CONTEXT.md) — the only count the product shows
+     * The Unread count (§7.4, GLOSSARY.md) — the only count the product shows
      * anywhere, derived at every ask and never stored: Messages in this
      * Member's Threads, written by the other person, past this Member's own
      * read mark. The mark is a message id, so a shared instant can never hide

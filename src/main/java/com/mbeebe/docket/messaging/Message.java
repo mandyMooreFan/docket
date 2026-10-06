@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 
 /**
- * A Message (SPEC.md §7.2, CONTEXT.md): one entry in a Thread — text, links and
+ * A Message (SPEC.md §7.2, GLOSSARY.md): one entry in a Thread — text, links and
  * still images, nothing else. Immutable once written: neither person may edit
  * or destroy the other's record of the correspondence (§7.3, §11.1), which is
  * also why a Message row is never deleted when a Connection ends.

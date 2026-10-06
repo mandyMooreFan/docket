@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 
 /**
- * A Recommendation (CONTEXT.md, §4.3): the words one Member wrote about another,
+ * A Recommendation (GLOSSARY.md, §4.3): the words one Member wrote about another,
  * plus two dated facts. Whether it displays is derived — approved and not since
  * hidden — never stored (ADR-0002). One per author per subject.
  */

@@ -12,7 +12,7 @@ detail this document had left open, this document now says so in place. The
 [wayfinder map](https://github.com/mandyMooreFan/docket/issues/1) that produced this spec is
 indexed in §17, and each section names the tickets whose resolutions it folds in — the ticket holds
 the full argument, this document holds the design. The language used throughout is
-[`CONTEXT.md`](./CONTEXT.md)'s, and the two ADRs in [`docs/adr/`](./docs/adr/) are part of this
+[`GLOSSARY.md`](./GLOSSARY.md)'s, and the two ADRs in [`docs/adr/`](./docs/adr/) are part of this
 spec.
 
 **§15 is the one to read before writing any code that touches a member under 18, an export, a
@@ -955,7 +955,7 @@ automated retrieval was blocked (`statutory-duties.md` §3).
 ## 16. The domain model
 
 *From [Model the domain](https://github.com/mandyMooreFan/docket/issues/11). The spec uses
-[`CONTEXT.md`](./CONTEXT.md)'s vocabulary or amends it deliberately; there is no third option.*
+[`GLOSSARY.md`](./GLOSSARY.md)'s vocabulary or amends it deliberately; there is no third option.*
 
 - **Member is the account (never public); Profile is the page it publishes.** There is no Person
   concept — the product deliberately cannot observe one.
@@ -975,7 +975,7 @@ automated retrieval was blocked (`statutory-duties.md` §3).
   Position ending is self-reported — the same self-declaration cost accepted everywhere.
 - **The vocabulary has no word for reach, ranking, score, relevance-to-you, degree of separation,
   or engagement.** A glossary that cannot say a thing keeps it out.
-- **Amendment made by this spec:** `CONTEXT.md` gains two fact-shaped terms — the **Age fact**
+- **Amendment made by this spec:** `GLOSSARY.md` gains two fact-shaped terms — the **Age fact**
   (§9.3's minimal form) and **Authored as minor** (§9.4) — recorded in this PR, per the map's
   create-then-wire note on Model the domain.
 
@@ -1034,7 +1034,7 @@ walked to this document; each ticket holds the full argument, alternatives, and 
 | [Name the product](https://github.com/mandyMooreFan/docket/issues/8) | §1 |
 | [Choose the platform target](https://github.com/mandyMooreFan/docket/issues/9) | §14.1 |
 | [Choose the stack](https://github.com/mandyMooreFan/docket/issues/10) | §14.2 |
-| [Model the domain](https://github.com/mandyMooreFan/docket/issues/11) | §16, `CONTEXT.md`, ADRs |
+| [Model the domain](https://github.com/mandyMooreFan/docket/issues/11) | §16, `GLOSSARY.md`, ADRs |
 | [Pick the license and contribution basics](https://github.com/mandyMooreFan/docket/issues/12) | §12 |
 | [Decide how company entities are created and trusted](https://github.com/mandyMooreFan/docket/issues/14) | §6.1–6.2 |
 | [Decide search and discovery](https://github.com/mandyMooreFan/docket/issues/15) | §8 |

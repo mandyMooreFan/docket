@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 
 /**
- * The Invite (CONTEXT.md, SPEC.md §13.3): an offer sent to an email address that
+ * The Invite (GLOSSARY.md, SPEC.md §13.3): an offer sent to an email address that
  * belongs to no Member yet, carrying an optional note. It never gates signup; it
  * becomes a Connection request if the person joins.
  *

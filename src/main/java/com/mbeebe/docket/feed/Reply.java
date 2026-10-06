@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 
 /**
- * A Reply (§5.3, CONTEXT.md): a response to a Post by one of the Post author's
+ * A Reply (§5.3, GLOSSARY.md): a response to a Post by one of the Post author's
  * Connections. Not a Post — it never enters a feed. Carries the same immutable
  * §9.4 authored-as-minor fact; a Reply inherits its author's protection, not
  * the Post's audience. {@code removedAt} is the Post author's removal, stored

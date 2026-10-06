@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The end of a Member (CONTEXT.md; SPEC.md §11.2), in one place and behind one
+ * The end of a Member (GLOSSARY.md; SPEC.md §11.2), in one place and behind one
  * call.
  *
  * <p><strong>The seam #38 asked for.</strong> The §10.3 moderation ladder's fourth

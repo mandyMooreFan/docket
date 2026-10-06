@@ -55,7 +55,7 @@ class MemberStanding implements WithdrawnCapabilities {
         });
     }
 
-    /** Read-only, but still able to sign in (CONTEXT.md) — the rung, not the whole account. */
+    /** Read-only, but still able to sign in (GLOSSARY.md) — the rung, not the whole account. */
     @Transactional(readOnly = true)
     boolean suspended(long memberId) {
         return live(memberId, clock.instant())

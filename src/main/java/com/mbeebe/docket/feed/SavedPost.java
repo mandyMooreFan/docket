@@ -8,7 +8,7 @@ import jakarta.persistence.Table;
 
 import java.time.Instant;
 
-/** A Save (§5.3, CONTEXT.md): a Member's private bookmark. Visible to nobody else. */
+/** A Save (§5.3, GLOSSARY.md): a Member's private bookmark. Visible to nobody else. */
 @Entity
 @Table(name = "saved_post")
 class SavedPost {
